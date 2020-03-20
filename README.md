@@ -1,2 +1,3 @@
 # PFTC5_Gr3
-Fire and traits and elevation
+Group 3 is looking at the effect of fire and elevation on plant community functional traits
+feel free to edit :)
