@@ -4,4 +4,13 @@
 .Ruserdata
 
 # data files
+.xls
+.xlsx
 .csv
+
+# graphics files
+.jpg
+.jpeg
+.png
+.bmp
+.tif
