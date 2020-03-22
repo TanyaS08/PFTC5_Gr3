@@ -14,7 +14,7 @@ if(!require(skimr)){        # for quick overview of dataset
 }
 library(tidyverse)
 
-### 2) Colour scheme ----
+### .5) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
 theme_red <- "#F96654"
 theme_blue <- "#4088C7"
@@ -23,14 +23,15 @@ theme_darkblue <- "#1D5799"
 theme_yellow <- "#FABC55"
 
 ### 1) Import data ----
-fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-19.csv", 
+fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv", 
                         header = T, 
                         sep = ",")
+
 ### 2) Inspect data ----
 skim(fire_traits)
 
 # LeafArea_cm2 is a factor, make numeric
-fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2.x)
+fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2)
 
 # create taxon column from Genus + species
 fire_traits <- fire_traits %>% 
@@ -42,13 +43,17 @@ fire_traits <- fire_traits %>%
   mutate(Leaf_Thickness_avg_mm = 
            (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3)
 
-# QUE contains C samples, have to be BB
+# QUE contains C samples, have to be BB -> recode (NOT WORKING YET; TO BE FINISHED)
 fire_traits <- fire_traits %>% 
   mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
-         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment),
+         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
   )
-
+fire_traits <- fire_traits %>% 
+  mutate(Experiment = case_when(
+    Site == "QUE" & Experiment %in% c("C", "B") ~ "BB",
+    TRUE ~ Experiment)
+    )
 # check again
 skim(fire_traits)
 
@@ -66,10 +71,17 @@ fire_traits_compl <- fire_traits %>%
 fire_traits_compl %>% group_by(Site, Experiment) %>% 
   summarise(n_taxa = n_distinct(Taxon)) %>% 
   ggplot(aes(x = Site, y = n_taxa, fill = Experiment)) +
-    geom_bar(stat = "identity", position = "dodge") +
+    geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
     scale_fill_manual(values = c(theme_red, theme_blue)) +
     scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
     theme_bw() +
     labs(y = "total no. taxa")
+
+fire_traits_compl %>% #group_by(Site) %>% 
+  ggplot(aes(Plant_Height_cm, fill = Site)) +
+    geom_density(alpha = .5, kernel = "gaussian") +
+    scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
+    theme_bw() +
+    labs(y = "density")
 
 # End of script ----
