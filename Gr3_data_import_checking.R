@@ -23,14 +23,14 @@ theme_darkblue <- "#1D5799"
 theme_yellow <- "#FABC55"
 
 ### 1) Import data ----
-fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv", 
+fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-19.csv", 
                         header = T, 
                         sep = ",")
 ### 2) Inspect data ----
 skim(fire_traits)
 
 # LeafArea_cm2 is a factor, make numeric
-fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2)
+fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2.x)
 
 # create taxon column from Genus + species
 fire_traits <- fire_traits %>% 
@@ -44,7 +44,7 @@ fire_traits <- fire_traits %>%
 
 # QUE contains C samples, have to be BB -> recode (NOT WORKING YET; TO BE FINISHED)
 fire_traits <- fire_traits %>% 
-  mutate_at(vars(Experiment, Site), as.character()) %>% 
+  mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
          Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment),
   )
