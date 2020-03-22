@@ -42,7 +42,7 @@ fire_traits <- fire_traits %>%
   mutate(Leaf_Thickness_avg_mm = 
            (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3)
 
-# QUE contains C samples, have to be BB -> recode (NOT WORKING YET; TO BE FINISHED)
+# QUE contains C samples, have to be BB
 fire_traits <- fire_traits %>% 
   mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
