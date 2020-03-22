@@ -27,7 +27,7 @@ fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv",
                         header = T, 
                         sep = ",")
 
-### 2) Inspect data ----
+### 2) Inspect data, calculate variables ----
 skim(fire_traits)
 
 # LeafArea_cm2 is a factor, make numeric
@@ -49,11 +49,7 @@ fire_traits <- fire_traits %>%
   mutate(.,
          Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
   )
-fire_traits <- fire_traits %>% 
-  mutate(Experiment = case_when(
-    Site == "QUE" & Experiment %in% c("C", "B") ~ "BB",
-    TRUE ~ Experiment)
-    )
+
 # check again
 skim(fire_traits)
 
