@@ -1,5 +1,5 @@
 # Plant functional trait course 5
-# Cusco/Wayqecha, Peru - March 2019
+# Cusco/Wayqecha, Peru - March 2020
 #
 # Group 3: Trait & taxonomic community response to fire and elevation
 # Authors: Dagmar D. Egelkraut, Lucely Vilca Bustamante, Sonya Geange,
@@ -23,7 +23,7 @@ theme_darkblue <- "#1D5799"
 theme_yellow <- "#FABC55"
 
 ### 1) Import data ----
-fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-19.csv", 
+fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv", 
                         header = T, 
                         sep = ",")
 ### 2) Inspect data ----
@@ -38,15 +38,17 @@ fire_traits <- fire_traits %>%
 fire_traits$Taxon <- as.factor(fire_traits$Taxon)
 
 # Average leaf thickness measurements
+# check Leaf_Thickness_3_mm for CHX5000
 fire_traits <- fire_traits %>% 
   mutate(Leaf_Thickness_avg_mm = 
            (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3)
 
-# QUE contains C samples, have to be BB
+# QUE contains C samples, have to be BB and TRE B must be BB (B not visited in 2020)
 fire_traits <- fire_traits %>% 
   mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
-         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment),
+         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B", NA), "BB", Experiment),
+         Experiment = ifelse(Site == "TRE" & Experiment %in% c("B"), "BB", Experiment)
   )
 
 # check again
@@ -71,5 +73,12 @@ fire_traits_compl %>% group_by(Site, Experiment) %>%
     scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
     theme_bw() +
     labs(y = "total no. taxa")
+
+fire_traits_compl %>% #group_by(Site) %>% 
+  ggplot(aes(Plant_Height_cm, fill = Site)) +
+  geom_density(alpha = .5, kernel = "gaussian") +
+  scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
+  theme_bw() +
+  labs(y = "density")
 
 # End of script ----
