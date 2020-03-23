@@ -14,7 +14,7 @@ if(!require(skimr)){        # for quick overview of dataset
 }
 library(tidyverse)
 
-### 2) Colour scheme ----
+### .5) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
 theme_red <- "#F96654"
 theme_blue <- "#4088C7"
@@ -26,11 +26,12 @@ theme_yellow <- "#FABC55"
 fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv", 
                         header = T, 
                         sep = ",")
-### 2) Inspect data ----
+
+### 2) Inspect data, calculate variables ----
 skim(fire_traits)
 
 # LeafArea_cm2 is a factor, make numeric
-fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2.x)
+fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2)
 
 # create taxon column from Genus + species
 fire_traits <- fire_traits %>% 
@@ -38,18 +39,17 @@ fire_traits <- fire_traits %>%
 fire_traits$Taxon <- as.factor(fire_traits$Taxon)
 
 # Average leaf thickness measurements
-# check Leaf_Thickness_3_mm for CHX5000
 fire_traits <- fire_traits %>% 
   mutate(Leaf_Thickness_avg_mm = 
            (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3)
 
-# QUE contains C samples, have to be BB and TRE B must be BB (B not visited in 2020)
+
+# QUE contains C samples, have to be BB -> recode 
 fire_traits <- fire_traits %>% 
   mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
-         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B", NA), "BB", Experiment),
-         Experiment = ifelse(Site == "TRE" & Experiment %in% c("B"), "BB", Experiment)
-  )
+         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
+         )
 
 # check again
 skim(fire_traits)
@@ -68,7 +68,7 @@ fire_traits_compl <- fire_traits %>%
 fire_traits_compl %>% group_by(Site, Experiment) %>% 
   summarise(n_taxa = n_distinct(Taxon)) %>% 
   ggplot(aes(x = Site, y = n_taxa, fill = Experiment)) +
-    geom_bar(stat = "identity", position = "dodge") +
+    geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
     scale_fill_manual(values = c(theme_red, theme_blue)) +
     scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
     theme_bw() +
@@ -80,5 +80,6 @@ fire_traits_compl %>% #group_by(Site) %>%
   scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
   theme_bw() +
   labs(y = "density")
+
 
 # End of script ----
