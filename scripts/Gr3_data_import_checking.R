@@ -71,11 +71,26 @@ traits_total_compl <- traits_total %>%
   filter(!Site == "WAY")
 
 ### >> b) Community data ----
+# compile graminoid taxa vector
+graminoid_taxa <- species_fire_acj_tre %>% 
+  select(name) %>% 
+  pull() %>% 
+  unique() %>% 
+  str_subset("Carex") # how to include more than one??
+  
 species_fire_acj_tre <- species_fire_acj_tre %>% 
   # drop non-occurring species
   filter(!Cover == "") %>% 
-  # split into genus and species columns
-  bind_cols(str_split_fixed(name, "_|\\s", 2))
+  # split species name into genus and species columns
+  separate(name, into = c("genus", "species"), sep = "_|\\s", 2) 
+
+species_fire_que <- species_fire_que %>% 
+  # drop non-occurring species
+  filter(!Cover == "") %>% 
+  # create functional group column based on Taxon
+  mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
+                                      "graminoid", 
+                                      "forb"))
 
 
 ### 4) Summary graphs ----
