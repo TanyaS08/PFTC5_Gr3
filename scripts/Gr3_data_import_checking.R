@@ -1,5 +1,5 @@
 # Plant functional trait course 5
-# Cusco/Wayqecha, Peru - March 2019
+# Cusco/Wayqecha, Peru - March 2020
 #
 # Group 3: Trait & taxonomic community response to fire and elevation
 # Authors: Dagmar D. Egelkraut, Lucely Vilca Bustamante, Sonya Geange,
@@ -7,14 +7,15 @@
 #          Tanya Strydom
 # Contact: dagmar.egelkraut@uib.no
 
-### 0) Dependencies ----
+### 0) Preamble ----
+### >> a) Dependencies ----
 if(!require(skimr)){        # for quick overview of dataset
   install.packages("skimr")
   library(skimr)
 }
 library(tidyverse)
 
-### .5) Colour scheme ----
+### >> b) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
 theme_red <- "#F96654"
 theme_blue <- "#4088C7"
@@ -22,49 +23,64 @@ theme_green <- "#34B362"
 theme_darkblue <- "#1D5799"
 theme_yellow <- "#FABC55"
 
-### 1) Import data ----
-fire_traits <- read.csv("PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv", 
-                        header = T, 
-                        sep = ",")
+### 1) Data import ----
+traits_total <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"), 
+                         header = T, 
+                         sep = ",")
+species_fire_acj_tre <- read.csv(file.path("data", "data_raw", "communitydata_TRE_ACJ_March2020.csv"),
+                                 header = T,
+                                 sep = ",")
+species_fire_que <- read.csv(file.path("data", "data_raw", "communitydata_QUE_March2020.csv"),
+                             header = T,
+                             sep = ",")
 
-### 2) Inspect data, calculate variables ----
-skim(fire_traits)
+### 2) Data cleaning ----
+### >> a) Traits data ----
+skim(traits_total)
 
 # LeafArea_cm2 is a factor, make numeric
-fire_traits$LeafArea_cm2 <- as.numeric(fire_traits$LeafArea_cm2)
+traits_total$LeafArea_cm2 <- as.numeric(traits_total$LeafArea_cm2)
 
 # create taxon column from Genus + species
-fire_traits <- fire_traits %>% 
+traits_total <- traits_total %>% 
   mutate(Taxon = paste(Genus, " ", Species))
-fire_traits$Taxon <- as.factor(fire_traits$Taxon)
+traits_total$Taxon <- as.factor(traits_total$Taxon)
 
 # Average leaf thickness measurements
-fire_traits <- fire_traits %>% 
+traits_total <- traits_total %>% 
   mutate(Leaf_Thickness_avg_mm = 
            (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3)
 
-# QUE contains C samples, have to be BB -> recode (NOT WORKING YET; TO BE FINISHED)
-fire_traits <- fire_traits %>% 
+# QUE contains C samples, have to be BB -> recode 
+traits_total <- traits_total %>% 
   mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
          Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
-  )
+         )
 
 # check again
-skim(fire_traits)
+skim(traits_total)
 
-### 3) Clean dataset ----
-# limit to traits project
-fire_traits_compl <- fire_traits %>% 
+# clean dataset:
+traits_total_compl <- traits_total %>% 
+# keep only samples from traits (T) project
   filter(Project == "T") %>% 
 # exclude cases with NA in Experiment, just for ease
   drop_na(Experiment) %>% 
 # also drop WAY samples, as not our focus
   filter(!Site == "WAY")
 
+### >> b) Community data ----
+species_fire_acj_tre <- species_fire_acj_tre %>% 
+  # drop non-occurring species
+  filter(!Cover == "") %>% 
+  # split into genus and species columns
+  bind_cols(str_split_fixed(name, "_|\\s", 2))
+
+
 ### 4) Summary graphs ----
-# N species per site and treatment
-fire_traits_compl %>% group_by(Site, Experiment) %>% 
+# N species sampled for traits per site and treatment
+traits_total_compl %>% group_by(Site, Experiment) %>% 
   summarise(n_taxa = n_distinct(Taxon)) %>% 
   ggplot(aes(x = Site, y = n_taxa, fill = Experiment)) +
     geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
@@ -73,11 +89,12 @@ fire_traits_compl %>% group_by(Site, Experiment) %>%
     theme_bw() +
     labs(y = "total no. taxa")
 
-fire_traits_compl %>% #group_by(Site) %>% 
+traits_total_compl %>% #group_by(Site) %>% 
   ggplot(aes(Plant_Height_cm, fill = Site)) +
-    geom_density(alpha = .5, kernel = "gaussian") +
-    scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
-    theme_bw() +
-    labs(y = "density")
+  geom_density(alpha = .5, kernel = "gaussian") +
+  scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
+  theme_bw() +
+  labs(y = "density")
+
 
 # End of script ----
