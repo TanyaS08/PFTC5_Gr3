@@ -24,12 +24,15 @@ theme_darkblue <- "#1D5799"
 theme_yellow <- "#FABC55"
 
 ### 1) Data import ----
+# traits data - complete
 traits_total <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"), 
                          header = T, 
                          sep = ",")
+# community data - part 1/2 (ACJ & TRE)
 species_fire_acj_tre <- read.csv(file.path("data", "data_raw", "communitydata_TRE_ACJ_March2020.csv"),
                                  header = T,
                                  sep = ",")
+# community data - part 2/2 (QUE)
 species_fire_que <- read.csv(file.path("data", "data_raw", "communitydata_QUE_March2020.csv"),
                              header = T,
                              sep = ",")
@@ -71,26 +74,66 @@ traits_total_compl <- traits_total %>%
   filter(!Site == "WAY")
 
 ### >> b) Community data ----
-# compile graminoid taxa vector
-graminoid_taxa <- species_fire_acj_tre %>% 
-  select(name) %>% 
-  pull() %>% 
-  unique() %>% 
-  str_subset("Carex") # how to include more than one??
-  
+# # compile graminoid taxa vector
+# graminoid_taxa <- species_fire_acj_tre %>% 
+#   select(name) %>% 
+#   pull() %>% 
+#   unique() %>% 
+#   str_subset("Carex") # how to include more than one??
+
+# basic cleaning (rename to lower case, drop empty records)
 species_fire_acj_tre <- species_fire_acj_tre %>% 
-  # drop non-occurring species
-  filter(!Cover == "") %>% 
-  # split species name into genus and species columns
-  separate(name, into = c("genus", "species"), sep = "_|\\s", 2) 
+  # rename columns to lower case
+  rename_all(tolower) %>% 
+  # drop all-NA "real_species_name" & "habit" columns
+  select_if(function(x){!all(is.na(x))}) %>% 
+  # rename "name" to "taxon"
+  rename(taxon = name) %>% 
+  # drop absent species
+  filter(!cover == "") %>% 
+  # remove dots after "cf"
+  mutate_at(vars(taxon), ~str_remove(., "\\.")) %>% 
+  # extract cfs into new column...
+  mutate_at(vars(taxon), list(cf = ~str_extract(., "cf "))) %>% 
+  # ...remove extra space from cf column...
+  mutate_at(vars(cf), ~str_remove(., " ")) %>% 
+  # ...and delete "cf " from taxon column
+  mutate_at(vars(taxon), ~str_remove(., "cf ")) %>% 
+  # split taxon into genus and species
+  separate(taxon, into = c("genus", "species"), 
+           sep = " ", 2, 
+           remove = FALSE) # %>% 
+  # create functional group column based on genus name
+  ## TBC
 
 species_fire_que <- species_fire_que %>% 
-  # drop non-occurring species
-  filter(!Cover == "") %>% 
-  # create functional group column based on Taxon
-  mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
+  # rename columns to lower case
+  rename_all(tolower) %>% 
+  # drop all-NA "real_species_name" & "habit" columns
+  select_if(function(x){!all(is.na(x))}) %>% 
+  # rename "name" to "taxon"
+  rename(taxon = name) %>% 
+  # drop absent species
+  filter(!cover == "") %>% 
+  # remove dots after "cf"
+  mutate_at(vars(taxon), ~str_remove(., "\\.")) %>% 
+  # extract cfs into new column...
+  mutate_at(vars(taxon), list(cf = ~str_extract(., "cf "))) %>% 
+  # ...remove extra space from cf column...
+  mutate_at(vars(cf), ~str_remove(., " ")) %>% 
+  # ...and delete "cf " from taxon column
+  mutate_at(vars(taxon), ~str_remove(., "cf ")) %>% 
+  # split taxon into genus and species
+  separate(taxon, into = c("genus", "species"), 
+           sep = " ", 2, 
+           remove = FALSE) # %>% 
+# create functional group column based on genus name
+## TBC
+
+mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
                                       "graminoid", 
                                       "forb"))
+# join both datasets
 
 
 ### 4) Summary graphs ----
