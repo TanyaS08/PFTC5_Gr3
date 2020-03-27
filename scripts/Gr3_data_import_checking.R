@@ -7,6 +7,15 @@
 #          Tanya Strydom
 # Contact: dagmar.egelkraut@uib.no
 
+
+#' ------------------------------------------------------------------#
+#' TO DO:
+#' - check ACJ&TRE recording year with Lucely, 2019?!? -> 2b i, l. 
+#' - create functional group column from genus names -> 2b iii, l.143
+#' - + cover values as 0.5? -> 2b iii, l. 141
+#' ------------------------------------------------------------------#
+
+
 ### 0) Preamble ----
 ### >> a) Dependencies ----
 if(!require(skimr)){        # for quick overview of dataset
@@ -74,69 +83,76 @@ traits_total_compl <- traits_total %>%
   filter(!Site == "WAY")
 
 ### >> b) Community data ----
-# # compile graminoid taxa vector
-# graminoid_taxa <- species_fire_acj_tre %>% 
-#   select(name) %>% 
-#   pull() %>% 
-#   unique() %>% 
-#   str_subset("Carex") # how to include more than one??
-
-# basic cleaning (rename to lower case, drop empty records)
+### ¤¤¤¤¤ i. ACJ & TRE ----
 species_fire_acj_tre <- species_fire_acj_tre %>% 
   # rename columns to lower case
   rename_all(tolower) %>% 
-  # drop all-NA "real_species_name" & "habit" columns
-  select_if(function(x){!all(is.na(x))}) %>% 
   # rename "name" to "taxon"
   rename(taxon = name) %>% 
+  # recode year 2019 to 2020 -> check with Lucely! ...
+  mutate_at(vars(year), ~recode(., "2019" = "2020")) %>% 
+  # ...and backtransform to integer
+  mutate_at(vars(year), ~as.integer(.)) %>% 
   # drop absent species
   filter(!cover == "") %>% 
   # remove dots after "cf"
   mutate_at(vars(taxon), ~str_remove(., "\\.")) %>% 
   # extract cfs into new column...
   mutate_at(vars(taxon), list(cf = ~str_extract(., "cf "))) %>% 
-  # ...remove extra space from cf column...
-  mutate_at(vars(cf), ~str_remove(., " ")) %>% 
+  # ...remove extra _/space from cf column...
+  mutate_at(vars(cf), ~str_remove(., "\\s")) %>% 
   # ...and delete "cf " from taxon column
   mutate_at(vars(taxon), ~str_remove(., "cf ")) %>% 
   # split taxon into genus and species
   separate(taxon, into = c("genus", "species"), 
            sep = " ", 2, 
-           remove = FALSE) # %>% 
-  # create functional group column based on genus name
-  ## TBC
+           remove = FALSE) 
 
+### ¤¤¤¤¤ ii. QUE ----
 species_fire_que <- species_fire_que %>% 
   # rename columns to lower case
   rename_all(tolower) %>% 
-  # drop all-NA "real_species_name" & "habit" columns
-  select_if(function(x){!all(is.na(x))}) %>% 
   # rename "name" to "taxon"
   rename(taxon = name) %>% 
   # drop absent species
   filter(!cover == "") %>% 
-  # remove dots after "cf"
+  # remove evt dots after "cf"...
   mutate_at(vars(taxon), ~str_remove(., "\\.")) %>% 
+  # ...and replace underscores with spaces in taxon cols
+  mutate_at(vars(taxon), ~str_replace(., "_", " ")) %>% 
   # extract cfs into new column...
   mutate_at(vars(taxon), list(cf = ~str_extract(., "cf "))) %>% 
-  # ...remove extra space from cf column...
-  mutate_at(vars(cf), ~str_remove(., " ")) %>% 
-  # ...and delete "cf " from taxon column
+  # ...remove extra _/space from cf column...
+  mutate_at(vars(cf), ~str_remove(., "\\s")) %>% 
+  # ...and delete "cf_" from taxon column
   mutate_at(vars(taxon), ~str_remove(., "cf ")) %>% 
   # split taxon into genus and species
   separate(taxon, into = c("genus", "species"), 
            sep = " ", 2, 
-           remove = FALSE) # %>% 
-# create functional group column based on genus name
-## TBC
+           remove = FALSE)
+  # one case with species == "3_sharp" [66] 
 
-mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
-                                      "graminoid", 
-                                      "forb"))
-# join both datasets
+### ¤¤¤¤¤ iii. merge community datasets ----
+species_fire <- species_fire_acj_tre %>% 
+  bind_rows(species_fire_que) %>% 
+  # drop all-NA "real_species_name" & "habit" columns
+  select_if(function(x){!all(is.na(x))}) %>% 
+  # extract treatment from plot
+  mutate_at(vars(plot), list(treatment = ~str_extract(., "[:alpha:]*"))) %>% 
+  # recode "+" cover value to 0.5 ... -> up for discussion!!
+  mutate_at(vars(cover), ~recode(., "+" = "0.5")) %>% 
+  # ...and convert cover column to numeric
+  mutate_at(vars(cover), as.numeric) %>% 
+  # convert all factors back to factors
+  mutate_at(vars(site, plot, taxon, genus, species, fertile, seedling, observer, sampled, treatment), factor) # %>% 
+  # create functional group column based on genus name
+  ## TBC, e.g. with something like
+  # mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
+  #                                       "graminoid", 
+  #                                       "forb"))
 
 
-### 4) Summary graphs ----
+### 3) Summary graphs ----
 # N species sampled for traits per site and treatment
 traits_total_compl %>% group_by(Site, Experiment) %>% 
   summarise(n_taxa = n_distinct(Taxon)) %>% 
