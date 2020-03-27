@@ -37,14 +37,9 @@ theme_yellow <- "#FABC55"
 traits_total <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"), 
                          header = T, 
                          sep = ",")
-# community data - part 1/2 (ACJ & TRE)
-species_fire_acj_tre <- read.csv(file.path("data", "data_raw", "communitydata_TRE_ACJ_March2020.csv"),
-                                 header = T,
-                                 sep = ",")
-# community data - part 2/2 (QUE)
-species_fire_que <- read.csv(file.path("data", "data_raw", "communitydata_QUE_March2020.csv"),
-                             header = T,
-                             sep = ",")
+# community data:
+files <- paste(file.path("data", "data_raw"), dir(file.path("data", "data_raw"), pattern = "communitydata"), sep = "/")
+species_total <- map_df(files, read_csv)
 
 ### 2) Data cleaning ----
 ### >> a) Traits data ----
@@ -83,6 +78,48 @@ traits_total_compl <- traits_total %>%
   filter(!Site == "WAY")
 
 ### >> b) Community data ----
+species_total <- species_total %>% 
+  # rename columns to lower case
+  rename_all(tolower) %>% 
+  # rename "name" to "taxon"
+  rename(taxon = name) %>% 
+  # # recode year 2019 to 2020 -> check with Lucely! ...
+  # mutate_at(vars(year), ~recode(., "2019" = "2020")) %>% 
+  # # ...and backtransform to integer
+  # mutate_at(vars(year), ~as.integer(.)) %>% 
+  # drop absent species
+  filter(!cover == "") %>% 
+  # remove dots after "cf"
+  mutate(taxon = str_remove(taxon, "\\.")) %>% 
+  # ...and replace underscores with spaces in taxon cols
+  mutate(taxon = str_replace(taxon, "_", " ")) %>% 
+  # extract cfs into new column...
+  mutate(cf = str_extract(taxon, "cf |cf_")) %>% 
+  # ...remove extra space/_ from cf column...
+  mutate(cf = str_remove(cf, "\\s|_")) %>% 
+  # ...and delete "cf "/"cf_" from taxon column
+  mutate(taxon = str_remove(taxon, "cf |cf_")) %>% 
+  # split taxon into genus and species
+  separate(taxon, into = c("genus", "species"), 
+           sep = "\\s", 2, 
+           remove = FALSE) %>% 
+  # drop all-NA "real_species_name" & "habit" columns
+  select_if(function(x){!all(is.na(x))}) %>% 
+  # extract treatment from plot
+  mutate(treatment = str_extract(plot, "[:alpha:]*")) %>% 
+  # recode "+" cover value to 0.5 ... -> up for discussion!!
+  mutate(cover = recode(cover, "+" = "0.5")) %>% 
+  # ...and convert cover column to numeric
+  mutate(cover = as.numeric(cover)) %>% 
+  # convert all factors back to factors
+  mutate_at(vars(site, plot, taxon, genus, species, fertile, seedling, observer, sampled, treatment), factor) # %>% 
+# create functional group column based on genus name
+## TBC, e.g. with something like
+# mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
+#                                       "graminoid", 
+#                                       "forb"))
+
+
 ### ¤¤¤¤¤ i. ACJ & TRE ----
 species_fire_acj_tre <- species_fire_acj_tre %>% 
   # rename columns to lower case
@@ -135,22 +172,7 @@ species_fire_que <- species_fire_que %>%
 ### ¤¤¤¤¤ iii. merge community datasets ----
 species_fire <- species_fire_acj_tre %>% 
   bind_rows(species_fire_que) %>% 
-  # drop all-NA "real_species_name" & "habit" columns
-  select_if(function(x){!all(is.na(x))}) %>% 
-  # extract treatment from plot
-  mutate_at(vars(plot), list(treatment = ~str_extract(., "[:alpha:]*"))) %>% 
-  # recode "+" cover value to 0.5 ... -> up for discussion!!
-  mutate_at(vars(cover), ~recode(., "+" = "0.5")) %>% 
-  # ...and convert cover column to numeric
-  mutate_at(vars(cover), as.numeric) %>% 
-  # convert all factors back to factors
-  mutate_at(vars(site, plot, taxon, genus, species, fertile, seedling, observer, sampled, treatment), factor) # %>% 
-  # create functional group column based on genus name
-  ## TBC, e.g. with something like
-  # mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
-  #                                       "graminoid", 
-  #                                       "forb"))
-
+  
 
 ### 3) Summary graphs ----
 # N species sampled for traits per site and treatment
