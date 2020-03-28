@@ -32,151 +32,121 @@ theme_green <- "#34B362"
 theme_darkblue <- "#1D5799"
 theme_yellow <- "#FABC55"
 
+### >> c) Functions ----
+capwords <- function(s, strict = FALSE) {
+  cap <- function(s) paste(toupper(substring(s, 1, 1)),
+                           {s <- substring(s, 2); if(strict) tolower(s) else s},
+                           sep = "", collapse = " " )
+  sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
+}
+
 ### 1) Data import ----
 # traits data - complete
-traits_total <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"), 
+traits_raw <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"), 
                          header = T, 
                          sep = ",")
-# community data:
-files <- paste(file.path("data", "data_raw"), dir(file.path("data", "data_raw"), pattern = "communitydata"), sep = "/")
-species_total <- map_df(files, read_csv)
+
+# community data
+species_files <- paste(file.path("data", "data_raw"), dir(file.path("data", "data_raw"), pattern = "communitydata"), sep = "/")
+species_raw <- map_df(species_files, read_csv)
+
 
 ### 2) Data cleaning ----
+
 ### >> a) Traits data ----
-skim(traits_total)
+skim(traits_raw)
 
-# LeafArea_cm2 is a factor, make numeric
-traits_total$LeafArea_cm2 <- as.numeric(traits_total$LeafArea_cm2)
+# clean data
+traits <- traits_raw %>% 
+  # LeafArea_cm2 is a factor, make numeric
+  mutate(LeafArea_cm2 = as.numeric(LeafArea_cm2)) %>% 
 
-# create taxon column from Genus + species
-traits_total <- traits_total %>% 
-  mutate(Taxon = paste(Genus, " ", Species))
-traits_total$Taxon <- as.factor(traits_total$Taxon)
+  # create Taxon column from Genus + species
+  mutate(Taxon = as.factor(paste(Genus, " ", Species))) %>% 
 
-# Average leaf thickness measurements
-traits_total <- traits_total %>% 
+  # Average leaf thickness measurements - !!! RETURNS NA IF <3 MEASUREMENTS !!! -> need to fix
   mutate(Leaf_Thickness_avg_mm = 
-           (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3)
+           (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3) %>% 
 
-# QUE contains C samples, have to be BB -> recode 
-traits_total <- traits_total %>% 
+  # QUE contains C samples, have to be BB -> recode 
   mutate_at(vars(Experiment, Site), as.character) %>% 
   mutate(.,
          Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
-         )
+         ) %>% 
+  
+  # keep only samples from traits (T) project
+  filter(Project == "T") %>% 
+  
+  # exclude cases with NA in Experiment, just for ease
+  drop_na(Experiment) %>% 
+  
+  # also drop WAY samples, as not our focus
+  filter(!Site == "WAY") %>% 
+  
+  # rename columns
+  rename(Treatment = Experiment, PlotID = Plot_ID, Comment = Remark) %>% 
+  
+  # create date variable from day
+  mutate(Date = as.Date(paste0("2020-03-", Day)))
 
 # check again
-skim(traits_total)
+skim(traits)
 
-# clean dataset:
-traits_total_compl <- traits_total %>% 
-# keep only samples from traits (T) project
-  filter(Project == "T") %>% 
-# exclude cases with NA in Experiment, just for ease
-  drop_na(Experiment) %>% 
-# also drop WAY samples, as not our focus
-  filter(!Site == "WAY")
 
 ### >> b) Community data ----
-species_total <- species_total %>% 
-  # rename columns to lower case
-  rename_all(tolower) %>% 
-  # rename "name" to "taxon"
-  rename(taxon = name) %>% 
+species <- species_raw %>% 
+  
+  # rename columns to first letter upper case
+  rename_all(capwords) %>% 
+  
+  # rename "name" to "Taxon"
+  rename(Taxon = Name, PlotID = Plot) %>% 
+  
   # # recode year 2019 to 2020 -> check with Lucely! ...
-  # mutate_at(vars(year), ~recode(., "2019" = "2020")) %>% 
-  # # ...and backtransform to integer
-  # mutate_at(vars(year), ~as.integer(.)) %>% 
+  # mutate(year = as.integer(recode(year, "2019" = "2020"))) %>% 
+  
   # drop absent species
-  filter(!cover == "") %>% 
+  filter(!Cover == "") %>% 
+  
   # remove dots after "cf"
-  mutate(taxon = str_remove(taxon, "\\.")) %>% 
-  # ...and replace underscores with spaces in taxon cols
-  mutate(taxon = str_replace(taxon, "_", " ")) %>% 
+  mutate(Taxon = str_remove(Taxon, "\\.")) %>% 
+  # ...and replace underscores with spaces in Taxon column
+  mutate(Taxon = str_replace(Taxon, "_", " ")) %>% 
+  
   # extract cfs into new column...
-  mutate(cf = str_extract(taxon, "cf |cf_")) %>% 
+  mutate(Cf = str_extract(Taxon, "cf |cf_")) %>% 
   # ...remove extra space/_ from cf column...
-  mutate(cf = str_remove(cf, "\\s|_")) %>% 
-  # ...and delete "cf "/"cf_" from taxon column
-  mutate(taxon = str_remove(taxon, "cf |cf_")) %>% 
-  # split taxon into genus and species
-  separate(taxon, into = c("genus", "species"), 
+  mutate(Cf = str_remove(Cf, "\\s|_")) %>% 
+  # ...and delete "cf "/"cf_" from Taxon column
+  mutate(Taxon = str_remove(Taxon, "cf |cf_")) %>% 
+  
+  # split Taxon into genus and species
+  separate(Taxon, into = c("Genus", "Species"), 
            sep = "\\s", 2, 
            remove = FALSE) %>% 
+  
   # drop all-NA "real_species_name" & "habit" columns
   select_if(function(x){!all(is.na(x))}) %>% 
+  
   # extract treatment from plot
-  mutate(treatment = str_extract(plot, "[:alpha:]*")) %>% 
-  # recode "+" cover value to 0.5 ... -> up for discussion!!
-  mutate(cover = recode(cover, "+" = "0.5")) %>% 
-  # ...and convert cover column to numeric
-  mutate(cover = as.numeric(cover)) %>% 
+  mutate(Treatment = str_extract(PlotID, "[:alpha:]*")) %>% 
+  
+  # recode "+" cover value to 0.5
+  mutate(Cover = as.numeric(recode(Cover, "+" = "0.5"))) %>% 
+  
   # convert all factors back to factors
-  mutate_at(vars(site, plot, taxon, genus, species, fertile, seedling, observer, sampled, treatment), factor) # %>% 
+  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) # %>% 
+
 # create functional group column based on genus name
 ## TBC, e.g. with something like
 # mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
 #                                       "graminoid", 
 #                                       "forb"))
-
-
-### ¤¤¤¤¤ i. ACJ & TRE ----
-species_fire_acj_tre <- species_fire_acj_tre %>% 
-  # rename columns to lower case
-  rename_all(tolower) %>% 
-  # rename "name" to "taxon"
-  rename(taxon = name) %>% 
-  # recode year 2019 to 2020 -> check with Lucely! ...
-  mutate_at(vars(year), ~recode(., "2019" = "2020")) %>% 
-  # ...and backtransform to integer
-  mutate_at(vars(year), ~as.integer(.)) %>% 
-  # drop absent species
-  filter(!cover == "") %>% 
-  # remove dots after "cf"
-  mutate_at(vars(taxon), ~str_remove(., "\\.")) %>% 
-  # extract cfs into new column...
-  mutate_at(vars(taxon), list(cf = ~str_extract(., "cf "))) %>% 
-  # ...remove extra _/space from cf column...
-  mutate_at(vars(cf), ~str_remove(., "\\s")) %>% 
-  # ...and delete "cf " from taxon column
-  mutate_at(vars(taxon), ~str_remove(., "cf ")) %>% 
-  # split taxon into genus and species
-  separate(taxon, into = c("genus", "species"), 
-           sep = " ", 2, 
-           remove = FALSE) 
-
-### ¤¤¤¤¤ ii. QUE ----
-species_fire_que <- species_fire_que %>% 
-  # rename columns to lower case
-  rename_all(tolower) %>% 
-  # rename "name" to "taxon"
-  rename(taxon = name) %>% 
-  # drop absent species
-  filter(!cover == "") %>% 
-  # remove evt dots after "cf"...
-  mutate_at(vars(taxon), ~str_remove(., "\\.")) %>% 
-  # ...and replace underscores with spaces in taxon cols
-  mutate_at(vars(taxon), ~str_replace(., "_", " ")) %>% 
-  # extract cfs into new column...
-  mutate_at(vars(taxon), list(cf = ~str_extract(., "cf "))) %>% 
-  # ...remove extra _/space from cf column...
-  mutate_at(vars(cf), ~str_remove(., "\\s")) %>% 
-  # ...and delete "cf_" from taxon column
-  mutate_at(vars(taxon), ~str_remove(., "cf ")) %>% 
-  # split taxon into genus and species
-  separate(taxon, into = c("genus", "species"), 
-           sep = " ", 2, 
-           remove = FALSE)
-  # one case with species == "3_sharp" [66] 
-
-### ¤¤¤¤¤ iii. merge community datasets ----
-species_fire <- species_fire_acj_tre %>% 
-  bind_rows(species_fire_que) %>% 
   
 
 ### 3) Summary graphs ----
 # N species sampled for traits per site and treatment
-traits_total_compl %>% group_by(Site, Experiment) %>% 
+traits_compl %>% group_by(Site, Experiment) %>% 
   summarise(n_taxa = n_distinct(Taxon)) %>% 
   ggplot(aes(x = Site, y = n_taxa, fill = Experiment)) +
     geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
@@ -185,7 +155,7 @@ traits_total_compl %>% group_by(Site, Experiment) %>%
     theme_bw() +
     labs(y = "total no. taxa")
 
-traits_total_compl %>% #group_by(Site) %>% 
+traits_compl %>% #group_by(Site) %>% 
   ggplot(aes(Plant_Height_cm, fill = Site)) +
   geom_density(alpha = .5, kernel = "gaussian") +
   scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
