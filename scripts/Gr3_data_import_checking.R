@@ -23,6 +23,10 @@ if(!require(skimr)){        # for quick overview of dataset
   library(skimr)
 }
 library(tidyverse)
+if(!require(vegan)){        # for mulitdimensional analysis
+  install.packages("vegan")
+  library(vegan)
+}
 
 ### >> b) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
@@ -64,9 +68,11 @@ traits <- traits_raw %>%
   # create Taxon column from Genus + species
   mutate(Taxon = as.factor(paste(Genus, " ", Species))) %>% 
 
-  # Average leaf thickness measurements - !!! RETURNS NA IF <3 MEASUREMENTS !!! -> need to fix
-  mutate(Leaf_Thickness_avg_mm = 
-           (Leaf_Thickness_1_mm + Leaf_Thickness_2_mm + Leaf_Thickness_3_mm) / 3) %>% 
+  # Average leaf thickness measurements
+  mutate(Leaf_Thickness_avg_mm = rowMeans(select(.,
+                                             Leaf_Thickness_1_mm,
+                                             Leaf_Thickness_2_mm,
+                                             Leaf_Thickness_3_mm), na.rm=TRUE)) %>%
 
   # QUE contains C samples, have to be BB -> recode 
   mutate_at(vars(Experiment, Site), as.character) %>% 
@@ -146,21 +152,37 @@ species <- species_raw %>%
 
 ### 3) Summary graphs ----
 # N species sampled for traits per site and treatment
-traits_compl %>% group_by(Site, Experiment) %>% 
+traits %>% group_by(Site, Treatment) %>% 
   summarise(n_taxa = n_distinct(Taxon)) %>% 
-  ggplot(aes(x = Site, y = n_taxa, fill = Experiment)) +
+  ggplot(aes(x = Site, y = n_taxa, fill = Treatment)) +
     geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
     scale_fill_manual(values = c(theme_red, theme_blue)) +
     scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
     theme_bw() +
     labs(y = "total no. taxa")
 
-traits_compl %>% #group_by(Site) %>% 
+#plant height density plot
+traits %>% #group_by(Site) %>% 
   ggplot(aes(Plant_Height_cm, fill = Site)) +
   geom_density(alpha = .5, kernel = "gaussian") +
   scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
   theme_bw() +
   labs(y = "density")
+
+#PCA of trait space by site and treatment
+
+traits %>%
+  
+  #select traits
+  select(.,
+         Plant_Height_cm,
+         Wet_Mass_g,
+         LeafArea_cm2,
+         Leaf_Thickness_avg_mm) %>%
+  
+  #set row names (both site and experiment)
+  rownames_to_column(.,
+                     var = 'Site')
 
 
 # End of script ----
