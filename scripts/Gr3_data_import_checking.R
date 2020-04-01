@@ -11,7 +11,7 @@
 #' ------------------------------------------------------------------#
 #' TO DO:
 #' - check ACJ&TRE recording year with Lucely, 2019?!? -> 2b i, l. 
-#' - create functional group column from genus names -> 2b iii, l.143
+#' - functional group column check genera -> 2b iii, l.143
 #' - + cover values as 0.5? -> 2b iii, l. 141
 #' ------------------------------------------------------------------#
 
@@ -23,6 +23,7 @@ if(!require(skimr)){        # for quick overview of dataset
   library(skimr)
 }
 library(tidyverse)
+library("tidylog")
 
 ### >> b) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
@@ -137,13 +138,25 @@ species <- species_raw %>%
   mutate(Cover = as.numeric(recode(Cover, "+" = "0.5"))) %>% 
   
   # convert all factors back to factors
-  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) # %>% 
-
-# create functional group column based on genus name
-## TBC, e.g. with something like
-# mutate(., functional_group = ifelse(name %in% graminoid_taxa, 
-#                                       "graminoid", 
-#                                       "forb"))
+  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>% 
+  
+  # create functional group column based on genus name
+  ## TBC
+  ## Confirm all graminoid gernera are represented
+  #mutate(., functional_group = ifelse(Genus %in% c("Agrostis",
+  #                                                 "Bromus",
+  #                                                 "Calamagrostis",
+  #                                                 "Carex",
+  #                                                 "Danthonia",
+  #                                                 "Festuca",
+  #                                                 "Luzula",
+  #                                                 "Oreobolus",
+  #                                                 "Paspalum",
+  #                                                 "Poa",
+  #                                                 "Rhynchospora",
+  #                                                 "Trichophorum"), 
+  #                                    "graminoid", 
+  #                                    "forb"))
   
 
 ### 3) Summary graphs ----
@@ -165,7 +178,7 @@ traits %>% #group_by(Site) %>%
   theme_bw() +
   labs(y = "density")
 
-#plant height density plot - split by treatment
+#plant height density plot - split by treatment ##Need to set a colour scheme
 traits %>% 
   #combine both Site and treatment to one variable
   unite(Plot,
