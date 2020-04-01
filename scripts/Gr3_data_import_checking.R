@@ -143,20 +143,20 @@ species <- species_raw %>%
   # create functional group column based on genus name
   ## TBC
   ## Confirm all graminoid gernera are represented
-  #mutate(., functional_group = ifelse(Genus %in% c("Agrostis",
-  #                                                 "Bromus",
-  #                                                 "Calamagrostis",
-  #                                                 "Carex",
-  #                                                 "Danthonia",
-  #                                                 "Festuca",
-  #                                                 "Luzula",
-  #                                                 "Oreobolus",
-  #                                                 "Paspalum",
-  #                                                 "Poa",
-  #                                                 "Rhynchospora",
-  #                                                 "Trichophorum"), 
-  #                                    "graminoid", 
-  #                                    "forb"))
+  #mutate(., functional_group = as.factor(ifelse(Genus %in% c("Agrostis",
+  #                                                           "Bromus",
+  #                                                           "Calamagrostis",
+  #                                                           "Carex",
+  #                                                           "Danthonia",
+  #                                                           "Festuca",
+  #                                                           "Luzula",
+  #                                                           "Oreobolus",
+  #                                                           "Paspalum",
+  #                                                           "Poa",
+  #                                                           "Rhynchospora",
+  #                                                           "Trichophorum"), 
+  #                                              "graminoid", 
+  #                                              "forb")))
   
 
 ### 3) Summary graphs ----
