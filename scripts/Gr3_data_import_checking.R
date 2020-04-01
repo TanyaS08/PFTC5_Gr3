@@ -63,7 +63,12 @@ traits <- traits_raw %>%
   mutate(LeafArea_cm2 = as.numeric(LeafArea_cm2)) %>% 
 
   # create Taxon column from Genus + species
-  mutate(Taxon = as.factor(paste(Genus, " ", Species))) %>% 
+  mutate(Taxon = as.factor(paste(Genus, " ", Species))) %>%
+  
+  #remove extra spacing between Genus and species in 'Taxon'
+  mutate_at(.,
+            vars(Taxon),
+            c(str_squish))  %>% 
 
   # Average leaf thickness measurements
   mutate(Leaf_Thickness_avg_mm = rowMeans(select(.,
