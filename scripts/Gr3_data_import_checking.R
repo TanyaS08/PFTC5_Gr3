@@ -23,10 +23,6 @@ if(!require(skimr)){        # for quick overview of dataset
   library(skimr)
 }
 library(tidyverse)
-if(!require(vegan)){        # for mulitdimensional analysis
-  install.packages("vegan")
-  library(vegan)
-}
 
 ### >> b) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
@@ -169,20 +165,16 @@ traits %>% #group_by(Site) %>%
   theme_bw() +
   labs(y = "density")
 
-#PCA of trait space by site and treatment
-
-traits %>%
-  
-  #select traits
-  select(.,
-         Plant_Height_cm,
-         Wet_Mass_g,
-         LeafArea_cm2,
-         Leaf_Thickness_avg_mm) %>%
-  
-  #set row names (both site and experiment)
-  rownames_to_column(.,
-                     var = 'Site')
-
+#plant height density plot - split by treatment
+traits %>% 
+  #combine both Site and treatment to one variable
+  unite(Plot,
+        c(Site, Treatment),
+        sep = " ", remove = FALSE) %>% 
+  ggplot(aes(Plant_Height_cm, fill = Plot)) +
+  geom_density(alpha = .5, kernel = "gaussian") +
+  #scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
+  theme_bw() +
+  labs(y = "density")
 
 # End of script ----
