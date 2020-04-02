@@ -95,7 +95,12 @@ traits <- traits_raw %>%
   rename(Treatment = Experiment, PlotID = Plot_ID, Comment = Remark) %>% 
   
   # create date variable from day
-  mutate(Date = as.Date(paste0("2020-03-", Day)))
+  mutate(Date = as.Date(paste0("2020-03-", Day))) %>%
+  
+  # convert all factors back to factors
+  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Treatment), factor)
+
+
 
 # check again
 skim(traits)
@@ -140,8 +145,16 @@ species <- species_raw %>%
   mutate(Treatment = str_extract(PlotID, "[:alpha:]*")) %>% 
   
   # recode "+" cover value to 0.5
-  mutate(Cover = as.numeric(recode(Cover, "+" = "0.5"))) %>% 
+  mutate(Cover = as.numeric(recode(Cover, "+" = "0.5")))  %>%
   
+  #Extract plot number from PlotID dropping the treatment code
+  ##If you find a more elegant way to do this please do so
+  mutate(.,
+         #Drops BB
+         PlotID = re_substitutes(as.character(PlotID), "BB", "\\1", options = "insensitive"),
+         #Drops C
+         PlotID = re_substitutes(as.character(PlotID), "C", "\\1", options = "insensitive")) %>%
+
   # convert all factors back to factors
   mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>% 
   
