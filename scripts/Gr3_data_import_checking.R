@@ -147,7 +147,7 @@ species <- species_raw %>%
   
   # create functional group column based on genus name
   ## TBC
-  ## Confirm all graminoid gernera are represented
+  ## Confirm all graminoid genera are represented
   #mutate(., functional_group = as.factor(ifelse(Genus %in% c("Agrostis",
   #                                                           "Bromus",
   #                                                           "Calamagrostis",
@@ -183,7 +183,8 @@ traits %>% #group_by(Site) %>%
   theme_bw() +
   labs(y = "density")
 
-#plant height density plot - split by treatment ##Need to set a colour scheme
+#plant height density plot - split by treatment
+##Need to set a colour scheme
 traits %>% 
   #combine both Site and treatment to one variable
   unite(Plot,
