@@ -10,6 +10,7 @@
 
 #' ------------------------------------------------------------------#
 #' TO DO:
+#' - Add species cover data for ACJ Control from 2019. Check???
 #' - check ACJ&TRE recording year with Lucely, 2019?!? -> 2b i, l. 
 #' - functional group column check genera -> 2b iii, l.143
 #' - + cover values as 0.5? -> 2b iii, l. 141
