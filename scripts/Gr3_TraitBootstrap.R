@@ -35,7 +35,6 @@ if(!require(traitstrap)){ # for bootstrapping trait data
   devtools::install_github("richardjtelford/traitstrap")
   library(traitstrap)
 }
-library(ggplot2) #for plotting
 
 ### 1) Bootstrap trait values using CWM ----
 
