@@ -154,8 +154,7 @@ species <- species_raw %>%
   #Extract plot number from PlotID dropping the treatment code
   #This extracts the final character in the string
   mutate(.,
-         PlotID = str_sub(PlotID, - 1, - 1)
-         ) %>%
+         PlotID = str_sub(PlotID, - 1, - 1)) %>%
 
   # convert all factors back to factors
   mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>% 
