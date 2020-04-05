@@ -10,7 +10,7 @@
 #' ------------------------------------------------------------------#
 #'  DATA IMPORTING AND DATAFRAMES
 #'  - Import and clean data using Gr3_data_import_checking.R
-#'    Can also be found in PFTC5_Gr Repo at: 
+#'    Can also be found in PFTC5_Gr3 Repo at: 
 #'    (https://github.com/TanyaS08/PFTC5_Gr3/blob/master/scripts/Gr3_data_import_checking.R)
 #'  - 'species' df = community cover data
 #'  - 'traits' df = traits data
@@ -22,10 +22,15 @@
 #'    when converting to long format -> ca. l. 50
 #'  - TBD: hierarchy when imputing/bootstrapping
 #'    for now using: Site > Treatment > PlotID
-#'  - TBD: number of reps and sample size for
-#'    bootstrapping
+#'        - changing this requires modifying select and gather when 
+#'          making the long dfs
+#'  - TBD: number of reps and sample size for bootstrapping
 #'  - Rank sites from high to low as opposed to alphabetical
 #'    for plotting
+#'  - if we do decide to plot outputs maybe set better colour scheme
+#'    manually
+#'  - might be worth exchanging gather for pivot_longer() as gather()
+#'    is a depreciated function  
 #' ------------------------------------------------------------------#
 
 ### 0) Preamble ----
@@ -146,6 +151,7 @@ trait_bootstrap_summary %>%
         c(Treatment, PlotID),
         sep = " ", remove = FALSE) %>% 
   ggplot() +
+  #split into panels by trait type and site
   facet_grid(rows = vars(Site),
              cols = vars(Trait),
              scales = 'free_x',) +
@@ -160,5 +166,15 @@ trait_bootstrap_summary %>%
 
 ## This code can be modified and tweaked for the other
 # moments if desired
+
+### 3) Mulivariate analysis of bootstrapped data ----
+
+### >> a) Manipulate df ----
+trait_bootstrap %>%
+  #need to create a unique ID for each entry
+  pivot_wider(.,
+              names_from = Trait,
+              values_from = mean)
+
 
 # End of script ----
