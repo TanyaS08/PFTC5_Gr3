@@ -27,6 +27,7 @@ if(!require(skimr)){        # for quick overview of dataset
 library(tidyverse)
 library("tidylog")
 library(rex)
+library(stringr)
 
 ### >> b) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
@@ -151,12 +152,10 @@ species <- species_raw %>%
   mutate(Cover = as.numeric(recode(Cover, "+" = "0.5")))  %>%
   
   #Extract plot number from PlotID dropping the treatment code
-  ##If you find a more elegant way to do this please do so
+  #This extracts the final character in the string
   mutate(.,
-         #Drops BB
-         PlotID = re_substitutes(as.character(PlotID), "BB", "\\1", options = "insensitive"),
-         #Drops C
-         PlotID = re_substitutes(as.character(PlotID), "C", "\\1", options = "insensitive")) %>%
+         PlotID = str_sub(PlotID, - 1, - 1)
+         ) %>%
 
   # convert all factors back to factors
   mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>% 
@@ -211,5 +210,7 @@ traits %>%
   #scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
   theme_bw() +
   labs(y = "density")
+
+
 
 # End of script ----
