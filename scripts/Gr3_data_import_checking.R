@@ -26,8 +26,10 @@ if(!require(skimr)){        # for quick overview of dataset
 }
 library(tidyverse)
 library("tidylog")
-library(rex)
-library(stringr)
+if(!require(stringr)){        # for string operations
+  install.packages("stringr")
+  library(stringr)
+}
 
 ### >> b) Colour scheme ----
 # ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
