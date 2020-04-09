@@ -30,14 +30,46 @@ if(!require(stringr)){        # for string operations
   install.packages("stringr")
   library(stringr)
 }
+if(!require(ggpomological)){  # for colour scheme
+  devtools::install_github("gadenbuie/ggpomological")
+  library(ggpomological)
+}
+library(paletteer)            # for "palettes_d" function to display colour schemes
 
 ### >> b) Colour scheme ----
-# ( from https://color.adobe.com/SRADDET-Sud-2-color-theme-14318632 )
-theme_red <- "#F96654"
-theme_blue <- "#4088C7"
-theme_green <- "#34B362"
-theme_darkblue <- "#1D5799"
-theme_yellow <- "#FABC55"
+# suggestion 1: draw from ggpomological theme: https://github.com/gadenbuie/ggpomological )
+scales::show_col(ggpomological:::pomological_palette)
+
+# example 1: dark (C) vs light (BB)
+acj_c <- palettes_d$ggpomological$pomological_palette[1]
+acj_bb <- palettes_d$ggpomological$pomological_palette[5]
+tre_c <- palettes_d$ggpomological$pomological_palette[2]
+tre_bb <- palettes_d$ggpomological$pomological_palette[7]
+que_c <- palettes_d$ggpomological$pomological_palette[8]
+que_bb <- palettes_d$ggpomological$pomological_palette[6]
+# example 2: loud (C) vs. muted (BB)
+acj_c <- palettes_d$ggpomological$pomological_palette[1]
+acj_bb <- palettes_d$ggpomological$pomological_palette[9]
+tre_c <- palettes_d$ggpomological$pomological_palette[3]
+tre_bb <- palettes_d$ggpomological$pomological_palette[4]
+que_c <- palettes_d$ggpomological$pomological_palette[8]
+que_bb <- palettes_d$ggpomological$pomological_palette[6]
+
+# suggestion 2: draw from Dresdencolor:::paired theme -> dark (C) vs light (BB)
+scales::show_col(palettes_d$DresdenColor$paired)
+
+acj_c <- palettes_d$DresdenColor$paired[11]
+acj_bb <- palettes_d$DresdenColor$paired[12]
+tre_c <- palettes_d$DresdenColor$paired[7]
+tre_bb <- palettes_d$DresdenColor$paired[8]
+que_c <- palettes_d$DresdenColor$paired[5]
+que_bb <- palettes_d$DresdenColor$paired[6]
+ 
+
+# theme_blue <- "#4088C7"
+# theme_green <- "#34B362"
+# theme_darkblue <- "#1D5799"
+# theme_yellow <- "#FABC55"
 
 ### >> c) Functions ----
 capwords <- function(s, strict = FALSE) {
@@ -104,7 +136,10 @@ traits <- traits_raw %>%
   mutate(Date = as.Date(paste0("2020-03-", Day))) %>%
   
   # convert all factors back to factors
-  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Treatment), factor)
+  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Treatment), factor) %>% 
+  
+  # reorder sites
+  mutate(Site = factor(Site, levels = c("ACJ", "TRE", "QUE")))
 
 
 
@@ -194,8 +229,10 @@ traits %>% group_by(Site, Treatment) %>%
 #plant height density plot
 traits %>% #group_by(Site) %>% 
   ggplot(aes(Plant_Height_cm, fill = Site)) +
-  geom_density(alpha = .5, kernel = "gaussian") +
-  scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
+  geom_density(alpha = .9, kernel = "gaussian") +
+  scale_fill_manual(values = c(acj_c,
+                               tre_c,
+                               que_c)) +
   theme_bw() +
   labs(y = "density")
 
@@ -206,9 +243,22 @@ traits %>%
   unite(Plot,
         c(Site, Treatment),
         sep = " ", remove = FALSE) %>% 
+  mutate(Plot = factor(Plot, levels = c("ACJ C", 
+                                        "ACJ BB", 
+                                        "TRE C", 
+                                        "TRE BB", 
+                                        #"QUE C",
+                                        "QUE BB"))) %>% 
   ggplot(aes(Plant_Height_cm, fill = Plot)) +
-  geom_density(alpha = .5, kernel = "gaussian") +
-  #scale_fill_manual(values = c(theme_darkblue, theme_green, theme_yellow)) +
+  geom_density(alpha = .9, kernel = "gaussian") +
+  scale_fill_paletteer_d("DresdenColor::paired") +
+  # scale_fill_manual(values = c(acj_c,
+  #                              acj_bb,
+  #                              tre_c,
+  #                              tre_bb,
+  #                              #que_c,
+  #                              que_bb)) +
+  #scale_fill_paletteer_d("nationalparkcolors::Everglades") +
   theme_bw() +
   labs(y = "density")
 
