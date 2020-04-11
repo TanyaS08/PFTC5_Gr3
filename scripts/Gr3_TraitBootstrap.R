@@ -7,6 +7,13 @@
 #          Tanya Strydom
 # Contact: dagmar.egelkraut@uib.no
 
+### IMPORTANT NOTICE ----
+#' ------------------------------------------------------------------#
+#' Please avoid working in section 3) 
+#'   Mulivariate analysis of bootstrapped data
+#'   Tanya Strydom is working in that section at the moment
+#' ------------------------------------------------------------------#
+
 #' ------------------------------------------------------------------#
 #'  DATA IMPORTING AND DATAFRAMES
 #'  - Import and clean data using Gr3_data_import_checking.R
@@ -171,6 +178,7 @@ trait_bootstrap_summary %>%
 
 ### >> a) Manipulate df onto wide format ----
 
+  traits_wide  <-
   trait_bootstrap %>%
   #remove all moments except for mean
   select(-c(variance,
@@ -184,5 +192,9 @@ trait_bootstrap_summary %>%
   mutate(row_ID = paste0(n, "_", Site, "_", Treatment, "_", PlotID)) %>%
   #set new column as row name
   column_to_rownames("row_ID")
+
+### >> b) PCA analysis ----
+
+
 
 # End of script ----
