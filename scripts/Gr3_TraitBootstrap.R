@@ -165,16 +165,24 @@ trait_bootstrap_summary %>%
   theme_bw()
 
 ## This code can be modified and tweaked for the other
-# moments if desired
+# moments if so desired
 
 ### 3) Mulivariate analysis of bootstrapped data ----
 
-### >> a) Manipulate df ----
-trait_bootstrap %>%
-  #need to create a unique ID for each entry
+### >> a) Manipulate df onto wide format ----
+
+  trait_bootstrap %>%
+  #remove all moments except for mean
+  select(-c(variance,
+            skewness,
+            kurtosis)) %>%
+  #change into wide form i.e. each trait becomes a column
   pivot_wider(.,
               names_from = Trait,
-              values_from = mean)
-
+              values_from = mean) %>%
+  #need to create a unique ID for each entry - make row name
+  mutate(row_ID = paste0(n, "_", Site, "_", Treatment, "_", PlotID)) %>%
+  #set new column as row name
+  column_to_rownames("row_ID")
 
 # End of script ----
