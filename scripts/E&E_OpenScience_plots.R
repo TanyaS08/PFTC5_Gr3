@@ -167,7 +167,7 @@ pftc5_polygons_res <- worldmap %>%
     # plot outline of PFTC country
     geom_polygon(data = pftc2_polygons_res %>% filter(region == "China"), aes(x = long, y = lat), colour = "black", size = 1.4, fill = NA) +
     # add gradient colour fill
-    scale_fill_gradientn(colours = grad_red, 
+    scale_fill_gradientn(colours = grad_yellow, 
                          na.value = "grey60",
                          breaks = c(1, 12)) + 
     labs(fill = "No. people\n") +
@@ -188,7 +188,7 @@ pftc5_polygons_res <- worldmap %>%
     # plot outline of PFTC country
     geom_polygon(data = pftc3_polygons_res %>% filter(region == "Peru"), aes(x = long, y = lat), colour = "black", size = 1.4, fill = NA) +
     # add gradient colour fill
-    scale_fill_gradientn(colours = grad_red, 
+    scale_fill_gradientn(colours = grad_pink, 
                          na.value = "grey60",
                          breaks = c(1, 12)) + 
     labs(fill = "No. people\n") +
@@ -214,7 +214,7 @@ pftc5_polygons_res <- worldmap %>%
               ymax = max(lat)+5), 
               colour = "black", size = 1.4, fill = NA) +
     # add gradient colour fill
-    scale_fill_gradientn(colours = grad_red, 
+    scale_fill_gradientn(colours = grad_green, 
                          na.value = "grey60",
                          breaks = c(1, 12)) + 
     labs(fill = "No. people\n") +
@@ -233,16 +233,26 @@ pftc5_polygons_res <- worldmap %>%
     geom_polygon(data = pftc5_polygons_res, #  %>% filter(region %in% pftc5_locations$residence) to not display other origin countries
                  aes(x = long, y = lat, group = group, fill = n_people_res)) +
     # plot outline of PFTC country
-    geom_polygon(data = pftc5_polygons_res %>% filter(region == "Peru"), aes(x = long, y = lat), colour = "black", size = 1.4, fill = NA) +
-    # add gradient colour fill
-    scale_fill_gradientn(colours = grad_red, 
+    geom_polygon(data = pftc5_polygons_res %>% filter(region == "Peru"), 
+                 aes(x = long, y = lat), 
+                 colour = "black", 
+                 size = 1.4, fill = NA) +
+   # add gradient colour fill
+   scale_fill_gradientn(colours = grad_red, 
                          na.value = "grey60",
                          breaks = c(1, 12)) + 
-    labs(fill = "No. people\n") +
-    coord_quickmap() +
-    theme_bw() +
-    theme(panel.grid = element_blank(),
-          legend.position = "bottom"))
+   labs(fill = "No. people\n",
+        title = "PFTC5 (2020, n = 47)") +
+   coord_quickmap() +
+   theme_bw() +
+   theme(panel.grid = element_blank(),
+          legend.position = "bottom")) %>% 
+
+  ggsave(path = "output",
+         filename = "pftc5_participants_map.png",
+         width = 150,
+         height = 125,
+         units = "mm")
 
 #___________________ ----
 # end of script ----
