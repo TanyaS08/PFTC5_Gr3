@@ -36,8 +36,6 @@
 #'    for plotting
 #'  - if we do decide to plot outputs maybe set better colour scheme
 #'    manually
-#'  - might be worth exchanging gather for pivot_longer() as gather()
-#'    is a depreciated function  
 #' ------------------------------------------------------------------#
 
 ### 0) Preamble ----
@@ -63,13 +61,19 @@ traits_long <-
          LeafArea_cm2,
          Leaf_Thickness_avg_mm,
          PlotID) %>%
-  #gather into long format
-  gather(key = "Trait",
-         value = "Value", 
-         -c(Taxon,
-            Site,
-            Treatment,
-            PlotID)) %>%
+  #pivot into long format
+  
+  pivot_longer(.,
+  #columns not to be pivoted but are 'retained' i.e. not the traits
+               cols = -c(Taxon,
+                         Site,
+                         Treatment,
+                         PlotID),
+  #traits column
+               names_to  = "Trait",
+  #traits value column
+               values_to = "Value") %>%
+  
   #remove NA values to avoid sampling
   na.omit()
 
@@ -83,17 +87,24 @@ species_long <-
          Treatment,
          Taxon,
          PlotID) %>%
-  #gather into long format
-  gather(key = "Attribute",
-         value = "Cover", 
-         -c(Taxon,
-            Site,
-            Treatment,
-            PlotID)) %>%
+  
+  #pivot into long format
+  pivot_longer(.,
+  #columns not to be pivoted but are 'retained' i.e. not the traits
+               cols = -c(Taxon,
+                         Site,
+                         Treatment,
+                         PlotID),
+  #traits column
+               names_to = "Attribute",
+  #cover column
+               values_to = "Cover") %>%
+  
   # remove 'Attribute' column to keep df sleek
   select(.,
          -Attribute) %>%
   
+  #reclassify vars
   mutate_at(.,
             vars(Taxon),
             as.character)
@@ -116,8 +127,7 @@ trait_bootstrap <-
     trait_col = "Trait",
     value_col = "Value",
     abundance_col = "Cover",
-    keep_all = TRUE
-  ) %>%
+    keep_all = TRUE) %>%
   
   #This bootstraps the imputed data using CWM
   trait_np_bootstrap(.,
