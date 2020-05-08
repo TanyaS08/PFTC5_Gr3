@@ -11,8 +11,7 @@
 if (!require('pacman')) install.packages('pacman', repos="https://cloud.r-project.org")
 pacman::p_load(
   # general
-  dplyr,
-  tidyr,
+  tidyverse,
   stringr,
   #sf,
   # for maps
@@ -29,7 +28,6 @@ pacman::p_load(
   #grid,      # for layout of inset maps
   #leaflet,   # for interactive maps
   #mapview,   # for interactive maps
-  ggplot2,   # tidyverse vis package
   #shiny,     # for web applications
   #cartogram, # for continuous and non-contiguous area cartograms
   update = FALSE)

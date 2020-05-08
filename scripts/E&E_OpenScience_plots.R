@@ -1,8 +1,8 @@
-#' PFTC5 - Perspective piece
-#' Script to produce support figures
+#' PFTC5 - Open Science lessons from PFTC for Ecol&Evol special issue
+#' Map with PFTC participants' countries of residence
 #' 
 #' Jonathan von Oppen, Aarhus University
-#' 01-04-2020
+#' 08-05-2020
 #' 
 #' #########################################################################
 
@@ -16,24 +16,9 @@ pacman::p_load(
   tidyverse,
   tidylog,
   stringr,
-  #sf,
   # for maps
   rgeos,
-  rworldmap,
-  maps,
-  geosphere,
-  #raster,
-  #spData,
-  #spDataLarge,
-  #rworldxtra,
-  # In addition, it uses the following visualisation packages:
-  #tmap,      # for static and interactive maps
-  #grid,      # for layout of inset maps
-  #leaflet,   # for interactive maps
-  #mapview,   # for interactive maps
-  #shiny,     # for web applications
-  #cartogram, # for continuous and non-contiguous area cartograms
-  update = FALSE)
+update = FALSE)
 
 ### >> b) Colour scheme ----
 grad_red <- c("#FFCCCB", "#F0AAAD", "#E1888F", "#D16570", "#C24352")
@@ -41,7 +26,6 @@ grad_green <- c("#D0EDC6", "#B0E0A0", "#90D27B", "#71C456", "58AA3D")
 grad_yellow <- c("#FFFFC2", "#FFFE55", "#FFF000", "#FFE23D", "#FFD700")
 grad_blue <- c("#A8D7FA", "#88CBFA", "#78B6FA", "#5AA2F6", "#408AF1")
 grad_pink <- c("#ECC3EB", "#DF9DDD", "#D178CF", "#C353C0", "#A73CA4")
-  # nord(palette = "silver_mine", n = 50, reverse = TRUE)
 
 ### >> c) Functions ----
 capwords <- function(s, strict = FALSE) {
@@ -51,8 +35,9 @@ capwords <- function(s, strict = FALSE) {
   sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
 }
 
-### 1) Map with countries of origin vs residence ----
-# >> prepare data ----
+
+### 1) Data preparation ----
+
 # get countries' centroid coordinates from https://worldmap.harvard.edu/data/geonode:country_centroids_az8
 centroids <- getMap(resolution = "high") %>% 
   as.data.frame(gCentroid(byid = TRUE)) %>% 
@@ -121,7 +106,7 @@ pftc5_locations <- locations %>%
 res_freq <- locations %>% group_by(residence) %>% summarise(n())
 ori_freq <- locations %>% group_by(origin) %>% summarise(n())
 
-# >> make map ----
+# 2) Map data extraction ----
 # create world base map
 worldmap <- map_data("world")
 # filter PFTC5 countries
@@ -146,6 +131,9 @@ pftc5_polygons_res <- worldmap %>%
 # pftc5_polygons_ori <- worldmap %>%
 #   filter(region %in% pftc5_countries) %>% 
 #   left_join(pftc5_locations, by = c("region" = "origin"))
+
+
+# 3) Map plotting ----
 
 # >> a) PFTC1 ----
 
@@ -256,4 +244,5 @@ pftc5_polygons_res <- worldmap %>%
     theme(panel.grid = element_blank(),
           legend.position = "bottom"))
 
-
+#___________________ ----
+# end of script ----
