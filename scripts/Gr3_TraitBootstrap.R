@@ -134,7 +134,7 @@ trait_bootstrap <-
 
 #Summary of different moments (\mu, lower CI and upper CI)
 trait_bootstrap_summary <-
-  SummariseBootMoments(trait_bootstrap)
+  trait_summarise_boot_moments(trait_bootstrap)
 
 ### 2) Plotting Boot Moments ----
 
