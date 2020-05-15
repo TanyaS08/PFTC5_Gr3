@@ -7,12 +7,6 @@
 #          Tanya Strydom
 # Contact: dagmar.egelkraut@uib.no
 
-### IMPORTANT NOTICE ----
-#' ------------------------------------------------------------------#
-#' Please avoid working in section 3) 
-#'   Mulivariate analysis of bootstrapped data
-#'   Tanya Strydom is working in that section at the moment
-#' ------------------------------------------------------------------#
 
 #' ------------------------------------------------------------------#
 #'  DATA IMPORTING AND DATAFRAMES
@@ -29,13 +23,14 @@
 #'    when converting to long format -> ca. l. 50
 #'  - TBD: hierarchy when imputing/bootstrapping
 #'    for now using: Site > Treatment > PlotID
-#'        - changing this requires modifying select and gather when 
+#'        - changing this requires modifying select and pivot_longer when 
 #'          making the long dfs
 #'  - TBD: number of reps and sample size for bootstrapping
 #'  - Rank sites from high to low as opposed to alphabetical
 #'    for plotting
 #'  - if we do decide to plot outputs maybe set better colour scheme
 #'    manually
+#'  - need to update colour pallete of plots when all sites are in dataset
 #' ------------------------------------------------------------------#
 
 ### 0) Preamble ----
@@ -45,6 +40,8 @@ if(!require(traitstrap)){ # for bootstrapping trait data
   devtools::install_github("richardjtelford/traitstrap")
   library(traitstrap)
 }
+library(FactoMineR)
+library(factoextra)
 
 ### 1) Bootstrap trait values using CWM ----
 
@@ -137,7 +134,7 @@ trait_bootstrap <-
 
 #Summary of different moments (\mu, lower CI and upper CI)
 trait_bootstrap_summary <-
-  SummariseBootMoments(trait_bootstrap)
+  trait_summarise_boot_moments(trait_bootstrap)
 
 ### 2) Plotting Boot Moments ----
 
@@ -181,7 +178,7 @@ trait_bootstrap_summary %>%
   scale_colour_brewer(palette = "RdYlGn")  +
   theme_bw()
 
-## This code can be modified and tweaked for the other
+## This code can probably be modified and tweaked for the other
 # moments if so desired
 
 ### 3) Mulivariate analysis of bootstrapped data ----
@@ -203,8 +200,26 @@ trait_bootstrap_summary %>%
   #set new column as row name
   column_to_rownames("row_ID")
 
-### >> b) PCA analysis ----
+### >> b) PCA ----
 
+trait.pca <- PCA(
+  #remove identification columns
+  traits_wide[,-c(1:5)],
+  graph = FALSE,
+  scale = TRUE)
 
+fviz_pca(trait.pca,
+         label = "var",
+         #create a grouping var consisting of treatment and site
+         habillage = as.factor(paste0(traits_wide$Site,
+                                      "_",
+                                      traits_wide$Treatment)),
+         addEllipses = TRUE,
+         #using the selected colour scheme for consistency
+         #NEED TO UPDATE COLOURS WHEN ALL SITES ARE INCLUDED
+         palette = c(acj_bb,
+                     que_bb,
+                     tre_bb,
+                     tre_c))
 
 # End of script ----
