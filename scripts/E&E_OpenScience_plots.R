@@ -18,6 +18,7 @@ pacman::p_load(
   stringr,
   # for maps
   rgeos,
+  rworldmap,
 update = FALSE)
 
 ### >> b) Colour scheme ----
@@ -246,13 +247,13 @@ pftc5_polygons_res <- worldmap %>%
    coord_quickmap() +
    theme_bw() +
    theme(panel.grid = element_blank(),
-          legend.position = "bottom")) %>% 
-
-  ggsave(path = "output",
-         filename = "pftc5_participants_map.png",
-         width = 150,
-         height = 125,
-         units = "mm")
+          legend.position = "bottom")) #%>% 
+# 
+#   ggsave(path = "output",
+#          filename = "pftc5_participants_map.png",
+#          width = 150,
+#          height = 125,
+#          units = "mm")
 
 #___________________ ----
 # end of script ----
