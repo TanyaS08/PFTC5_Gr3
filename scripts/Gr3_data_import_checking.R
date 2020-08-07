@@ -25,7 +25,7 @@ if(!require(skimr)){        # for quick overview of dataset
   library(skimr)
 }
 library(tidyverse)
-library("tidylog")
+library(tidylog)
 if(!require(stringr)){        # for string operations
   install.packages("stringr")
   library(stringr)
@@ -33,6 +33,10 @@ if(!require(stringr)){        # for string operations
 if(!require(ggpomological)){  # for colour scheme
   devtools::install_github("gadenbuie/ggpomological")
   library(ggpomological)
+}
+if(!require(ggpomological)){  # for colour scheme
+  install.packages("ggridges")
+  library(ggridges)
 }
 library(paletteer)            # for "palettes_d" function to display colour schemes
 
@@ -249,9 +253,14 @@ traits %>%
                                         "TRE BB", 
                                         #"QUE C",
                                         "QUE BB"))) %>% 
-  ggplot(aes(Plant_Height_cm, fill = Plot)) +
-  geom_density(alpha = .9, kernel = "gaussian") +
+  ggplot() +
+  stat_density_ridges(aes(y = Site,
+                          x = Plant_Height_cm,
+                          fill = Plot,
+                          color = Plot),
+                      alpha = 0.7) +
   scale_fill_paletteer_d("DresdenColor::paired") +
+  scale_colour_paletteer_d("DresdenColor::paired") +
   # scale_fill_manual(values = c(acj_c,
   #                              acj_bb,
   #                              tre_c,
@@ -263,5 +272,46 @@ traits %>%
   labs(y = "density")
 
 
+#plotting all traits using facets
+##Need to set a colour scheme
+density_plots <- 
+traits %>% 
+  #combine both Site and treatment to one variable
+  unite(Plot,
+        c(Site, Treatment),
+        sep = " ", remove = FALSE) %>% 
+  select(Plot, Site, Plant_Height_cm, Wet_Mass_g, Leaf_Thickness_avg_mm) %>%
+  #pivot into long format for splitting into facets
+  pivot_longer(cols = -c(Plot, Site),
+               values_to = "Value",
+               names_to = "Trait") %>%
+  mutate(Plot = factor(Plot, levels = c("ACJ C", 
+                                        "ACJ BB", 
+                                        "TRE C", 
+                                        "TRE BB", 
+                                        #"QUE C",
+                                        "QUE BB")),
+          # Rename traits for labels
+           Trait = case_when(Trait == "Plant_Height_cm" ~ "Plant height (cm)",
+                             Trait == "Wet_Mass_g" ~ "Wet mass (g)",
+                             Trait == "Leaf_Thickness_avg_mm" ~ "Leaf Thickness (mm)")) %>% 
+  ggplot() +
+  stat_density_ridges(aes(y = Site,
+                          x = Value,
+                          fill = Plot,
+                          color = Plot),
+                      alpha = 0.5) +
+  facet_wrap(vars(Trait),
+             scales = "free") + 
+  scale_fill_paletteer_d("DresdenColor::paired") +
+  scale_colour_paletteer_d("DresdenColor::paired") +
+  theme_bw() +
+  labs(y = "density",
+  x = "trait value")
+
+ggsave("/Users/tanyastrydom/Documents/Uni/PFTC/PFTC5/PFTC5_Gr3/output/DensityPlots.png",
+       density_plots,
+       height = 8.3, width = 15, 
+       units = "in", dpi = 600)
 
 # End of script ----
