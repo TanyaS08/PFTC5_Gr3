@@ -3,7 +3,7 @@
 #
 # Group 3: Trait & taxonomic community response to fire and elevation
 # Authors: Dagmar D. Egelkraut, Lucely Vilca Bustamante, Sonya Geange,
-#          Korina Ocampo-Zuleta, Jonathan von Oppen, Jess Rickenback, 
+#          Korina Ocampo-Zuleta, Jonathan von Oppen, Jess Rickenback,
 #          Tanya Strydom
 # Contact: dagmar.egelkraut@uib.no
 
@@ -11,7 +11,7 @@
 #' ------------------------------------------------------------------#
 #' TO DO:
 #' - Add species cover data for ACJ Control from 2019. Check???
-#' - check ACJ&TRE recording year with Lucely, 2019?!? -> 2b i, l. 
+#' - check ACJ&TRE recording year with Lucely, 2019?!? -> 2b i, l.
 #' - functional group column check genera -> 2b iii, l.143
 #' - + cover values as 0.5? -> 2b iii, l. 141
 #' - Need to add control traits data from QUE from 2019
@@ -39,6 +39,8 @@ if(!require(ggpomological)){  # for colour scheme
   library(ggridges)
 }
 library(paletteer)            # for "palettes_d" function to display colour schemes
+library(ggdist)
+library(tvthemes)
 
 ### >> b) Colour scheme ----
 # suggestion 1: draw from ggpomological theme: https://github.com/gadenbuie/ggpomological )
@@ -68,12 +70,17 @@ tre_c <- palettes_d$DresdenColor$paired[7]
 tre_bb <- palettes_d$DresdenColor$paired[8]
 que_c <- palettes_d$DresdenColor$paired[5]
 que_bb <- palettes_d$DresdenColor$paired[6]
- 
+
 
 # theme_blue <- "#4088C7"
 # theme_green <- "#34B362"
 # theme_darkblue <- "#1D5799"
 # theme_yellow <- "#FABC55"
+
+#suggestion 3: using the Fire Nation palette from {tvthemes}
+scales::show_col(avatar_pal(palette = "FireNation")(4))
+#then use lighten() to get the paried shades e.g.
+colorspace::lighten("#ecb100", .2, space = "HLS")
 
 ### >> c) Functions ----
 capwords <- function(s, strict = FALSE) {
@@ -85,8 +92,8 @@ capwords <- function(s, strict = FALSE) {
 
 ### 1) Data import ----
 # traits data - complete
-traits_raw <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"), 
-                         header = T, 
+traits_raw <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"),
+                         header = T,
                          sep = ",")
 
 # community data
@@ -100,17 +107,17 @@ species_raw <- map_df(species_files, read_csv)
 skim(traits_raw)
 
 # clean data
-traits <- traits_raw %>% 
+traits <- traits_raw %>%
   # LeafArea_cm2 is a factor, make numeric
-  mutate(LeafArea_cm2 = as.numeric(LeafArea_cm2)) %>% 
+  mutate(LeafArea_cm2 = as.numeric(LeafArea_cm2)) %>%
 
   # create Taxon column from Genus + species
   mutate(Taxon = as.factor(paste(Genus, " ", Species))) %>%
-  
+
   #remove extra spacing between Genus and species in 'Taxon'
   mutate_at(.,
             vars(Taxon),
-            c(str_squish))  %>% 
+            c(str_squish))  %>%
 
   # Average leaf thickness measurements
   mutate(Leaf_Thickness_avg_mm = rowMeans(select(.,
@@ -118,30 +125,30 @@ traits <- traits_raw %>%
                                              Leaf_Thickness_2_mm,
                                              Leaf_Thickness_3_mm), na.rm=TRUE)) %>%
 
-  # QUE contains C samples, have to be BB -> recode 
-  mutate_at(vars(Experiment, Site), as.character) %>% 
+  # QUE contains C samples, have to be BB -> recode
+  mutate_at(vars(Experiment, Site), as.character) %>%
   mutate(.,
          Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
-         ) %>% 
-  
+         ) %>%
+
   # keep only samples from traits (T) project
-  filter(Project == "T") %>% 
-  
+  filter(Project == "T") %>%
+
   # exclude cases with NA in Experiment, just for ease
-  drop_na(Experiment) %>% 
-  
+  drop_na(Experiment) %>%
+
   # also drop WAY samples, as not our focus
-  filter(!Site == "WAY") %>% 
-  
+  filter(!Site == "WAY") %>%
+
   # rename columns
-  rename(Treatment = Experiment, PlotID = Plot_ID, Comment = Remark) %>% 
-  
+  rename(Treatment = Experiment, PlotID = Plot_ID, Comment = Remark) %>%
+
   # create date variable from day
   mutate(Date = as.Date(paste0("2020-03-", Day))) %>%
-  
+
   # convert all factors back to factors
-  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Treatment), factor) %>% 
-  
+  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Treatment), factor) %>%
+
   # reorder sites
   mutate(Site = factor(Site, levels = c("ACJ", "TRE", "QUE")))
 
@@ -152,54 +159,54 @@ skim(traits)
 
 
 ### >> b) Community data ----
-species <- species_raw %>% 
-  
+species <- species_raw %>%
+
   # rename columns to first letter upper case
-  rename_all(capwords) %>% 
-  
+  rename_all(capwords) %>%
+
   # rename "name" to "Taxon"
-  rename(Taxon = Name, PlotID = Plot) %>% 
-  
+  rename(Taxon = Name, PlotID = Plot) %>%
+
   # # recode year 2019 to 2020 -> check with Lucely! ...
-  # mutate(year = as.integer(recode(year, "2019" = "2020"))) %>% 
-  
+  # mutate(year = as.integer(recode(year, "2019" = "2020"))) %>%
+
   # drop absent species
-  filter(!Cover == "") %>% 
-  
+  filter(!Cover == "") %>%
+
   # remove dots after "cf"
-  mutate(Taxon = str_remove(Taxon, "\\.")) %>% 
+  mutate(Taxon = str_remove(Taxon, "\\.")) %>%
   # ...and replace underscores with spaces in Taxon column
-  mutate(Taxon = str_replace(Taxon, "_", " ")) %>% 
-  
+  mutate(Taxon = str_replace(Taxon, "_", " ")) %>%
+
   # extract cfs into new column...
-  mutate(Cf = str_extract(Taxon, "cf |cf_")) %>% 
+  mutate(Cf = str_extract(Taxon, "cf |cf_")) %>%
   # ...remove extra space/_ from cf column...
-  mutate(Cf = str_remove(Cf, "\\s|_")) %>% 
+  mutate(Cf = str_remove(Cf, "\\s|_")) %>%
   # ...and delete "cf "/"cf_" from Taxon column
-  mutate(Taxon = str_remove(Taxon, "cf |cf_")) %>% 
-  
+  mutate(Taxon = str_remove(Taxon, "cf |cf_")) %>%
+
   # split Taxon into genus and species
-  separate(Taxon, into = c("Genus", "Species"), 
-           sep = "\\s", 2, 
-           remove = FALSE) %>% 
-  
+  separate(Taxon, into = c("Genus", "Species"),
+           sep = "\\s", 2,
+           remove = FALSE) %>%
+
   # drop all-NA "real_species_name" & "habit" columns
-  select_if(function(x){!all(is.na(x))}) %>% 
-  
+  select_if(function(x){!all(is.na(x))}) %>%
+
   # extract treatment from plot
-  mutate(Treatment = str_extract(PlotID, "[:alpha:]*")) %>% 
-  
+  mutate(Treatment = str_extract(PlotID, "[:alpha:]*")) %>%
+
   # recode "+" cover value to 0.5
   mutate(Cover = as.numeric(recode(Cover, "+" = "0.5")))  %>%
-  
+
   #Extract plot number from PlotID dropping the treatment code
   #This extracts the final character in the string
   mutate(.,
          PlotID = str_sub(PlotID, - 1, - 1)) %>%
 
   # convert all factors back to factors
-  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>% 
-  
+  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>%
+
   # create functional group column based on genus name
   ## TBC
   ## Confirm all graminoid genera are represented
@@ -214,15 +221,15 @@ species <- species_raw %>%
   #                                                           "Paspalum",
   #                                                           "Poa",
   #                                                           "Rhynchospora",
-  #                                                           "Trichophorum"), 
-  #                                              "graminoid", 
+  #                                                           "Trichophorum"),
+  #                                              "graminoid",
   #                                              "forb")))
-  
+
 
 ### 3) Summary graphs ----
 # N species sampled for traits per site and treatment
-traits %>% group_by(Site, Treatment) %>% 
-  summarise(n_taxa = n_distinct(Taxon)) %>% 
+traits %>% group_by(Site, Treatment) %>%
+  summarise(n_taxa = n_distinct(Taxon)) %>%
   ggplot(aes(x = Site, y = n_taxa, fill = Treatment)) +
     geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
     scale_fill_manual(values = c(theme_red, theme_blue)) +
@@ -231,7 +238,7 @@ traits %>% group_by(Site, Treatment) %>%
     labs(y = "total no. taxa")
 
 #plant height density plot
-traits %>% #group_by(Site) %>% 
+traits %>% #group_by(Site) %>%
   ggplot(aes(Plant_Height_cm, fill = Site)) +
   geom_density(alpha = .9, kernel = "gaussian") +
   scale_fill_manual(values = c(acj_c,
@@ -242,17 +249,17 @@ traits %>% #group_by(Site) %>%
 
 #plant height density plot - split by treatment
 ##Need to set a colour scheme
-traits %>% 
+traits %>%
   #combine both Site and treatment to one variable
   unite(Plot,
         c(Site, Treatment),
-        sep = " ", remove = FALSE) %>% 
-  mutate(Plot = factor(Plot, levels = c("ACJ C", 
-                                        "ACJ BB", 
-                                        "TRE C", 
-                                        "TRE BB", 
+        sep = " ", remove = FALSE) %>%
+  mutate(Plot = factor(Plot, levels = c("ACJ C",
+                                        "ACJ BB",
+                                        "TRE C",
+                                        "TRE BB",
                                         #"QUE C",
-                                        "QUE BB"))) %>% 
+                                        "QUE BB"))) %>%
   ggplot() +
   stat_density_ridges(aes(y = Site,
                           x = Plant_Height_cm,
@@ -274,27 +281,27 @@ traits %>%
 
 #plotting all traits using facets
 ##Need to set a colour scheme
-density_plots <- 
-traits %>% 
+#density_plots <-
+traits %>%
   #combine both Site and treatment to one variable
   unite(Plot,
         c(Site, Treatment),
-        sep = " ", remove = FALSE) %>% 
+        sep = " ", remove = FALSE) %>%
   select(Plot, Site, Plant_Height_cm, Wet_Mass_g, Leaf_Thickness_avg_mm) %>%
   #pivot into long format for splitting into facets
   pivot_longer(cols = -c(Plot, Site),
                values_to = "Value",
                names_to = "Trait") %>%
-  mutate(Plot = factor(Plot, levels = c("ACJ C", 
-                                        "ACJ BB", 
-                                        "TRE C", 
-                                        "TRE BB", 
+  mutate(Plot = factor(Plot, levels = c("ACJ C",
+                                        "ACJ BB",
+                                        "TRE C",
+                                        "TRE BB",
                                         #"QUE C",
                                         "QUE BB")),
           # Rename traits for labels
            Trait = case_when(Trait == "Plant_Height_cm" ~ "Plant height (cm)",
                              Trait == "Wet_Mass_g" ~ "Wet mass (g)",
-                             Trait == "Leaf_Thickness_avg_mm" ~ "Leaf Thickness (mm)")) %>% 
+                             Trait == "Leaf_Thickness_avg_mm" ~ "Leaf Thickness (mm)")) %>%
   ggplot() +
   stat_density_ridges(aes(y = Site,
                           x = Value,
@@ -302,7 +309,7 @@ traits %>%
                           color = Plot),
                       alpha = 0.5) +
   facet_wrap(vars(Trait),
-             scales = "free") + 
+             scales = "free") +
   scale_fill_paletteer_d("DresdenColor::paired") +
   scale_colour_paletteer_d("DresdenColor::paired") +
   theme_bw() +
@@ -311,7 +318,7 @@ traits %>%
 
 ggsave("/Users/tanyastrydom/Documents/Uni/PFTC/PFTC5/PFTC5_Gr3/output/DensityPlots.png",
        density_plots,
-       height = 8.3, width = 15, 
+       height = 8.3, width = 15,
        units = "in", dpi = 600)
 
 # End of script ----
