@@ -59,7 +59,6 @@ traits_long <-
          Leaf_Thickness_avg_mm,
          PlotID) %>%
   #pivot into long format
-  
   pivot_longer(.,
   #columns not to be pivoted but are 'retained' i.e. not the traits
                cols = -c(Taxon,
@@ -70,7 +69,6 @@ traits_long <-
                names_to  = "Trait",
   #traits value column
                values_to = "Value") %>%
-  
   #remove NA values to avoid sampling
   na.omit()
 
