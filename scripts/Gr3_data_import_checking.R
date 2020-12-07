@@ -40,7 +40,10 @@ if(!require(ggpomological)){  # for colour scheme
 }
 library(paletteer)            # for "palettes_d" function to display colour schemes
 library(ggdist)
-library(tvthemes)
+library(tvthemes) #A:tla colour theme
+library(osfr) #for getting files off of osf
+library(here) #uses wd as starting point for paths
+library(ggridges) #for ridge plots
 
 ### >> b) Colour scheme ----
 # suggestion 1: draw from ggpomological theme: https://github.com/gadenbuie/ggpomological )
@@ -79,8 +82,11 @@ que_bb <- palettes_d$DresdenColor$paired[6]
 
 #suggestion 3: using the Fire Nation palette from {tvthemes}
 scales::show_col(avatar_pal(palette = "FireNation")(4))
-#then use lighten() to get the paried shades e.g.
-colorspace::lighten("#ecb100", .2, space = "HLS")
+#then use lighten() to get the paired shades e.g.
+scales::show_col(
+  colorspace::lighten(avatar_pal(palette = "FireNation")(4),
+                      .3, space = "HLS")
+)
 
 ### >> c) Functions ----
 capwords <- function(s, strict = FALSE) {
@@ -90,16 +96,29 @@ capwords <- function(s, strict = FALSE) {
   sapply(strsplit(s, split = " "), cap, USE.NAMES = !is.null(names(s)))
 }
 
+### >> d) Data from osf ----
+
+osf_retrieve_node("gs8u6") %>%
+  osf_ls_files() %>%
+  filter(name %in% c("traits", "community")) %>%
+  osf_download(
+    path = here(path = "data/"),
+    conflicts = "overwrite"
+  )
+
 ### 1) Data import ----
 # traits data - complete
-traits_raw <- read.csv(file.path("data", "data_raw", "PFTC5_Peru_2020_LeafTraits_cleaned_20-03-21.csv"),
-                         header = T,
-                         sep = ",")
+traits_raw <- read.csv(file.path("data", "traits", "PFTC5_Peru_2020_LeafTraits_clean.csv"),
+                       header = T,
+                       sep = ",",
+                       stringsAsFactors = TRUE)
 
+#TODO
 # community data
-species_files <- paste(file.path("data", "data_raw"), dir(file.path("data", "data_raw"), pattern = "communitydata"), sep = "/")
+species_files <- paste(file.path("data", "community"), 
+                       dir(file.path("data", "community"), 
+                           pattern = ""), sep = "/")
 species_raw <- map_df(species_files, read_csv)
-
 
 ### 2) Data cleaning ----
 
@@ -108,51 +127,11 @@ skim(traits_raw)
 
 # clean data
 traits <- traits_raw %>%
-  # LeafArea_cm2 is a factor, make numeric
-  mutate(LeafArea_cm2 = as.numeric(LeafArea_cm2)) %>%
-
-  # create Taxon column from Genus + species
-  mutate(Taxon = as.factor(paste(Genus, " ", Species))) %>%
-
-  #remove extra spacing between Genus and species in 'Taxon'
-  mutate_at(.,
-            vars(Taxon),
-            c(str_squish))  %>%
-
-  # Average leaf thickness measurements
-  mutate(Leaf_Thickness_avg_mm = rowMeans(select(.,
-                                             Leaf_Thickness_1_mm,
-                                             Leaf_Thickness_2_mm,
-                                             Leaf_Thickness_3_mm), na.rm=TRUE)) %>%
-
-  # QUE contains C samples, have to be BB -> recode
-  mutate_at(vars(Experiment, Site), as.character) %>%
-  mutate(.,
-         Experiment = ifelse(Site == "QUE" & Experiment %in% c("C", "B"), "BB", Experiment)
-         ) %>%
-
-  # keep only samples from traits (T) project
-  filter(Project == "T") %>%
-
-  # exclude cases with NA in Experiment, just for ease
-  drop_na(Experiment) %>%
-
-  # also drop WAY samples, as not our focus
-  filter(!Site == "WAY") %>%
-
-  # rename columns
-  rename(Treatment = Experiment, PlotID = Plot_ID, Comment = Remark) %>%
-
-  # create date variable from day
-  mutate(Date = as.Date(paste0("2020-03-", Day))) %>%
-
-  # convert all factors back to factors
-  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Treatment), factor) %>%
-
-  # reorder sites
-  mutate(Site = factor(Site, levels = c("ACJ", "TRE", "QUE")))
-
-
+  #remove WAY sites - not needed
+  filter(site != "WAY") %>%
+  #convert plot ID & indiv no. to factor
+  mutate_at(vars(plot_id, individual_nr), 
+            as.factor)
 
 # check again
 skim(traits)
@@ -160,82 +139,21 @@ skim(traits)
 
 ### >> b) Community data ----
 species <- species_raw %>%
-
-  # rename columns to first letter upper case
-  rename_all(capwords) %>%
-
-  # rename "name" to "Taxon"
-  rename(Taxon = Name, PlotID = Plot) %>%
-
-  # # recode year 2019 to 2020 -> check with Lucely! ...
-  # mutate(year = as.integer(recode(year, "2019" = "2020"))) %>%
-
-  # drop absent species
-  filter(!Cover == "") %>%
-
-  # remove dots after "cf"
-  mutate(Taxon = str_remove(Taxon, "\\.")) %>%
-  # ...and replace underscores with spaces in Taxon column
-  mutate(Taxon = str_replace(Taxon, "_", " ")) %>%
-
-  # extract cfs into new column...
-  mutate(Cf = str_extract(Taxon, "cf |cf_")) %>%
-  # ...remove extra space/_ from cf column...
-  mutate(Cf = str_remove(Cf, "\\s|_")) %>%
-  # ...and delete "cf "/"cf_" from Taxon column
-  mutate(Taxon = str_remove(Taxon, "cf |cf_")) %>%
-
-  # split Taxon into genus and species
-  separate(Taxon, into = c("Genus", "Species"),
-           sep = "\\s", 2,
-           remove = FALSE) %>%
-
-  # drop all-NA "real_species_name" & "habit" columns
-  select_if(function(x){!all(is.na(x))}) %>%
-
-  # extract treatment from plot
-  mutate(Treatment = str_extract(PlotID, "[:alpha:]*")) %>%
-
-  # recode "+" cover value to 0.5
-  mutate(Cover = as.numeric(recode(Cover, "+" = "0.5")))  %>%
-
-  #Extract plot number from PlotID dropping the treatment code
-  #This extracts the final character in the string
-  mutate(.,
-         PlotID = str_sub(PlotID, - 1, - 1)) %>%
-
-  # convert all factors back to factors
-  mutate_at(vars(Site, PlotID, Taxon, Genus, Species, Fertile, Seedling, Observer, Sampled, Treatment), factor) #%>%
-
-  # create functional group column based on genus name
-  ## TBC
-  ## Confirm all graminoid genera are represented
-  #mutate(., functional_group = as.factor(ifelse(Genus %in% c("Agrostis",
-  #                                                           "Bromus",
-  #                                                           "Calamagrostis",
-  #                                                           "Carex",
-  #                                                           "Danthonia",
-  #                                                           "Festuca",
-  #                                                           "Luzula",
-  #                                                           "Oreobolus",
-  #                                                           "Paspalum",
-  #                                                           "Poa",
-  #                                                           "Rhynchospora",
-  #                                                           "Trichophorum"),
-  #                                              "graminoid",
-  #                                              "forb")))
-
-
+  #select only target site = TRE, QUE, ACJ
+  filter(site %in% c("QUE", "ACJ") &
+           treatment == "C" &
+           year == 2019)
+  
 ### 3) Summary graphs ----
 # N species sampled for traits per site and treatment
 traits %>% group_by(Site, Treatment) %>%
   summarise(n_taxa = n_distinct(Taxon)) %>%
   ggplot(aes(x = Site, y = n_taxa, fill = Treatment)) +
-    geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
-    scale_fill_manual(values = c(theme_red, theme_blue)) +
-    scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
-    theme_bw() +
-    labs(y = "total no. taxa")
+  geom_bar(stat = "identity", position = position_dodge2(preserve = "single")) +
+  scale_fill_manual(values = c(theme_red, theme_blue)) +
+  scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
+  theme_bw() +
+  labs(y = "total no. taxa")
 
 #plant height density plot
 traits %>% #group_by(Site) %>%
@@ -284,29 +202,38 @@ traits %>%
 #density_plots <-
 traits %>%
   #combine both Site and treatment to one variable
-  unite(Plot,
-        c(Site, Treatment),
-        sep = " ", remove = FALSE) %>%
-  select(Plot, Site, Plant_Height_cm, Wet_Mass_g, Leaf_Thickness_avg_mm) %>%
+  unite(
+    #new variable name
+    plot,
+    #cols to combine
+    c(site, treatment),
+    sep = " ", remove = FALSE
+  ) %>%
+  select(
+    plot, site, plant_height_cm, leaf_area_cm2, sla_cm2_g, ldmc,
+    leaf_thickness_ave_mm
+  ) %>%
   #pivot into long format for splitting into facets
-  pivot_longer(cols = -c(Plot, Site),
+  pivot_longer(cols = -c(plot, site),
                values_to = "Value",
                names_to = "Trait") %>%
-  mutate(Plot = factor(Plot, levels = c("ACJ C",
+  mutate(plot = factor(plot, levels = c("ACJ C",
                                         "ACJ BB",
                                         "TRE C",
-                                        "TRE BB",
+                                        "TRE B",
                                         #"QUE C",
                                         "QUE BB")),
-          # Rename traits for labels
-           Trait = case_when(Trait == "Plant_Height_cm" ~ "Plant height (cm)",
-                             Trait == "Wet_Mass_g" ~ "Wet mass (g)",
-                             Trait == "Leaf_Thickness_avg_mm" ~ "Leaf Thickness (mm)")) %>%
+         # Rename traits for labels
+         Trait = case_when(Trait == "plant_height_cm" ~ "Plant height (cm)",
+                           Trait == "leaf_area_cm2" ~ "Wet mass (g)",
+                           Trait == "sla_cm2_g" ~ "SLA (cm2/g)",
+                           Trait == "ldmc" ~ "LDMC",
+                           Trait == "leaf_thickness_ave_mm" ~ "Leaf Thickness (mm)")) %>%
   ggplot() +
-  stat_density_ridges(aes(y = Site,
+  stat_density_ridges(aes(y = site,
                           x = Value,
-                          fill = Plot,
-                          color = Plot),
+                          fill = plot,
+                          color = plot),
                       alpha = 0.5) +
   facet_wrap(vars(Trait),
              scales = "free") +
@@ -314,7 +241,7 @@ traits %>%
   scale_colour_paletteer_d("DresdenColor::paired") +
   theme_bw() +
   labs(y = "density",
-  x = "trait value")
+       x = "trait value")
 
 ggsave("/Users/tanyastrydom/Documents/Uni/PFTC/PFTC5/PFTC5_Gr3/output/DensityPlots.png",
        density_plots,
