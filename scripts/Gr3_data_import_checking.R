@@ -42,6 +42,7 @@ library(paletteer)            # for "palettes_d" function to display colour sche
 library(ggdist)
 library(osfr) #for getting files off of osf
 library(here) #uses wd as starting point for paths
+library(gsheet)
 
 
 ### >> b) Functions ----
@@ -80,7 +81,82 @@ traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC5_Peru_2020_LeafT
 species_files <- paste(file.path("data", "raw", "community"), 
                        dir(file.path("data", "raw", "community"), 
                            pattern = ""), sep = "/")
-species_raw <- map_df(species_files, read_csv)
+
+species_raw <- map_df(species_files, read_csv) %>%
+  mutate(taxon = case_when(taxon == "Lachemilla cf vulcanica" ~ "Lachemilla cf. vulcanica",
+                           taxon == "Jamesonia alstonii" ~ "Jamesonia alstonii",
+                           TRUE ~ taxon),
+         specie = case_when(specie == "cf vulcanica" ~ "cf. vulcanica",
+                            specie == "Jamesonia alstonii" ~ "alstonii",
+                            TRUE ~ specie),
+         genus = case_when(genus == "Jamesonia alstonii" ~ "alstonii",
+                           TRUE ~ genus))
+
+species_2018 <- gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUEovI4OlHoX3BjA/view?usp=sharing") %>%
+  
+  # edit character in and around _cf_
+  mutate(taxon = str_replace_all(taxon, "_", " ")) %>% 
+  mutate(taxon = str_replace(taxon, "cf", "cf.")) %>% 
+  
+  #taxanomic corrections
+  mutate(taxon = case_when(
+    #misspelling
+    taxon == "Viola pymaea" ~ "Viola pygmaea",
+    #misspelling
+    taxon == "Agrostis trichoides" ~ "Agrostis trichodes",
+    #misspelling - CHECK
+    taxon == "Lysipomia glanulifera" ~ "Lysipomia glandulifera",
+    #misspelling - CHECK
+    taxon == "Chusquea intipacarina" ~ "Chusquea intipaqariy",
+    #misspelling - CHECK
+    taxon == "Carex bomplandii" ~ "Carex bonplandii",
+    #punctuation error
+    taxon == "Hieracium cf.. mandonii" ~ "Hieracium cf. mandonii",
+    #punctuation error
+    taxon == "Diplostephium cf.. haenkei" ~ "Diplostephium cf. haenkei",
+    #general fix
+    taxon == "Calamagrostis cf.. macrophylla" ~ "Calamagrostis cf. macrophylla",
+    TRUE ~ taxon)) %>% 
+  
+  # split taxon into genus and species
+  separate(taxon, 
+           into = c("genus", "specie"), 
+           sep = "\\s", 2, 
+           remove = FALSE,
+           # keeps cf. and species taxon together
+           extra = "merge") %>%
+  
+  #tidy columns to match with osf dataset
+  separate(plot, 
+           into = c("treatment", "plot_id"), 
+           #sperate befor last character
+           sep = -1, 2, 
+           remove = TRUE) %>%
+  mutate(month = rep("March",
+                     nrow(.)),
+         project = rep("PFTC3",
+                       nrow(.))) %>%
+  
+  #change '+' in cover to 0.5 and make numeric and omit NA's
+  mutate(cover = as.numeric(case_when(cover == "+" ~ "0.5",
+                                      TRUE ~ cover))) %>%
+  # drop absent species (no cover value)
+  filter(!cover == "") %>% 
+  
+  #add other cols from osf dataset
+  left_join(.,
+            species_raw  %>%
+              select(taxon, functional_group, family),
+            by = 'taxon') %>%
+  distinct() %>%
+
+  select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover)
+
+
+
+#anti_join(species_2018, species_raw,
+#          by = 'taxon') %>%
+#  distinct()
 
 ### 2) Data cleaning ----
 
@@ -118,10 +194,28 @@ skim(traits)
 
 
 ### >> b) Community data ----
-species <- species_raw %>%
-  #select only target site = TRE, QUE, ACJ
-  filter(site %in% c("QUE") &
-           year == 2019)
+species_combined <- species_raw %>%
+  
+  bind_rows(.,
+            species_2018) %>%
+  #samples from QUE 2018 will be considered C for our purposes
+  mutate(treatment = ifelse(site == "QUE" & year == 2018,
+                            "C",
+                            treatment)) %>%
+  filter(site == "QUE" & year == 2018 | 
+           year == 2020 |
+           site == "ACJ" & year == 2019 & treatment == "C")
 
+skim(species_combined)
+
+### 3) Data export ----
+
+write.csv(traits, 
+          file = here(path = "data/processed/traits_cleaned.csv"), 
+          row.names = FALSE)
+
+write.csv(species_combined, 
+          file = here(path = "data/processed/species_cleaned.csv"), 
+          row.names = FALSE)
 
 # End of script ----
