@@ -69,7 +69,8 @@ scales::show_col(
 
 ### 1) Summary graphs ----
 # N0. species sampled for traits per site and treatment
-traits %>% 
+NTaxa <-
+  traits %>% 
   group_by(site, treatment) %>%
   summarise(n_taxa = n_distinct(name_2020)) %>%
   ggplot(aes(x = site, 
@@ -82,6 +83,11 @@ traits %>%
   theme_bw() +
   labs(y = "Total no. taxa",
        x = "Site")
+
+ggsave(here(path = "output/number_of_taxa.png"),
+       NTaxa,
+       height = 8.3, width = 10,
+       units = "in", dpi = 600)
 
 ### 2) Density Distribution of Traits ----
 
@@ -144,7 +150,7 @@ density_plots <-
        x = "Trait Value") +
   theme(legend.position = "bottom")
 
-ggsave(here(path = "output/DensityPlots.png"),
+ggsave(here(path = "output/traits_density_plots.png"),
        density_plots,
        height = 8.3, width = 15,
        units = "in", dpi = 600)
