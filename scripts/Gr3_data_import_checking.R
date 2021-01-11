@@ -166,9 +166,7 @@ skim(traits_raw)
 # clean data
 traits <- traits_raw %>%
   #remove WAY sites - not needed
-  filter(site != "WAY" &
-           #remove Sean's samples
-           treatment != "OFF-PLOT") %>%
+  filter(site %in% c("ACJ", "QUE", "TRE")) %>%
   mutate( 
     #Replace incorrect treatments for samples
     treatment = case_when(
@@ -178,7 +176,7 @@ traits <- traits_raw %>%
       #Correct C sample for QUE
       site == "QUE" & 
         treatment == "C" ~ "BB",
-      #Rename 2019 samples to control for QUE
+      #Rename 2019 samples to C for QUE
       site == "QUE" & 
         year == 2019 ~ "C",
       #Correct B sample for QUE
@@ -187,10 +185,15 @@ traits <- traits_raw %>%
       #Correct B sample for QUE
       site == "TRE" & 
         treatment == "B" ~ "BB",
-      TRUE ~ treatment))
+      TRUE ~ treatment)) %>%
+  filter(month != "November",
+         treatment != "OFF-PLOT")
 
 # check again
 skim(traits)
+
+traits %>%
+  filter(month == "April")
 
 
 ### >> b) Community data ----
@@ -202,11 +205,27 @@ species_combined <- species_raw %>%
   mutate(treatment = ifelse(site == "QUE" & year == 2018,
                             "C",
                             treatment)) %>%
-  filter(site == "QUE" & year == 2018 | 
+  filter(site == "QUE" & year == 2018 & treatment == "C" | 
            year == 2020 |
-           site == "ACJ" & year == 2019 & treatment == "C")
+           site == "ACJ" & year == 2019 & month == "April" & treatment == "C")
 
 skim(species_combined)
+
+ggplot(species_combined) +
+  geom_histogram(aes(x = site,
+                     group = treatment,
+                     fill = treatment),
+                 stat = 'count',
+                 position = 'dodge') +
+  facet_wrap(vars(plot_id))
+
+ggplot(traits) +
+  geom_histogram(aes(x = site,
+                     group = treatment,
+                     fill = treatment),
+                 stat = 'count',
+                 position = 'dodge') +
+  facet_wrap(vars(plot_id))
 
 ### 3) Data export ----
 
