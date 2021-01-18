@@ -186,14 +186,21 @@ traits <- traits_raw %>%
       site == "TRE" & 
         treatment == "B" ~ "BB",
       TRUE ~ treatment)) %>%
+  #remove Novemebr samples (multiple sampling from 2019 - Puna Project)
   filter(month != "November",
-         treatment != "OFF-PLOT")
+         #remove Sean's samples
+         treatment != "OFF-PLOT") %>%
+  
+  #REMOVING DUPLICATES FOR INDIVIDUALS
+  #group by each individual at each plot for each site & treatment
+  group_by(site, treatment, plot_id, name_2020, individual_nr) %>%
+  #arrange in a set way each time to ensure we use the same individuals
+  arrange(id) %>%
+  #keep only the first record for each individual
+  slice_head()
 
 # check again
 skim(traits)
-
-traits %>%
-  filter(month == "April")
 
 
 ### >> b) Community data ----
@@ -211,21 +218,6 @@ species_combined <- species_raw %>%
 
 skim(species_combined)
 
-ggplot(species_combined) +
-  geom_histogram(aes(x = site,
-                     group = treatment,
-                     fill = treatment),
-                 stat = 'count',
-                 position = 'dodge') +
-  facet_wrap(vars(plot_id))
-
-ggplot(traits) +
-  geom_histogram(aes(x = site,
-                     group = treatment,
-                     fill = treatment),
-                 stat = 'count',
-                 position = 'dodge') +
-  facet_wrap(vars(plot_id))
 
 ### 3) Data export ----
 
