@@ -87,10 +87,12 @@ traits <- traits_raw %>%
       #Correct B sample for QUE
       site == "TRE" & 
         treatment == "B" ~ "BB",
+      TRUE ~ treatment)) %>%
   
-## BURNT QUE SITES FORM 2019 ARE OUR CONTROL SITES
+## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
       #Rename 2019 samples to C for QUE
-      site == "QUE" & 
+  mutate( 
+    treatment = case_when(site == "QUE" & 
         year == 2019 ~ "C",
       TRUE ~ treatment)) %>%
 
