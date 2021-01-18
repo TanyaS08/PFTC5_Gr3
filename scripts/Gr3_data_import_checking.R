@@ -52,6 +52,10 @@ osf_retrieve_node("gs8u6") %>%
 
 ### >> a) Traits data ----
 
+#TODO
+#Replace ACJ C 2020 traits data with that from 2019
+
+
 # traits data - complete
 traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC5_Peru_2020_LeafTraits_clean.csv"),
                        header = T,
@@ -116,7 +120,7 @@ skim(traits)
 
 ### >> b) Community data ----
 
-#' I did corrections (clenaing) on the fly here to make sure names and columns match
+#' I did corrections (cleaning) on the fly here to make sure names and columns match
 #' when importing the QUE data for 2020
 #' 2020 is then combined with the osf datasets after cleaning
 #' this is then followed by some final filtering
@@ -133,8 +137,11 @@ species_raw <- map_df(species_files, read_csv) %>%
          specie = case_when(specie == "cf vulcanica" ~ "cf. vulcanica",
                             specie == "Jamesonia alstonii" ~ "alstonii",
                             TRUE ~ specie),
-         genus = case_when(genus == "Jamesonia alstonii" ~ "alstonii",
+         genus = case_when(genus == "Jamesonia alstonii" ~ "Jamesonia",
                            TRUE ~ genus))
+
+##TODO 
+# PULL AND STORE IN RAW AND THEN PULL BACK INTO SCRIPT
 
 species_2020 <- gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUEovI4OlHoX3BjA/view?usp=sharing") %>%
   
@@ -180,7 +187,7 @@ species_2020 <- gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUE
   mutate(month = rep("March",
                      nrow(.)),
   #add project
-         project = rep("PFTC3",
+         project = rep("PFTC5",
                        nrow(.))) %>%
   #change '+' in cover to 0.5 and make numeric
   mutate(cover = as.numeric(case_when(cover == "+" ~ "0.5",
@@ -205,15 +212,15 @@ species <- species_raw %>%
   
   bind_rows(.,
             species_2020) %>%
-  #samples from QUE 2018 will be considered C for our purposes
-  mutate(treatment = ifelse(site == "QUE" & year == 2018,
+  #samples from QUE 2019 will be considered C for our purposes
+  mutate(treatment = ifelse(site == "QUE" & year == 2019,
                             "C",
                             treatment)) %>%
-  filter(site == "QUE" & year == 2018 & treatment == "C" | 
+  filter(site == "QUE" & year == 2019 & month == "April" & treatment == "C" | 
            year == 2020 |
            site == "ACJ" & year == 2019 & month == "April" & treatment == "C")
 
-skim(species)
+skim(species_2020)
 
 
 ### 2) Data export ----
@@ -227,3 +234,33 @@ write.csv(species,
           row.names = FALSE)
 
 # End of script ----
+
+ggplot(traits) +
+  geom_histogram(aes(x = site,
+                     fill = treatment),
+                 stat ="count",
+                 position = "dodge") +
+  facet_wrap(vars(plot_id)) +
+  labs(title = "TRAITS",
+       y = "number of samples") +
+  scale_fill_manual(values = c("#7E605E",
+                               "#8AB573")) 
+
+ggplot(species) +
+  geom_histogram(aes(x = site,
+                     fill = treatment),
+                 stat ="count",
+                 position = "dodge") +
+  facet_wrap(vars(plot_id)) +
+  labs(title = "COMMUNITY",
+       y = "number of species") +
+  scale_fill_manual(values = c("#7E605E",
+                               "#8AB573")) 
+
+ggplot(traits) +
+  geom_histogram(aes(x = site,
+                     fill = treatment),
+                 stat ="count",
+                 position = "dodge") +
+  facet_wrap(vars(plot_id))
+
