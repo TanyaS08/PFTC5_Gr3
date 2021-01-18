@@ -16,9 +16,18 @@
 
 ### 0) Preamble ----
 ### >> a) Dependencies ----
-library(ggridges) #for ridge plots
 library(tvthemes) #A:tla colour theme
 library(here)
+if(!require(ggpomological)){  # for colour scheme
+  devtools::install_github("gadenbuie/ggpomological")
+  library(ggpomological)
+}
+if(!require(ggridges)){  # for pretty plots
+  install.packages("ggridges")
+  library(ggridges)
+}
+library(paletteer)            # for "palettes_d" function to display colour schemes
+library(ggdist)
 
 ### >> b) Call source script----
 
@@ -66,6 +75,7 @@ scales::show_col(
   colorspace::lighten(avatar_pal(palette = "FireNation")(4),
                       .5, space = "HLS")
 )
+
 
 ### 1) Summary graphs ----
 # N0. species sampled for traits per site and treatment
