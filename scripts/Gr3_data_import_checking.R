@@ -140,10 +140,19 @@ species_raw <- map_df(species_files, read_csv) %>%
          genus = case_when(genus == "Jamesonia alstonii" ~ "Jamesonia",
                            TRUE ~ genus))
 
-##TODO 
-# PULL AND STORE IN RAW AND THEN PULL BACK INTO SCRIPT
 
-species_2020 <- gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUEovI4OlHoX3BjA/view?usp=sharing") %>%
+#' This is where the 2020 Community data lives
+#' It is downloaded and saved as a .csv in the data/raw/community folder
+#' but for record purposes keeping the 'legacy' link as wee
+#' 
+#write.csv(gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUEovI4OlHoX3BjA/view?usp=sharing") , 
+#          file = here(path = "data/raw/community/PFTC5_2020_CommunityCover_raw.csv"), 
+#          row.names = FALSE)
+
+
+species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCover_raw.csv"),
+                         header = T,
+                         sep = ",") %>%
   
 ## edit characters in and around _cf_
   mutate(taxon = str_replace_all(taxon, "_", " ")) %>% 
