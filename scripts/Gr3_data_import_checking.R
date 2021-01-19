@@ -52,10 +52,6 @@ osf_retrieve_node("gs8u6") %>%
 
 ### >> a) Traits data ----
 
-#TODO
-#Replace ACJ C 2020 traits data with that from 2019
-
-
 # traits data - complete
 traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC5_Peru_2020_LeafTraits_clean.csv"),
                        header = T,
@@ -64,7 +60,9 @@ traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC5_Peru_2020_LeafT
   rbind(read.csv(file.path("data", "raw", "traits", "PunaProject_Peru_2019_LeafTraits_clean.csv"),
                  header = T,
                  sep = ",") %>%
-          filter(site == "QUE"))
+          #Keep only QUE and ACJ C sites
+          filter(site == "QUE" |
+                   site == "ACJ" & treatment == "C"))
 
 skim(traits_raw)
 
@@ -73,7 +71,9 @@ traits <- traits_raw %>%
 
 ##REMOVE NON- TARGET SITES
   #remove WAY sites - not needed
-  filter(site %in% c("ACJ", "QUE", "TRE")) %>%
+  filter(site %in% c("ACJ", "QUE", "TRE") |
+           #Removing ACJ C 2020 
+           site != "ACJ" & year != 2020 & treatment != "C") %>%
 
 ##CORRECTIONS FOR WRONG NAMING OF TREATMENTS
   mutate( 
@@ -88,7 +88,7 @@ traits <- traits_raw %>%
       #Correct B sample for QUE
       site == "QUE" & 
         treatment == "B" ~ "BB",
-      #Correct B sample for QUE
+      #Correct B sample for TRE
       site == "TRE" & 
         treatment == "B" ~ "BB",
       TRUE ~ treatment)) %>%
@@ -257,10 +257,4 @@ ggplot(species) +
   scale_fill_manual(values = c("#7E605E",
                                "#8AB573")) 
 
-ggplot(traits) +
-  geom_histogram(aes(x = site,
-                     fill = treatment),
-                 stat ="count",
-                 position = "dodge") +
-  facet_wrap(vars(plot_id))
 
