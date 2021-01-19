@@ -62,61 +62,27 @@ traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC5_Peru_2020_LeafT
                  sep = ",") %>%
           #Keep only QUE and ACJ C sites
           filter(site == "QUE" |
-                   site == "ACJ" & treatment == "C"))
-
-skim(traits_raw)
-
-# clean data
-traits <- traits_raw %>%
-
-##REMOVE NON- TARGET SITES
-  #remove WAY sites - not needed
-  filter(site %in% c("ACJ", "QUE", "TRE") |
-           #Removing ACJ C 2020 
-           site != "ACJ" & year != 2020 & treatment != "C") %>%
-
-##CORRECTIONS FOR WRONG NAMING OF TREATMENTS
+                   site == "ACJ" & treatment == "C")) %>%
+  
+  ##CORRECTIONS FOR WRONG NAMING OF TREATMENTS
   mutate( 
     #Replace incorrect treatments for samples
     treatment = case_when(
       #Correct B sample for ACJ
-      site == "ACJ" & 
+      site == "ACJ" & year == 2020 &
         treatment == "B" ~ "BB",
       #Correct C sample for QUE
-      site == "QUE" & 
+      site == "QUE" & year == 2020 &
         treatment == "C" ~ "BB",
       #Correct B sample for QUE
-      site == "QUE" & 
+      site == "QUE" & year == 2020 &
         treatment == "B" ~ "BB",
       #Correct B sample for TRE
-      site == "TRE" & 
+      site == "TRE" & year == 2020 &
         treatment == "B" ~ "BB",
-      TRUE ~ treatment)) %>%
-  
-## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
-      #Rename 2019 samples to C for QUE
-  mutate( 
-    treatment = case_when(site == "QUE" & 
-        year == 2019 ~ "C",
-      TRUE ~ treatment)) %>%
+      TRUE ~ treatment))
 
-##REMOVE SAMPLING THAT OCCURED IN A DIFFERENT SEASON
-  #remove November samples (multiple sampling from 2019 - Puna Project)
-  filter(month != "November",
-         #remove Sean's samples
-         treatment != "OFF-PLOT") %>%
-  
-##REMOVING DUPLICATES FOR INDIVIDUALS
-  #group by each individual at each plot for each site & treatment
-  group_by(site, treatment, plot_id, name_2020, individual_nr) %>%
-  #arrange in a set way each time to ensure we use the same individuals
-  arrange(id) %>%
-  #keep only the first record for each individual
-  slice_head()
-
-# check again
-skim(traits)
-
+skim(traits_raw)
 
 ### >> b) Community data ----
 
@@ -154,11 +120,11 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
                          header = T,
                          sep = ",") %>%
   
-## edit characters in and around _cf_
+  ## edit characters in and around _cf_
   mutate(taxon = str_replace_all(taxon, "_", " ")) %>% 
   mutate(taxon = str_replace(taxon, "cf", "cf.")) %>% 
   
-##taxanomic corrections
+  ##taxanomic corrections
   mutate(taxon = case_when(
     #misspelling
     taxon == "Viola pymaea" ~ "Viola pygmaea",
@@ -179,7 +145,7 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
     TRUE ~ taxon)) %>% 
   
   ##TIDY COLUMNS TO MATCH osf COLUMNS
-   # split taxon into genus and species
+  # split taxon into genus and species
   separate(taxon, 
            into = c("genus", "specie"), 
            sep = "\\s", 2, 
@@ -195,7 +161,7 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
   #add month
   mutate(month = rep("March",
                      nrow(.)),
-  #add project
+         #add project
          project = rep("PFTC5",
                        nrow(.))) %>%
   #change '+' in cover to 0.5 and make numeric
@@ -209,14 +175,54 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
               select(taxon, functional_group, family),
             by = 'taxon') %>%
   
-#REMOVE ANY DUPLICATES
+  #REMOVE ANY DUPLICATES
   distinct() %>%
   
-##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
+  ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
   select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover)
 
 
-## COMBINING THE DATASETS
+### 2) Data filtering ----
+
+### >> a) Traits data ----
+
+# clean data
+traits <- traits_raw %>%
+
+##REMOVE NON- TARGET SITES
+  #remove WAY sites - not needed
+  filter(site %in% c("ACJ", "QUE", "TRE") |
+           #Removing ACJ C 2020 
+           site != "ACJ" & year != 2020 & treatment != "C") %>%
+  
+## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
+      #Rename 2019 samples to C for QUE
+  mutate( 
+    treatment = case_when(site == "QUE" & 
+        year == 2019 ~ "C",
+      TRUE ~ treatment)) %>%
+
+##REMOVE SAMPLING THAT OCCURED IN A DIFFERENT SEASON
+  #remove November samples (multiple sampling from 2019 - Puna Project)
+  filter(month != "November",
+         #remove Sean's samples
+         treatment != "OFF-PLOT") %>%
+  
+##REMOVING DUPLICATES FOR INDIVIDUALS
+  #group by each individual at each plot for each site & treatment
+  group_by(site, treatment, plot_id, name_2020, individual_nr) %>%
+  #arrange in a set way each time to ensure we use the same individuals
+  arrange(id) %>%
+  #keep only the first record for each individual
+  slice_head()
+
+# check again
+skim(traits)
+
+
+### >> b) Community data ----
+
+#Combine species datasets
 species <- species_raw %>%
   
   bind_rows(.,
@@ -225,6 +231,7 @@ species <- species_raw %>%
   mutate(treatment = ifelse(site == "QUE" & year == 2019,
                             "C",
                             treatment)) %>%
+  #filter out the November samples from 2019
   filter(site == "QUE" & year == 2019 & month == "April" & treatment == "C" | 
            year == 2020 |
            site == "ACJ" & year == 2019 & month == "April" & treatment == "C")
@@ -232,7 +239,8 @@ species <- species_raw %>%
 skim(species_2020)
 
 
-### 2) Data export ----
+### 3) Data export ----
+# This can probably fall away
 
 write.csv(traits, 
           file = here(path = "data/processed/traits_cleaned.csv"), 
