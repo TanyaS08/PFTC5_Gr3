@@ -244,26 +244,5 @@ write.csv(species,
 
 # End of script ----
 
-ggplot(traits) +
-  geom_histogram(aes(x = site,
-                     fill = treatment),
-                 stat ="count",
-                 position = "dodge") +
-  facet_wrap(vars(plot_id)) +
-  labs(title = "TRAITS",
-       y = "number of samples") +
-  scale_fill_manual(values = c("#7E605E",
-                               "#8AB573")) 
-
-ggplot(species) +
-  geom_histogram(aes(x = site,
-                     fill = treatment),
-                 stat ="count",
-                 position = "dodge") +
-  facet_wrap(vars(plot_id)) +
-  labs(title = "COMMUNITY",
-       y = "number of species") +
-  scale_fill_manual(values = c("#7E605E",
-                               "#8AB573")) 
 
 

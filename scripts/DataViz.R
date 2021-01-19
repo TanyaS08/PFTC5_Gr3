@@ -78,7 +78,51 @@ scales::show_col(
 
 
 ### 1) Summary graphs ----
+
+# Number of indivdiuals traits data were collected for
+  #per individual per plot per site per treatment
+
+NIndivids <-
+ggplot(traits) +
+  geom_histogram(aes(x = site,
+                     fill = treatment),
+                 stat ="count",
+                 position = "dodge") +
+  facet_wrap(vars(plot_id)) +
+  labs(title = "TRAITS",
+       y = "number of samples") +
+  scale_fill_manual(values = c("#7E605E",
+                               "#8AB573")) +
+  theme_bw()
+
+ggsave(here(path = "output/Number_indivs_per_plot.png"),
+       NIndivids,
+       height = 8.3, width = 10,
+       units = "in", dpi = 600)
+
+# Number of species
+  #species per plot per site per treatment
+
+NSpecies <-
+ggplot(species) +
+  geom_histogram(aes(x = site,
+                     fill = treatment),
+                 stat ="count",
+                 position = "dodge") +
+  facet_wrap(vars(plot_id)) +
+  labs(title = "COMMUNITY",
+       y = "number of species") +
+  scale_fill_manual(values = c("#7E605E",
+                               "#8AB573")) +
+  theme_bw()
+
+ggsave(here(path = "output/Number_species_per_plot.png"),
+       NSpecies,
+       height = 8.3, width = 10,
+       units = "in", dpi = 600)
+
 # N0. species sampled for traits per site and treatment
+
 NTaxa <-
   traits %>% 
   group_by(site, treatment) %>%
@@ -103,8 +147,9 @@ ggsave(here(path = "output/number_of_taxa.png"),
 
 density_plots <-
   traits %>%
+  ungroup() %>%
   filter(
-    #remove what are potentially eroneous LDMC vals
+    #remove what are potentially erroneous LDMC vals
     ldmc <= 1
   ) %>%
   #combine both Site and treatment to one variable
