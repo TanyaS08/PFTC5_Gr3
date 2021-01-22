@@ -3,14 +3,14 @@
 .RData
 .Ruserdata
 
+# MacOS nonsense
+.DS_Store
+
 # data files
 .xls
 .xlsx
-.csv
+
 
 # graphics files
-.jpg
-.jpeg
-.png
 .bmp
 .tif
