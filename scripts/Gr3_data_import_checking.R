@@ -96,7 +96,13 @@ species_files <- paste(file.path("data", "raw", "community"),
                        dir(file.path("data", "raw", "community"), 
                            pattern = ""), sep = "/")
 
-species_raw <- map_df(species_files, read_csv) %>%
+species_raw <- read.csv(file.path("data", "raw", "community", "PFTC3_Peru_2018_CommunityCover_clean.csv"),
+                        header = T,
+                        sep = ",") %>%
+  #add Puna Project (2019 data)
+  rbind(read.csv(file.path("data", "raw", "community", "PunaProject_Peru_2019_CommunityCover_clean.csv"),
+                 header = T,
+                 sep = ",")) %>%
   mutate(taxon = case_when(taxon == "Lachemilla cf vulcanica" ~ "Lachemilla cf. vulcanica",
                            taxon == "Jamesonia alstonii" ~ "Jamesonia alstonii",
                            TRUE ~ taxon),
@@ -236,7 +242,7 @@ species <- species_raw %>%
            year == 2020 |
            site == "ACJ" & year == 2019 & month == "April" & treatment == "C")
 
-skim(species_2020)
+skim(species)
 
 
 ### 3) Data export ----
