@@ -184,6 +184,12 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
   #REMOVE ANY DUPLICATES
   distinct() %>%
   
+  mutate(#Functional Group and Family for Jamesonia
+         functional_group = case_when(taxon == "Jamesonia alstonii" ~ "Fern",
+                                      TRUE ~ "NA"),
+         family = case_when(taxon == "Jamesonia alstonii" ~ "Pteridaceae",
+                            TRUE ~ "NA")) %>%
+  
   ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
   select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover)
 
@@ -194,27 +200,27 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
 
 # clean data
 traits <- traits_raw %>%
-
-##REMOVE NON- TARGET SITES
+  
+  ##REMOVE NON- TARGET SITES
   #remove WAY sites - not needed
   filter(site %in% c("ACJ", "QUE", "TRE") |
            #Removing ACJ C 2020 
            site != "ACJ" & year != 2020 & treatment != "C") %>%
   
-## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
-      #Rename 2019 samples to C for QUE
+  ## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
+  #Rename 2019 samples to C for QUE
   mutate( 
     treatment = case_when(site == "QUE" & 
-        year == 2019 ~ "C",
-      TRUE ~ treatment)) %>%
-
-##REMOVE SAMPLING THAT OCCURED IN A DIFFERENT SEASON
+                            year == 2019 ~ "C",
+                          TRUE ~ treatment)) %>%
+  
+  ##REMOVE SAMPLING THAT OCCURED IN A DIFFERENT SEASON
   #remove November samples (multiple sampling from 2019 - Puna Project)
   filter(month != "November",
          #remove Sean's samples
          treatment != "OFF-PLOT") %>%
   
-##REMOVING DUPLICATES FOR INDIVIDUALS
+  ##REMOVING DUPLICATES FOR INDIVIDUALS
   #group by each individual at each plot for each site & treatment
   group_by(site, treatment, plot_id, name_2020, individual_nr) %>%
   #arrange in a set way each time to ensure we use the same individuals
@@ -257,6 +263,3 @@ write.csv(species,
           row.names = FALSE)
 
 # End of script ----
-
-
-
