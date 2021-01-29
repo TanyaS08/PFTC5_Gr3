@@ -212,7 +212,10 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
     )) %>%
   
   ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
-  select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover)
+  select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover) %>%
+  
+  # REMOVE WHERE COVER = 0 i.e. absent
+  filter(cover > 0)
 
 
 ### 2) Data filtering ----
