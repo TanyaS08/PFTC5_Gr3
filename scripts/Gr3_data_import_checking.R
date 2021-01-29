@@ -146,8 +146,26 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
     taxon == "Hieracium cf.. mandonii" ~ "Hieracium cf. mandonii",
     #punctuation error
     taxon == "Diplostephium cf.. haenkei" ~ "Diplostephium cf. haenkei",
-    #general fix
-    taxon == "Calamagrostis cf.. macrophylla" ~ "Calamagrostis cf. macrophylla",
+    #species change - was checked with Lucely
+    taxon == "Calamagrostis cf.. macrophylla" ~ "Calamagrostis cf. amoena",
+    #species change - was checked with Lucely
+    taxon == "Geranium filipes" ~ "Geranium sessiliflorum",
+    #species change - was checked with Lucely
+    taxon == "Jamesonia alstonii" ~ "Jamesonia blepharum",
+    #species change - was checked with Lucely
+    taxon == "Bartsia inaequalis" ~ "Bartsia trichophylla",
+    #species change - was checked with Lucely
+    taxon == "Calamagrostis sp8" ~ "Anatherostipa hans-meyeri",
+    #species change - was checked with Lucely
+    taxon == "Calamagrostis sp7" ~ "Anatherostipa hans-meyeri",
+    #species change - was checked with Lucely
+    taxon == "Oreobolus sp1" ~ "Oreobolus goeppingeri",
+    #species change - was checked with Lucely
+    taxon == "Festuca 3 sharp" ~ "Festuca sp4",
+    #species change - was checked with Lucely
+    taxon == "Agrostis sp1" ~ "Agrostis trichodes",
+    #species change - was checked with Lucely
+    taxon == "Calamagrostis tricophylla" ~ "Calamagrostis cf. amoena",
     TRUE ~ taxon)) %>% 
   
   ##TIDY COLUMNS TO MATCH osf COLUMNS
@@ -184,12 +202,18 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
   #REMOVE ANY DUPLICATES
   distinct() %>%
   
-  mutate(#Functional Group and Family for Jamesonia
-         functional_group = case_when(taxon == "Jamesonia alstonii" ~ "Fern",
-                                      TRUE ~ "NA"),
-         family = case_when(taxon == "Jamesonia alstonii" ~ "Pteridaceae",
-                            TRUE ~ "NA")) %>%
-  
+  #ADDING FAMILY AND FUNCTIONAL GROUP FOR Festuca cf. andina.
+  mutate(
+    functional_group = case_when(
+      taxon == "Festuca cf. andina" ~ "Gramminoid",
+      TRUE ~ functional_group
+    ),
+    family = case_when(
+      taxon == "Festuca cf. andina" ~ "Poaceae",
+      TRUE ~ family
+    )
+  ) %>%
+
   ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
   select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover)
 
