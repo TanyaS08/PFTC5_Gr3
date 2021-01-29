@@ -10,11 +10,6 @@
 
 #' ------------------------------------------------------------------#
 #' TO DO:
-#' - Add species cover data for ACJ Control from 2019. Check???
-#' - check ACJ&TRE recording year with Lucely, 2019?!? -> 2b i, l.
-#' - functional group column check genera -> 2b iii, l.143
-#' - + cover values as 0.5? -> 2b iii, l. 141
-#' - Need to add control traits data from QUE from 2019
 #' ------------------------------------------------------------------#
 
 
@@ -37,16 +32,16 @@ library(gsheet)
 
 ### >> c) Data from osf ----
 
-osf_retrieve_node("gs8u6") %>%
-  osf_ls_files() %>%
+#' osf_retrieve_node("gs8u6") %>%
+#'  osf_ls_files() %>%
   #dataset folders of interest
-  filter(name %in% c("traits", "community")) %>%
-  osf_download(
+#'  filter(name %in% c("traits", "community")) %>%
+#'  osf_download(
     #where to download
-    path = here(path = "data/raw"),
+#'    path = here(path = "data/raw"),
     #allows overwriting of folders
-    conflicts = "overwrite"
-  )
+#'    conflicts = "overwrite"
+#'  )
 
 ### 1) Data cleaning ----
 
@@ -273,17 +268,5 @@ species <- species_raw %>%
            site == "ACJ" & year == 2019 & month == "April" & treatment == "C")
 
 skim(species)
-
-
-### 3) Data export ----
-# This can probably fall away
-
-write.csv(traits, 
-          file = here(path = "data/processed/traits_cleaned.csv"), 
-          row.names = FALSE)
-
-write.csv(species, 
-          file = here(path = "data/processed/species_cleaned.csv"), 
-          row.names = FALSE)
 
 # End of script ----
