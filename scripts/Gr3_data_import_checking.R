@@ -247,7 +247,9 @@ traits <- traits_raw %>%
   #arrange in a set way each time to ensure we use the same individuals
   arrange(id) %>%
   #keep only the first record for each individual
-  slice_head()
+  slice_head()  %>%
+  #rename full species name to match species dataset i.e. 'taxon'
+  rename(taxon = name_2020)
 
 # check again
 skim(traits)
