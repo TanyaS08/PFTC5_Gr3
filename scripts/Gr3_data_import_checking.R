@@ -201,14 +201,16 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
   mutate(
     functional_group = case_when(
       taxon == "Festuca cf. andina" ~ "Gramminoid",
+      taxon == "Bartsia trichophylla" ~ "Forb",
+      taxon == "seedling unknown" ~ NA_character_,
       TRUE ~ functional_group
     ),
     family = case_when(
       taxon == "Festuca cf. andina" ~ "Poaceae",
+      taxon == "Bartsia trichophylla" ~ "Orobanchaceae",
       TRUE ~ family
-    )
-  ) %>%
-
+    )) %>%
+  
   ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
   select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover)
 
