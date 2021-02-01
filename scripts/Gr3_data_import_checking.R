@@ -276,4 +276,19 @@ species <- species_raw %>%
 
 skim(species)
 
+## 3) Traits Trimming species with low cover ----
+
+#This needs to be contemplated further
+
+#' This is to account for the 'incomplete' sampling effort for ACJ BB in 2020
+#' Thus removing all traits records for species that had a cover greater than
+#' 2.0 %
+
+
+traits_trimmed =
+inner_join(species %>%
+             filter(cover >= 2.0) %>%
+             select(cover, taxon, site, treatment, plot_id),
+           traits) 
+
 # End of script ----

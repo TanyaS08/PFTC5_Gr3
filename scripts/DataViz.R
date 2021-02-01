@@ -28,6 +28,7 @@ if(!require(ggridges)){  # for pretty plots
 }
 library(paletteer)            # for "palettes_d" function to display colour schemes
 library(ggdist)
+library(naniar)
 
 ### >> b) Call source script----
 
@@ -79,17 +80,18 @@ scales::show_col(
 
 ### 1) Summary graphs ----
 
+### >> a) Number of indivdiuals (traits)----
 # Number of indivdiuals traits data were collected for
-  #per individual per plot per site per treatment
+#per individual per plot per site per treatment
 
 NIndivids <-
-ggplot(traits) +
+  ggplot(traits) +
   geom_histogram(aes(x = site,
                      fill = treatment),
                  stat ="count",
                  position = "dodge") +
   facet_wrap(vars(plot_id)) +
-  labs(title = "TRAITS",
+  labs(title = "TRAITS not trimmed",
        y = "number of samples") +
   scale_fill_manual(values = c("#7E605E",
                                "#8AB573")) +
@@ -100,11 +102,13 @@ ggsave(here(path = "output/Number_indivs_per_plot.png"),
        height = 8.3, width = 10,
        units = "in", dpi = 600)
 
+
+### >> b) Number of specied (community)----
 # Number of species
-  #species per plot per site per treatment
+#species per plot per site per treatment
 
 NSpecies <-
-ggplot(species) +
+  ggplot(species) +
   geom_histogram(aes(x = site,
                      fill = treatment),
                  stat ="count",
@@ -126,7 +130,7 @@ ggsave(here(path = "output/Number_species_per_plot.png"),
 NTaxa <-
   traits %>% 
   group_by(site, treatment) %>%
-  summarise(n_taxa = n_distinct(name_2020)) %>%
+  summarise(n_taxa = n_distinct(taxon)) %>%
   ggplot(aes(x = site, 
              y = n_taxa, 
              fill = treatment)) +
@@ -136,7 +140,8 @@ NTaxa <-
   scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
   theme_bw() +
   labs(y = "Total no. taxa",
-       x = "Site")
+       x = "Site",
+       title = "Not Trimmed")
 
 ggsave(here(path = "output/number_of_taxa.png"),
        NTaxa,
@@ -164,6 +169,7 @@ density_plots <-
     plot, site, plant_height_cm, sla_cm2_g, ldmc,
     leaf_thickness_ave_mm
   ) %>%
+  filter(ldmc <= 1) %>%
   #pivot into long format for splitting into facets
   pivot_longer(cols = -c(plot, site),
                values_to = "Value",
@@ -177,11 +183,16 @@ density_plots <-
                            Trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
                            Trait == "ldmc" ~ "LDMC",
                            Trait == "leaf_thickness_ave_mm" ~ "Leaf~Thickness~(mm)")) %>%
+  filter(Value >= 0) 
+
+trait_density <-
+density_plots %>%
+  filter(Value != Inf) %>%
   ggplot() +
-  stat_density_ridges(aes(y = site,
+  geom_density_ridges(aes(y = site,
                           x = Value,
                           fill = plot,
-                          color = plot),
+                          colour = plot),
                       alpha = 0.6) +
   facet_wrap(vars(Trait),
              scales = "free_x",
@@ -206,9 +217,100 @@ density_plots <-
   theme(legend.position = "bottom")
 
 ggsave(here(path = "output/traits_density_plots.png"),
-       density_plots,
+       trait_density,
        height = 8.3, width = 15,
        units = "in", dpi = 600)
 
 
+
 # End of script ----
+
+##Zone of Experimentation
+
+### >> Appendix 1) The case of the missing data----
+
+traits %>%
+  ungroup() %>%
+  filter(
+    #remove what are potentially erroneous LDMC vals
+    ldmc <= 1
+  ) %>%
+  #combine both Site and treatment to one variable
+  unite(
+    #new variable name
+    plot,
+    #cols to combine
+    c(site, treatment),
+    sep = " ", remove = FALSE
+  ) %>%
+  select(
+    plot, site, plant_height_cm, sla_cm2_g, ldmc,
+    leaf_thickness_ave_mm, functional_group, treatment 
+  ) %>%
+  ggplot() +
+  stat_density_ridges(aes(y = site,
+                          x = ldmc,
+                          fill = functional_group,
+                          colour = functional_group),
+                      alpha = 0.6) +
+  facet_wrap(vars(treatment),
+             ncol = 1,
+             labeller = label_parsed)  +
+  theme_bw() +
+  labs(y = "Density",
+       x = "Trait Value") +
+  theme(legend.position = "bottom")
+
+### >> Appendix 2) The case of the missing data----
+
+cowplot::save_plot(
+  here(path = "output/missing_data.png"),
+  cowplot::plot_grid(
+    vis_miss(traits %>%
+               filter(year == 2020) %>%
+               select(-c(area_flag, dry_flag, wet_flag))) +
+      labs(title = "2020 Traits data"), 
+    vis_miss(traits %>%
+               filter(year != 2020) %>%
+               select(-c(area_flag, dry_flag, wet_flag))) +
+      labs(title = "Not 2020 Traits data") +
+      theme(axis.text.x = element_blank()),
+    ncol = 1
+  )
+)
+
+### >> Appendix 3) The trimmed (traits) menace ----
+
+
+cowplot::save_plot(
+  here(path = "output/trimmed_vs_untrimmed_traits.png"),
+  cowplot::plot_grid(
+    ggplot(traits) +
+      geom_histogram(aes(x = site,
+                         fill = treatment),
+                     stat ="count",
+                     position = "dodge") +
+      #facet_wrap(vars(plot_id)) +
+      labs(title = "traits NOT trimmed",
+           y = "number of samples") +
+      scale_fill_manual(values = c("#7E605E",
+                                   "#8AB573")) +
+      theme_bw() +
+      ylim(0, 300),
+    ggplot(traits_trimmed) +
+      geom_histogram(aes(x = site,
+                         fill = treatment),
+                     stat ="count",
+                     position = "dodge") +
+      #facet_wrap(vars(plot_id)) +
+      labs(title = "traits trimmed",
+           y = "number of samples") +
+      scale_fill_manual(values = c("#7E605E",
+                                   "#8AB573")) +
+      theme_bw() +
+      ylim(0, 300),
+    ncol = 1
+  )
+)
+
+
