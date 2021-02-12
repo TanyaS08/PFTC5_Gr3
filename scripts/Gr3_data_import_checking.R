@@ -99,12 +99,15 @@ species_raw <- read.csv(file.path("data", "raw", "community", "PFTC3_Peru_2018_C
                  header = T,
                  sep = ",")) %>%
   mutate(taxon = case_when(taxon == "Lachemilla cf vulcanica" ~ "Lachemilla cf. vulcanica",
-                           taxon == "Jamesonia alstonii" ~ "Jamesonia alstonii",
+                           str_detect(taxon,
+                                      "alstonii") == TRUE ~ "Jamesonia alstonii",
                            TRUE ~ taxon),
          specie = case_when(specie == "cf vulcanica" ~ "cf. vulcanica",
-                            specie == "Jamesonia alstonii" ~ "alstonii",
+                            str_detect(taxon,
+                                       "alstonii") == TRUE ~ "alstonii",
                             TRUE ~ specie),
-         genus = case_when(genus == "Jamesonia alstonii" ~ "Jamesonia",
+         genus = case_when(str_detect(genus,
+                                      "alstonii") == TRUE ~ "Jamesonia",
                            TRUE ~ genus))
 
 
@@ -292,3 +295,17 @@ inner_join(species %>%
            traits) 
 
 # End of script ----
+
+species_raw %>%
+  filter(site == "PIL") %>%
+  pull(taxon)
+
+str_detect(species_raw %>%
+              filter(site == "PIL") %>%
+              pull(taxon),
+          "alstonii")
+
+ifelse(str_detect(species_raw %>%
+                    filter(site == "PIL") %>%
+                    pull(taxon),
+                  "alstonii"))
