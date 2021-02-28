@@ -169,7 +169,7 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
   ##TIDY COLUMNS TO MATCH osf COLUMNS
   # split taxon into genus and species
   separate(taxon, 
-           into = c("genus", "specie"), 
+           into = c("genus", "species"), 
            sep = "\\s", 2, 
            remove = FALSE,
            # keeps cf. and species taxon together
@@ -215,7 +215,7 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
     )) %>%
   
   ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
-  select(year, project, month, site, treatment, plot_id, functional_group, family, genus, specie, taxon, cover) %>%
+  select(year, project, month, site, treatment, plot_id, functional_group, family, genus, species, taxon, cover) %>%
   
   # REMOVE WHERE COVER = 0 i.e. absent
   filter(cover > 0)
@@ -281,6 +281,7 @@ skim(species)
 
 ## 3) Traits Trimming species with low cover ----
 
+#TODO
 #This needs to be contemplated further
 
 #' This is to account for the 'incomplete' sampling effort for ACJ BB in 2020
@@ -295,17 +296,3 @@ inner_join(species %>%
            traits) 
 
 # End of script ----
-
-species_raw %>%
-  filter(site == "PIL") %>%
-  pull(taxon)
-
-str_detect(species_raw %>%
-              filter(site == "PIL") %>%
-              pull(taxon),
-          "alstonii")
-
-ifelse(str_detect(species_raw %>%
-                    filter(site == "PIL") %>%
-                    pull(taxon),
-                  "alstonii"))
