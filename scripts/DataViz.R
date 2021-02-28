@@ -16,67 +16,17 @@
 
 ### 0) Preamble ----
 ### >> a) Dependencies ----
-library(tvthemes) #A:tla colour theme
 library(here)
-if(!require(ggpomological)){  # for colour scheme
-  devtools::install_github("gadenbuie/ggpomological")
-  library(ggpomological)
-}
 if(!require(ggridges)){  # for pretty plots
   install.packages("ggridges")
   library(ggridges)
-}
-library(paletteer)            # for "palettes_d" function to display colour schemes
+}           # for "palettes_d" function to display colour schemes
 library(ggdist)
 library(naniar)
 
 ### >> b) Call source script----
 
-source(here(path = "scripts/Gr3_data_import_checking.R"))
-
-### >> c) Colour scheme ----
-# suggestion 1: draw from ggpomological theme: https://github.com/gadenbuie/ggpomological )
-scales::show_col(ggpomological:::pomological_palette)
-
-# example 1: dark (C) vs light (BB)
-acj_c <- palettes_d$ggpomological$pomological_palette[1]
-acj_bb <- palettes_d$ggpomological$pomological_palette[5]
-tre_c <- palettes_d$ggpomological$pomological_palette[2]
-tre_bb <- palettes_d$ggpomological$pomological_palette[7]
-que_c <- palettes_d$ggpomological$pomological_palette[8]
-que_bb <- palettes_d$ggpomological$pomological_palette[6]
-# example 2: loud (C) vs. muted (BB)
-acj_c <- palettes_d$ggpomological$pomological_palette[1]
-acj_bb <- palettes_d$ggpomological$pomological_palette[9]
-tre_c <- palettes_d$ggpomological$pomological_palette[3]
-tre_bb <- palettes_d$ggpomological$pomological_palette[4]
-que_c <- palettes_d$ggpomological$pomological_palette[8]
-que_bb <- palettes_d$ggpomological$pomological_palette[6]
-
-# suggestion 2: draw from Dresdencolor:::paired theme -> dark (C) vs light (BB)
-scales::show_col(palettes_d$DresdenColor$paired)
-
-acj_c <- palettes_d$DresdenColor$paired[11]
-acj_bb <- palettes_d$DresdenColor$paired[12]
-tre_c <- palettes_d$DresdenColor$paired[7]
-tre_bb <- palettes_d$DresdenColor$paired[8]
-que_c <- palettes_d$DresdenColor$paired[5]
-que_bb <- palettes_d$DresdenColor$paired[6]
-
-
-# theme_blue <- "#4088C7"
-# theme_green <- "#34B362"
-# theme_darkblue <- "#1D5799"
-# theme_yellow <- "#FABC55"
-
-#suggestion 3: using the Fire Nation palette from {tvthemes}
-scales::show_col(avatar_pal(palette = "FireNation")(4))
-#then use lighten() to get the paired shades e.g.
-scales::show_col(
-  colorspace::lighten(avatar_pal(palette = "FireNation")(4),
-                      .5, space = "HLS")
-)
-
+source(here::here(path = "scripts/Gr3_data_import_checking.R"))
 
 ### 1) Summary graphs ----
 
