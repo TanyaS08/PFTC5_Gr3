@@ -34,8 +34,7 @@ source(here::here(path = "scripts/Gr3_data_import_checking.R"))
 # Number of indivdiuals traits data were collected for
 #per individual per plot per site per treatment
 
-NIndivids <-
-  ggplot(traits) +
+ggplot(traits) +
   geom_histogram(aes(x = site,
                      fill = treatment),
                  stat ="count",
@@ -48,17 +47,15 @@ NIndivids <-
   theme_bw()
 
 ggsave(here(path = "output/Number_indivs_per_plot.png"),
-       NIndivids,
        height = 8.3, width = 10,
-       units = "in", dpi = 600)
+       units = "in", dpi = 300)
 
 
 ### >> b) Number of specied (community)----
 # Number of species
 #species per plot per site per treatment
 
-NSpecies <-
-  ggplot(species) +
+ggplot(species) +
   geom_histogram(aes(x = site,
                      fill = treatment),
                  stat ="count",
@@ -71,14 +68,12 @@ NSpecies <-
   theme_bw()
 
 ggsave(here(path = "output/Number_species_per_plot.png"),
-       NSpecies,
        height = 8.3, width = 10,
-       units = "in", dpi = 600)
+       units = "in", dpi = 300)
 
 # N0. species sampled for traits per site and treatment
 
-NTaxa <-
-  traits %>% 
+traits %>% 
   group_by(site, treatment) %>%
   summarise(n_taxa = n_distinct(taxon)) %>%
   ggplot(aes(x = site, 
@@ -94,7 +89,6 @@ NTaxa <-
        title = "Not Trimmed")
 
 ggsave(here(path = "output/number_of_taxa.png"),
-       NTaxa,
        height = 8.3, width = 10,
        units = "in", dpi = 600)
 
@@ -115,7 +109,7 @@ density_plots <-
     c(site, treatment),
     sep = " ", remove = FALSE
   ) %>%
-  select(
+  dplyr::select(
     plot, site, plant_height_cm, sla_cm2_g, ldmc,
     leaf_thickness_ave_mm
   ) %>%
@@ -135,7 +129,6 @@ density_plots <-
                            Trait == "leaf_thickness_ave_mm" ~ "Leaf~Thickness~(mm)")) %>%
   filter(Value >= 0) 
 
-trait_density <-
 density_plots %>%
   filter(Value != Inf) %>%
   ggplot() +
@@ -148,28 +141,19 @@ density_plots %>%
              scales = "free_x",
              labeller = label_parsed) +
   scale_fill_manual(name = "Plot",
-                    values = c("#ecb100", 
-                               "#FFDD76", 
-                               "#a10000",
-                               "#FF5151",
-                               "#FF4500", 
-                               "#FFA280")) +
+                    values = colours_site$c,
+                    breaks = colours_site$t) +
   scale_colour_manual(name = "Plot",
-                      values = c("#ecb100", 
-                                 "#FFDD76", 
-                                 "#a10000",
-                                 "#FF5151",
-                                 "#FF4500", 
-                                 "#FFA280")) +
+                      values = colours_site$c,
+                      breaks = colours_site$t) +
   theme_bw() +
   labs(y = "Density",
        x = "Trait Value") +
   theme(legend.position = "bottom")
 
 ggsave(here(path = "output/traits_density_plots.png"),
-       trait_density,
        height = 8.3, width = 15,
-       units = "in", dpi = 600)
+       units = "in", dpi = 300)
 
 
 
@@ -178,6 +162,9 @@ ggsave(here(path = "output/traits_density_plots.png"),
 ##Zone of Experimentation
 
 ### >> Appendix 1) The case of the missing data----
+
+traits_raw %>%
+  filter(is.na(functional_group))
 
 traits %>%
   ungroup() %>%
@@ -193,7 +180,7 @@ traits %>%
     c(site, treatment),
     sep = " ", remove = FALSE
   ) %>%
-  select(
+  dplyr::select(
     plot, site, plant_height_cm, sla_cm2_g, ldmc,
     leaf_thickness_ave_mm, functional_group, treatment 
   ) %>%
@@ -210,6 +197,8 @@ traits %>%
   labs(y = "Density",
        x = "Trait Value") +
   theme(legend.position = "bottom")
+
+
 
 ### >> Appendix 2) The case of the missing data----
 
