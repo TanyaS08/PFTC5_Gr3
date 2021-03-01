@@ -102,10 +102,10 @@ species_raw <- read.csv(file.path("data", "raw", "community", "PFTC3_Peru_2018_C
                            str_detect(taxon,
                                       "alstonii") == TRUE ~ "Jamesonia alstonii",
                            TRUE ~ taxon),
-         specie = case_when(specie == "cf vulcanica" ~ "cf. vulcanica",
+         species = case_when(species == "cf vulcanica" ~ "cf. vulcanica",
                             str_detect(taxon,
                                        "alstonii") == TRUE ~ "alstonii",
-                            TRUE ~ specie),
+                            TRUE ~ species),
          genus = case_when(str_detect(genus,
                                       "alstonii") == TRUE ~ "Jamesonia",
                            TRUE ~ genus))
