@@ -174,9 +174,9 @@ ggplot(plot_data_all %>%
   labs(x = "PC1",
        y = "PC2")  
 
-gg_save(here(path = "output/PCA.png"),
-        height = 797, width = 1440,
-        units = "px")
+ggsave(here(path = "output/PCA.png"),
+        height = 7.9, width = 13,
+        units = "in")
 
 # End of script ----
 

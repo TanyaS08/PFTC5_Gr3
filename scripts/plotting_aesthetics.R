@@ -75,9 +75,6 @@ colours_site <- tribble(
 )
 
 
-# Join colors with categories
-pal_df <- data.frame(c = unname(colors)[1:4], l = names(colors)[1:4])
-
 ### 2) For facet labels ----
 
 #To capitalise labels
