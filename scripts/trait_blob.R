@@ -31,17 +31,17 @@ library(tidyverse)
 
 ### >> b) Call source script----
 
-#source(here(path = "scripts/Gr3_data_import_checking.R"))
+source(here(path = "scripts/Gr3_data_import_checking.R"))
 
-### 1) Removing 'uncommon' spp. from traits dataset ----
+### 1) Removing unwanted/needed cols ----
 
 
 blob_traits =
   traits %>%
   ungroup() %>%
   dplyr::select(site, treatment, taxon, functional_group, plant_height_cm, leaf_area_cm2, sla_cm2_g, ldmc, leaf_thickness_ave_mm) %>%
-  na.omit() %>%
-  filter(sla_cm2_g != Inf)
+  na.omit() %>% #PCAs don't want any NAs...
+  filter(sla_cm2_g != Inf) 
 
 
 #this list is if we want to do traitspace at site level/burn level??
@@ -55,10 +55,6 @@ blob_traits_list =
   group_by(site) %>%
   group_split()
 
-
-xlim <- c(-6, 6)
-ylim <- c(-6, 6)
-lims <- c(c(-7, 7), c(-7, 7)) 
 mult <- 5.5
 
 ### 2) "Global" traitspace ----
@@ -98,6 +94,94 @@ plot_data_all = tibble(Axis1 = x,
                        Site = Blob_site$site)
 
 plot_data_all$Site <- factor(as.factor(plot_data_all$Site),levels=c("ACJ","TRE","QUE"))
+
+#pca_all <- 
+ggplot(plot_data_all,
+       aes(x = Axis1,
+           y = Axis2))  +
+  stat_density_2d(geom = "polygon",
+                  aes(fill = FGroup,
+                      alpha = ..nlevel..),
+                  contour_var = "ndensity",
+                  breaks = c(0.5, 0.9)) +
+  scale_alpha(range = c(0.3, 0.7)) +
+  guides(alpha = FALSE) +
+  geom_point(size = 0.2,
+             alpha = 0.6) +
+  facet_grid(cols = vars(Site),
+             rows = vars(Treatment)) +
+  geom_segment(data = arrows_all,
+               aes(xend = xend, 
+                   yend = yend,
+                   x = x,
+                   y = y),
+               arrow = arrow(length=unit(0.2,"cm")),
+               size = 0.2) +
+  geom_text(data = arrows_all,
+            aes(label = Trait,
+                x = xend + 0.3,
+                y = yend + 0.2),
+            hjust = 0.1,
+            parse = TRUE, 
+            size = 2) +
+  theme_classic() +
+  theme(legend.position = 'bottom',
+        plot.title = element_text(size = 20)) +
+  xlim(-5,5) +
+  ylim(-5,5) +
+  labs(x = "PC1",
+       y = "PC2")
+
+
+ggsave(here(path = "output/PCA_global.png"),
+       height = 8.3, width = 15,
+       units = "in", dpi = 300)
+
+ggplot(plot_data_all %>%
+         unite(plot, c(Site, Treatment),
+               sep = " ", remove = FALSE),
+       aes(x = Axis1,
+           y = Axis2))  +
+  stat_density_2d(geom = "polygon",
+                  aes(fill = plot,
+                      alpha = ..nlevel..),
+                  contour_var = "ndensity",
+                  breaks = c(0.5, 0.9)) +
+  scale_alpha(range = c(0.3, 0.7)) +
+  guides(alpha = FALSE) +
+  scale_fill_manual(name = "Plot",
+                    values = colours_site$c,
+                    breaks = colours_site$t) +
+  geom_point(size = 0.1,
+             alpha = 0.6)  +
+  geom_segment(data = arrows_all,
+               aes(xend = xend, 
+                   yend = yend,
+                   x = x,
+                   y = y),
+               arrow = arrow(length=unit(0.3,"cm"))) +
+  geom_text(data = arrows_all,
+            aes(label = Trait,
+                x = xend + 0.3,
+                y = yend + 0.2),
+            hjust = 0.1,
+            parse = TRUE) +
+  theme_classic() +
+  theme(legend.position = 'bottom',
+        plot.title = element_text(size = 20)) +
+  xlim(-5,5) +
+  ylim(-5,5) +
+  labs(x = "PC1",
+       y = "PC2")  
+
+gg_save(here(path = "output/PCA.png"),
+        height = 797, width = 1440,
+        units = "px")
+
+# End of script ----
+
+
+# GIF version
 
 gif_all <-   
   ggplot(plot_data_all,
@@ -146,52 +230,6 @@ anim_save(here(path = "output/PCA_annimate_global.gif"),
           gif_all,
           height = 797, width = 1440,
           units = "px")
-
-#pca_all <- 
-  ggplot(plot_data_all,
-         aes(x = Axis1,
-             y = Axis2))  +
-  stat_density_2d(geom = "polygon",
-                  aes(fill = FGroup,
-                      alpha = ..nlevel..),
-                  contour_var = "ndensity",
-                  breaks = c(0.5, 0.9)) +
-  scale_alpha(range = c(0.3, 0.7)) +
-  guides(alpha = FALSE) +
-  geom_point(size = 0.2,
-             alpha = 0.6) +
-  facet_grid(cols = vars(Site),
-             rows = vars(Treatment)) +
-  geom_segment(data = arrows_all,
-               aes(xend = xend, 
-                   yend = yend,
-                   x = x,
-                   y = y),
-               arrow = arrow(length=unit(0.2,"cm")),
-               size = 0.2) +
-  geom_text(data = arrows_all,
-            aes(label = Trait,
-                x = xend + 0.3,
-                y = yend + 0.2),
-            hjust = 0.1,
-            parse = TRUE, 
-            size = 2) +
-  theme_classic() +
-  theme(legend.position = 'bottom',
-        plot.title = element_text(size = 20)) +
-  xlim(-5,5) +
-  ylim(-5,5) +
-  labs(x = "PC1",
-       y = "PC2")
-
-
-ggsave(here(path = "output/PCA_global.png"),
-       height = 8.3, width = 15,
-       units = "in", dpi = 300)
-
-
-# End of script ----
-
 
 ##There are some loops etc. here that might be useful...
 
