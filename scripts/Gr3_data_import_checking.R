@@ -194,7 +194,7 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
   #add other cols from osf dataset - taxon, functional group and family
   left_join(.,
             species_raw  %>%
-              select(taxon, functional_group, family),
+              dplyr::select(taxon, functional_group, family),
             by = 'taxon') %>%
   
   #REMOVE ANY DUPLICATES
@@ -215,7 +215,7 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
     )) %>%
   
   ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
-  select(year, project, month, site, treatment, plot_id, functional_group, family, genus, species, taxon, cover) %>%
+  dplyr::select(year, project, month, site, treatment, plot_id, functional_group, family, genus, species, taxon, cover) %>%
   
   # REMOVE WHERE COVER = 0 i.e. absent
   filter(cover > 0)
