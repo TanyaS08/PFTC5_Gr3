@@ -85,11 +85,11 @@ capitalize <- function(string) {
 
 #rename traits - plase this in facet labeller cal and will change automatically
 traits_parsed <- c(
-  plant_height_cm = "Height", 
+  plant_height_cm = "Height~(cm)", 
   leaf_area_cm2 = "LA~(cm^2)", 
-  sla_cm2_g = "SLA~(cm^2%.%g)",
+  sla_cm2_g = "SLA~(cm^{2}/g)",
   ldmc = "LDMC", 
-  leaf_thickness_ave_mm = "Thickness~(mm)")
+  leaf_thickness_ave_mm = "Leaf~thickness~(mm)")
 
 ### 3) Figure theme ----
 

@@ -32,50 +32,27 @@ library(gsheet)
 
 ### >> c) Data from osf ----
 
-#' osf_retrieve_node("gs8u6") %>%
-#'  osf_ls_files() %>%
-  #dataset folders of interest
-#'  filter(name %in% c("traits", "community")) %>%
-#'  osf_download(
-    #where to download
-#'    path = here(path = "data/raw"),
-    #allows overwriting of folders
-#'    conflicts = "overwrite"
-#'  )
+ # osf_retrieve_node("gs8u6") %>%
+ #  osf_ls_files() %>%
+ #  #dataset folders of interest
+ #  filter(name %in% c("traits", "community")) %>%
+ #  osf_download(
+ #    #where to download
+ #    path = here(path = "data/raw"),
+ #    #allows overwriting of folders
+ #    conflicts = "overwrite"
+ #  )
 
 ### 1) Data cleaning ----
 
 ### >> a) Traits data ----
 
 # traits data - complete
-traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC5_Peru_2020_LeafTraits_clean.csv"),
+traits_raw <- read.csv(file.path("data", "raw", "traits", "PFTC3-Puna-PFTC5_Peru_2018-2020_LeafTraits_clean.csv"),
                        header = T,
                        sep = ",") %>%
-  #add Puna Project (2019 data)
-  rbind(read.csv(file.path("data", "raw", "traits", "PunaProject_Peru_2019_LeafTraits_clean.csv"),
-                 header = T,
-                 sep = ",") %>%
-          #Keep only QUE and ACJ C sites
-          filter(site == "QUE" |
-                   site == "ACJ" & treatment == "C")) %>%
-  
-  ##CORRECTIONS FOR WRONG NAMING OF TREATMENTS
-  mutate( 
-    #Replace incorrect treatments for samples
-    treatment = case_when(
-      #Correct B sample for ACJ
-      site == "ACJ" & year == 2020 &
-        treatment == "B" ~ "BB",
-      #Correct C sample for QUE
-      site == "QUE" & year == 2020 &
-        treatment == "C" ~ "BB",
-      #Correct B sample for QUE
-      site == "QUE" & year == 2020 &
-        treatment == "B" ~ "BB",
-      #Correct B sample for TRE
-      site == "TRE" & year == 2020 &
-        treatment == "B" ~ "BB",
-      TRUE ~ treatment))
+  #remove all PFTC3
+  filter(year != 2018)
 
 skim(traits_raw)
 
@@ -225,14 +202,23 @@ species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCov
 
 ### >> a) Traits data ----
 
+#TODO
+#Filter out ACJ C from PFTC5
+
 # clean data
 traits <- traits_raw %>%
   
-  ##REMOVE NON- TARGET SITES
-  #remove WAY sites - not needed
-  filter(site %in% c("ACJ", "QUE", "TRE") |
+  ##REMOVE NON-TARGET SITES
+  #selecting the sites we want from PFTC 5
+  filter(site %in% c("ACJ", "QUE", "TRE") & year == 2020 |
            #Removing ACJ C 2020 
-           site != "ACJ" & year != 2020 & treatment != "C") %>%
+           site == "ACJ" & year == 2020 & treatment == "NB" |
+           #selecting ACJ C from Puna
+           site == "ACJ" & year == 2019 & treatment== "C" |
+           #QUE form Puna
+           site == "QUE"& year == 2019 |
+           #remove other Puna entries
+           year != 2019) %>%
   
   ## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
   #Rename 2019 samples to C for QUE
@@ -245,17 +231,16 @@ traits <- traits_raw %>%
   #remove November samples (multiple sampling from 2019 - Puna Project)
   filter(month != "November",
          #remove Sean's samples
-         treatment != "OFF-PLOT") %>%
+         treatment != "OFF-PLOT",
+         site != "WAY") %>%
   
   ##REMOVING DUPLICATES FOR INDIVIDUALS
   #group by each individual at each plot for each site & treatment
-  group_by(site, treatment, plot_id, name_2020, individual_nr) %>%
+  group_by(site, treatment, plot_id, taxon, individual_nr, trait) %>%
   #arrange in a set way each time to ensure we use the same individuals
   arrange(id) %>%
   #keep only the first record for each individual
-  slice_head()  %>%
-  #rename full species name to match species dataset i.e. 'taxon'
-  rename(taxon = name_2020)
+  slice_head()
 
 # check again
 skim(traits)

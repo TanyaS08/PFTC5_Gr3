@@ -42,8 +42,6 @@ ggplot(traits) +
   facet_wrap(vars(plot_id)) +
   labs(title = "TRAITS not trimmed",
        y = "number of samples") +
-  scale_fill_manual(values = c("#7E605E",
-                               "#8AB573")) +
   theme_bw()
 
 ggsave(here(path = "output/Number_indivs_per_plot.png"),
@@ -97,10 +95,6 @@ ggsave(here(path = "output/number_of_taxa.png"),
 density_plots <-
   traits %>%
   ungroup() %>%
-  filter(
-    #remove what are potentially erroneous LDMC vals
-    ldmc <= 1
-  ) %>%
   #combine both Site and treatment to one variable
   unite(
     #new variable name
@@ -109,35 +103,25 @@ density_plots <-
     c(site, treatment),
     sep = " ", remove = FALSE
   ) %>%
-  dplyr::select(
-    plot, site, plant_height_cm, sla_cm2_g, ldmc,
-    leaf_thickness_ave_mm
-  ) %>%
-  filter(ldmc <= 1) %>%
-  #pivot into long format for splitting into facets
-  pivot_longer(cols = -c(plot, site),
-               values_to = "Value",
-               names_to = "Trait") %>%
   #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(site = case_when(site == "ACJ" ~ "3 468 m.a.s.l.",
                           site == "TRE" ~ "3 715 m.a.s.l.",
                           site == "QUE" ~ "3 888 m.a.s.l"),
          # Rename traits for labels
-         Trait = case_when(Trait == "plant_height_cm" ~ "Plant~height~(cm)",
-                           Trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
-                           Trait == "ldmc" ~ "LDMC",
-                           Trait == "leaf_thickness_ave_mm" ~ "Leaf~Thickness~(mm)")) %>%
-  filter(Value >= 0) 
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~Thickness~(mm)"))
 
 density_plots %>%
-  filter(Value != Inf) %>%
+  filter(value != Inf) %>%
   ggplot() +
   geom_density_ridges(aes(y = site,
-                          x = Value,
+                          x = value,
                           fill = plot,
                           colour = plot),
                       alpha = 0.6) +
-  facet_wrap(vars(Trait),
+  facet_wrap(vars(trait),
              scales = "free_x",
              labeller = label_parsed) +
   scale_fill_manual(name = "Plot",
