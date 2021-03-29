@@ -63,140 +63,22 @@ skim(traits_raw)
 #' 2020 is then combined with the osf datasets after cleaning
 #' this is then followed by some final filtering
 
-
-species_files <- paste(file.path("data", "raw", "community"), 
-                       dir(file.path("data", "raw", "community"), 
-                           pattern = ""), sep = "/")
-
-species_raw <- read.csv(file.path("data", "raw", "community", "PFTC3_Peru_2018_CommunityCover_clean.csv"),
-                        header = T,
-                        sep = ",") %>%
-  #add Puna Project (2019 data)
-  rbind(read.csv(file.path("data", "raw", "community", "PunaProject_Peru_2019_CommunityCover_clean.csv"),
+species_raw <- read.csv(file.path("data", "raw", "community", "PunaProject_Peru_2019_CommunityCover_clean.csv"),
                  header = T,
-                 sep = ",")) %>%
-  mutate(taxon = case_when(taxon == "Lachemilla cf vulcanica" ~ "Lachemilla cf. vulcanica",
-                           str_detect(taxon,
-                                      "alstonii") == TRUE ~ "Jamesonia alstonii",
-                           TRUE ~ taxon),
-         species = case_when(species == "cf vulcanica" ~ "cf. vulcanica",
-                            str_detect(taxon,
-                                       "alstonii") == TRUE ~ "alstonii",
-                            TRUE ~ species),
-         genus = case_when(str_detect(genus,
-                                      "alstonii") == TRUE ~ "Jamesonia",
-                           TRUE ~ genus))
+                 sep = ",") %>%
+  rename(species = specie) %>%
+  rbind(read.csv(file.path("data", "raw", "community", "PFTC5_Peru_2020_CommunityCover_clean.csv"),
+                 header = T,
+                 sep = ","))
 
 
 #' This is where the 2020 Community data lives
 #' It is downloaded and saved as a .csv in the data/raw/community folder
-#' but for record purposes keeping the 'legacy' link as wee
+#' but for record purposes keeping the 'legacy' link
 #' 
 #write.csv(gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUEovI4OlHoX3BjA/view?usp=sharing") , 
 #          file = here(path = "data/raw/community/PFTC5_2020_CommunityCover_raw.csv"), 
 #          row.names = FALSE)
-
-
-species_2020 <- read.csv(here(path = "data/raw/community/PFTC5_2020_CommunityCover_raw.csv"),
-                         header = T,
-                         sep = ",") %>%
-  
-  ## edit characters in and around _cf_
-  mutate(taxon = str_replace_all(taxon, "_", " ")) %>% 
-  mutate(taxon = str_replace(taxon, "cf", "cf.")) %>% 
-  
-  ##taxanomic corrections
-  mutate(taxon = case_when(
-    #misspelling
-    taxon == "Viola pymaea" ~ "Viola pygmaea",
-    #misspelling
-    taxon == "Agrostis trichoides" ~ "Agrostis trichodes",
-    #misspelling - CHECK
-    taxon == "Lysipomia glanulifera" ~ "Lysipomia glandulifera",
-    #misspelling - CHECK
-    taxon == "Chusquea intipacarina" ~ "Chusquea intipaqariy",
-    #misspelling - CHECK
-    taxon == "Carex bomplandii" ~ "Carex bonplandii",
-    #punctuation error
-    taxon == "Hieracium cf.. mandonii" ~ "Hieracium cf. mandonii",
-    #punctuation error
-    taxon == "Diplostephium cf.. haenkei" ~ "Diplostephium cf. haenkei",
-    #species change - was checked with Lucely
-    taxon == "Calamagrostis cf.. macrophylla" ~ "Calamagrostis cf. amoena",
-    #species change - was checked with Lucely
-    taxon == "Geranium filipes" ~ "Geranium sessiliflorum",
-    #species change - was checked with Lucely
-    taxon == "Jamesonia alstonii" ~ "Jamesonia blepharum",
-    #species change - was checked with Lucely
-    taxon == "Bartsia inaequalis" ~ "Bartsia trichophylla",
-    #species change - was checked with Lucely
-    taxon == "Calamagrostis sp8" ~ "Anatherostipa hans-meyeri",
-    #species change - was checked with Lucely
-    taxon == "Calamagrostis sp7" ~ "Anatherostipa hans-meyeri",
-    #species change - was checked with Lucely
-    taxon == "Oreobolus sp1" ~ "Oreobolus goeppingeri",
-    #species change - was checked with Lucely
-    taxon == "Festuca 3 sharp" ~ "Festuca sp4",
-    #species change - was checked with Lucely
-    taxon == "Agrostis sp1" ~ "Agrostis trichodes",
-    #species change - was checked with Lucely
-    taxon == "Calamagrostis tricophylla" ~ "Calamagrostis cf. amoena",
-    TRUE ~ taxon)) %>% 
-  
-  ##TIDY COLUMNS TO MATCH osf COLUMNS
-  # split taxon into genus and species
-  separate(taxon, 
-           into = c("genus", "species"), 
-           sep = "\\s", 2, 
-           remove = FALSE,
-           # keeps cf. and species taxon together
-           extra = "merge") %>%
-  #create treatment and plot_id
-  separate(plot, 
-           into = c("treatment", "plot_id"), 
-           #sperates before last character
-           sep = -1, 2, 
-           remove = TRUE) %>%
-  #add month
-  mutate(month = rep("March",
-                     nrow(.)),
-         #add project
-         project = rep("PFTC5",
-                       nrow(.))) %>%
-  #change '+' in cover to 0.5 and make numeric
-  mutate(cover = as.numeric(case_when(cover == "+" ~ "0.5",
-                                      TRUE ~ cover))) %>%
-  # drop absent species (no cover value)
-  filter(!cover == "") %>% 
-  #add other cols from osf dataset - taxon, functional group and family
-  left_join(.,
-            species_raw  %>%
-              dplyr::select(taxon, functional_group, family),
-            by = 'taxon') %>%
-  
-  #REMOVE ANY DUPLICATES
-  distinct() %>%
-  
-  #ADDING FAMILY AND FUNCTIONAL GROUP FOR Festuca cf. andina.
-  mutate(
-    functional_group = case_when(
-      taxon == "Festuca cf. andina" ~ "Gramminoid",
-      taxon == "Bartsia trichophylla" ~ "Forb",
-      taxon == "seedling unknown" ~ NA_character_,
-      TRUE ~ functional_group
-    ),
-    family = case_when(
-      taxon == "Festuca cf. andina" ~ "Poaceae",
-      taxon == "Bartsia trichophylla" ~ "Orobanchaceae",
-      TRUE ~ family
-    )) %>%
-  
-  ##SELECT ONLY COLUMNS THAT ARE IN THE osf DATA
-  dplyr::select(year, project, month, site, treatment, plot_id, functional_group, family, genus, species, taxon, cover) %>%
-  
-  # REMOVE WHERE COVER = 0 i.e. absent
-  filter(cover > 0)
-
 
 ### 2) Data filtering ----
 
@@ -251,16 +133,27 @@ skim(traits)
 #Combine species datasets
 species <- species_raw %>%
   
-  bind_rows(.,
-            species_2020) %>%
-  #samples from QUE 2019 will be considered C for our purposes
-  mutate(treatment = ifelse(site == "QUE" & year == 2019,
-                            "C",
-                            treatment)) %>%
-  #filter out the November samples from 2019
-  filter(site == "QUE" & year == 2019 & month == "April" & treatment == "C" | 
-           year == 2020 |
-           site == "ACJ" & year == 2019 & month == "April" & treatment == "C")
+  ##REMOVE NON-TARGET SITES
+  #selecting the sites we want from PFTC 5
+  filter(site %in% c("ACJ", "QUE", "TRE") & year == 2020 |
+           #Removing ACJ C 2020 
+           site == "ACJ" & year == 2020 & treatment == "NB" |
+           #selecting ACJ C from Puna
+           site == "ACJ" & year == 2019 & treatment== "C" |
+           #QUE form Puna
+           site == "QUE"& year == 2019 |
+           #remove other Puna entries
+           year != 2019) %>%
+  
+  ## BURNT QUE SITES FROM 2019 ARE OUR CONTROL SITES
+  #Rename 2019 samples to C for QUE
+  mutate( 
+    treatment = case_when(site == "QUE" & 
+                            year == 2019 ~ "C",
+                          TRUE ~ treatment)) %>%
+  filter(month != "November",
+         #remove Sean's samples
+         treatment != "OFF-PLOT")
 
 skim(species)
 

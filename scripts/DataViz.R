@@ -58,7 +58,7 @@ ggplot(species) +
                      fill = treatment),
                  stat ="count",
                  position = "dodge") +
-  facet_wrap(vars(plot_id)) +
+  facet_wrap(vars(year)) +
   labs(title = "COMMUNITY",
        y = "number of species") +
   scale_fill_manual(values = c("#7E605E",
