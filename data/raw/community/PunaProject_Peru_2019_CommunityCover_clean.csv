@@ -1,4 +1,4 @@
-year,project,month,site,treatment,plot_id,functional_group,family,genus,species,taxon,cover
+year,project,month,site,treatment,plot_id,functional_group,family,genus,specie,taxon,cover
 2019,Puna,April,ACJ,B,1,Forb,Asteraceae,Chaptalia,cordata,Chaptalia cordata,0.5
 2019,Puna,April,ACJ,B,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2019,Puna,April,ACJ,B,1,Forb,Asteraceae,Laestadia,muscicola,Laestadia muscicola,0.5
@@ -328,7 +328,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,April,PIL,B,4,Gramminoid,Poaceae,Festuca,procera,Festuca procera,5
 2019,Puna,April,PIL,B,4,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,2.5
 2019,Puna,April,PIL,B,4,Fern,Pteridaceae,Jamesonia,blepharum,Jamesonia blepharum,0.5
-2019,Puna,April,PIL,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,April,PIL,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,April,PIL,B,4,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2019,Puna,April,PIL,B,5,Forb,Apiaceae,Azorella,biloba,Azorella biloba,1
 2019,Puna,April,PIL,B,5,Gramminoid,Cyperaceae,Carex,pichinchensis,Carex pichinchensis,5
@@ -342,7 +342,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,April,PIL,B,5,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,20
 2019,Puna,April,PIL,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,30
 2019,Puna,April,PIL,B,5,Gramminoid,Poaceae,Festuca,procera,Festuca procera,10
-2019,Puna,April,PIL,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,April,PIL,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,April,PIL,B,5,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2019,Puna,April,PIL,C,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2019,Puna,April,PIL,C,1,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,1
@@ -567,7 +567,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,April,TRE,B,2,Woody,Ericaceae,Vaccinium,floribundum,Vaccinium floribundum,0.5
 2019,Puna,April,TRE,B,2,Gramminoid,Juncaceae,Luzula,racemosa,Luzula racemosa,0.5
 2019,Puna,April,TRE,B,2,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,25
-2019,Puna,April,TRE,B,2,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,April,TRE,B,2,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,April,TRE,B,2,Forb,Rosaceae,Lachemilla,jamesonii,Lachemilla jamesonii,0.5
 2019,Puna,April,TRE,B,2,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2019,Puna,April,TRE,B,3,Forb,Asteraceae,Aphanactis,villosa,Aphanactis villosa,0.5
@@ -579,7 +579,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,April,TRE,B,3,Gramminoid,Juncaceae,Luzula,racemosa,Luzula racemosa,1
 2019,Puna,April,TRE,B,3,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,1
 2019,Puna,April,TRE,B,3,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,25
-2019,Puna,April,TRE,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,April,TRE,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,April,TRE,B,4,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,1
 2019,Puna,April,TRE,B,4,Gramminoid,Cyperaceae,Carex,pygmaea,Carex pygmaea,3
 2019,Puna,April,TRE,B,4,Gramminoid,Cyperaceae,Rhynchospora,macrochaeta,Rhynchospora macrochaeta,1
@@ -908,7 +908,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,ACJ,B,3,Gramminoid,Poaceae,Cortaderia,bifida,Cortaderia bifida,26
 2019,Puna,July,ACJ,B,3,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,1
 2019,Puna,July,ACJ,B,3,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,8
-2019,Puna,July,ACJ,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,ACJ,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,ACJ,B,4,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2019,Puna,July,ACJ,B,4,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,0.5
 2019,Puna,July,ACJ,B,4,Gramminoid,Cyperaceae,Carex,pichinchensis,Carex pichinchensis,3
@@ -1128,7 +1128,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,PIL,B,3,Gramminoid,Poaceae,Festuca,procera,Festuca procera,2
 2019,Puna,July,PIL,B,3,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,8
 2019,Puna,July,PIL,B,3,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
-2019,Puna,July,PIL,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,July,PIL,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,July,PIL,B,3,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,1
 2019,Puna,July,PIL,B,4,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,0.5
 2019,Puna,July,PIL,B,4,Forb,Asteraceae,Hypochaeris,taraxacoides,Hypochaeris taraxacoides,2
@@ -1150,7 +1150,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,PIL,B,4,Gramminoid,Poaceae,Festuca,procera,Festuca procera,4
 2019,Puna,July,PIL,B,4,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
 2019,Puna,July,PIL,B,4,Fern,Pteridaceae,Jamesonia,blepharum,Jamesonia blepharum,2
-2019,Puna,July,PIL,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,July,PIL,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,July,PIL,B,4,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,2
 2019,Puna,July,PIL,B,5,Forb,Apiaceae,Azorella,biloba,Azorella biloba,1
 2019,Puna,July,PIL,B,5,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
@@ -1167,7 +1167,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,PIL,B,5,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,10
 2019,Puna,July,PIL,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,28
 2019,Puna,July,PIL,B,5,Gramminoid,Poaceae,Festuca,procera,Festuca procera,16
-2019,Puna,July,PIL,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,2
+2019,Puna,July,PIL,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,2
 2019,Puna,July,PIL,B,5,Forb,NA,seedling,unknown,seedling unknown,0.5
 2019,Puna,July,PIL,C,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2019,Puna,July,PIL,C,1,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,2
@@ -1344,7 +1344,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,QUE,B,3,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,43
 2019,Puna,July,QUE,B,3,Gramminoid,Poaceae,Poa,sp2,Poa sp2,4
 2019,Puna,July,QUE,B,3,Forb,Rosaceae,Acaena,cylindristachya,Acaena cylindristachya,0.5
-2019,Puna,July,QUE,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,QUE,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,QUE,B,4,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,1
 2019,Puna,July,QUE,B,4,Forb,Asteraceae,Hypochaeris,taraxacoides,Hypochaeris taraxacoides,0.5
 2019,Puna,July,QUE,B,4,Forb,Asteraceae,Oritrophium,hieracioides,Oritrophium hieracioides,0.5
@@ -1364,7 +1364,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,QUE,B,4,Gramminoid,Poaceae,Bromus,lanatus,Bromus lanatus,1
 2019,Puna,July,QUE,B,4,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,24
 2019,Puna,July,QUE,B,4,Gramminoid,Poaceae,Poa,spicigera,Poa spicigera,12
-2019,Puna,July,QUE,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,QUE,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,QUE,B,4,Forb,Rosaceae,Lachemilla,jamesonii,Lachemilla jamesonii,0.5
 2019,Puna,July,QUE,B,5,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,1
 2019,Puna,July,QUE,B,5,Forb,Asteraceae,Aphanactis,villosa,Aphanactis villosa,0.5
@@ -1394,14 +1394,14 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,QUE,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,40
 2019,Puna,July,QUE,B,5,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,0.5
 2019,Puna,July,QUE,B,5,Gramminoid,Poaceae,Poa,spicigera,Poa spicigera,8
-2019,Puna,July,QUE,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,QUE,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,QUE,B,5,Forb,Violaceae,Viola,pygmaea,Viola pygmaea,2
 2019,Puna,July,TRE,B,1,Gramminoid,Cyperaceae,Carex,bonplandii,Carex bonplandii,17
 2019,Puna,July,TRE,B,1,Gramminoid,Cyperaceae,Carex,pygmaea,Carex pygmaea,1
 2019,Puna,July,TRE,B,1,Gramminoid,Cyperaceae,Rhynchospora,macrochaeta,Rhynchospora macrochaeta,4
 2019,Puna,July,TRE,B,1,Gramminoid,Poaceae,Agrostis,foliata,Agrostis foliata,0.5
 2019,Puna,July,TRE,B,1,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,20
-2019,Puna,July,TRE,B,1,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,TRE,B,1,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,TRE,B,1,Forb,Rosaceae,Lachemilla,jamesonii,Lachemilla jamesonii,0.5
 2019,Puna,July,TRE,B,2,Forb,Asteraceae,Senecio,burkartii,Senecio burkartii,0.5
 2019,Puna,July,TRE,B,2,Gramminoid,Cyperaceae,Carex,bonplandii,Carex bonplandii,10
@@ -1412,7 +1412,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,TRE,B,2,Gramminoid,Poaceae,Agrostis,foliata,Agrostis foliata,0.5
 2019,Puna,July,TRE,B,2,Gramminoid,Poaceae,Agrostis,trichodes,Agrostis trichodes,0.5
 2019,Puna,July,TRE,B,2,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,20
-2019,Puna,July,TRE,B,2,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,TRE,B,2,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,TRE,B,2,Forb,Rosaceae,Lachemilla,jamesonii,Lachemilla jamesonii,0.5
 2019,Puna,July,TRE,B,2,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2019,Puna,July,TRE,B,3,Forb,Asteraceae,Aphanactis,villosa,Aphanactis villosa,0.5
@@ -1427,7 +1427,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,TRE,B,3,Gramminoid,Poaceae,Agrostis,foliata,Agrostis foliata,0.5
 2019,Puna,July,TRE,B,3,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,0.5
 2019,Puna,July,TRE,B,3,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,25
-2019,Puna,July,TRE,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,TRE,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,TRE,B,4,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,0.5
 2019,Puna,July,TRE,B,4,Gramminoid,Cyperaceae,Carex,pygmaea,Carex pygmaea,0.5
 2019,Puna,July,TRE,B,4,Gramminoid,Cyperaceae,Rhynchospora,macrochaeta,Rhynchospora macrochaeta,1
@@ -1445,7 +1445,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,July,TRE,B,5,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,1
 2019,Puna,July,TRE,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,40
 2019,Puna,July,TRE,B,5,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,1
-2019,Puna,July,TRE,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,July,TRE,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,July,TRE,B,5,Forb,Rosaceae,Lachemilla,jamesonii,Lachemilla jamesonii,2
 2019,Puna,July,TRE,C,1,Forb,Asteraceae,Hypochaeris,taraxacoides,Hypochaeris taraxacoides,0.5
 2019,Puna,July,TRE,C,1,Forb,Asteraceae,Perezia,pungens,Perezia pungens,0.5
@@ -1762,7 +1762,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,ACJ,B,3,Gramminoid,Poaceae,Cortaderia,bifida,Cortaderia bifida,45
 2019,Puna,November,ACJ,B,3,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,0.5
 2019,Puna,November,ACJ,B,3,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,10
-2019,Puna,November,ACJ,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,November,ACJ,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,November,ACJ,B,4,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2019,Puna,November,ACJ,B,4,Gramminoid,Cyperaceae,Carex,pichinchensis,Carex pichinchensis,4
 2019,Puna,November,ACJ,B,4,Gramminoid,Cyperaceae,Oreobolus,venezuelensis,Oreobolus venezuelensis,0.5
@@ -1900,7 +1900,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,ACJ,NB,1,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,2
 2019,Puna,November,ACJ,NB,1,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
 2019,Puna,November,ACJ,NB,1,Fern,Pteridaceae,Jamesonia,blepharum,Jamesonia blepharum,1
-2019,Puna,November,ACJ,NB,1,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,November,ACJ,NB,1,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,November,ACJ,NB,1,Forb,NA,seedling,unknown,seedling unknown,0.5
 2019,Puna,November,ACJ,NB,2,Forb,Apiaceae,Niphogeton,dissecta,Niphogeton dissecta,0.5
 2019,Puna,November,ACJ,NB,2,Gramminoid,Cyperaceae,Carex,pygmaea,Carex pygmaea,1
@@ -1979,7 +1979,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,PIL,B,3,Gramminoid,Poaceae,Festuca,procera,Festuca procera,3
 2019,Puna,November,PIL,B,3,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,10
 2019,Puna,November,PIL,B,3,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
-2019,Puna,November,PIL,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,November,PIL,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,November,PIL,B,4,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,0.5
 2019,Puna,November,PIL,B,4,Forb,Asteraceae,Hypochaeris,taraxacoides,Hypochaeris taraxacoides,1
 2019,Puna,November,PIL,B,4,Forb,Asteraceae,Oritrophium,hieracioides,Oritrophium hieracioides,1
@@ -1998,9 +1998,9 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,PIL,B,4,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,1
 2019,Puna,November,PIL,B,4,Gramminoid,Poaceae,Festuca,procera,Festuca procera,4
 2019,Puna,November,PIL,B,4,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
-2019,Puna,November,PIL,B,4,Fern,Pteridaceae,Jamesonia,alstonii,Jamesonia alstonii,1
 2019,Puna,November,PIL,B,4,Fern,Pteridaceae,Jamesonia,blepharum,Jamesonia blepharum,0.5
-2019,Puna,November,PIL,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,4
+2019,Puna,November,PIL,B,4,Fern,Pteridaceae,Jamesonia alstonii,Jamesonia alstonii,Jamesonia alstonii,1
+2019,Puna,November,PIL,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,4
 2019,Puna,November,PIL,B,4,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2019,Puna,November,PIL,B,4,Fern,NA,fern,unknown,fern unknown,0.5
 2019,Puna,November,PIL,B,5,Forb,Apiaceae,Azorella,biloba,Azorella biloba,0.5
@@ -2018,7 +2018,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,PIL,B,5,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,20
 2019,Puna,November,PIL,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,40
 2019,Puna,November,PIL,B,5,Gramminoid,Poaceae,Festuca,procera,Festuca procera,16
-2019,Puna,November,PIL,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,November,PIL,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,November,PIL,C,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2019,Puna,November,PIL,C,1,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,0.5
 2019,Puna,November,PIL,C,1,Forb,Caryophyllaceae,Cerastium,arvense,Cerastium arvense,4
@@ -2183,7 +2183,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,QUE,B,3,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,25
 2019,Puna,November,QUE,B,3,Gramminoid,Poaceae,Poa,sp2,Poa sp2,8
 2019,Puna,November,QUE,B,3,Forb,Rosaceae,Acaena,cylindristachya,Acaena cylindristachya,0.5
-2019,Puna,November,QUE,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,November,QUE,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,November,QUE,B,4,Forb,Apiaceae,Azorella,biloba,Azorella biloba,0.5
 2019,Puna,November,QUE,B,4,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,0.5
 2019,Puna,November,QUE,B,4,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,0.5
@@ -2207,7 +2207,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,QUE,B,4,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,28
 2019,Puna,November,QUE,B,4,Gramminoid,Poaceae,Poa,sp2,Poa sp2,16
 2019,Puna,November,QUE,B,4,Gramminoid,Poaceae,Poa,spicigera,Poa spicigera,1
-2019,Puna,November,QUE,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,November,QUE,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,November,QUE,B,5,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,2
 2019,Puna,November,QUE,B,5,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,0.5
 2019,Puna,November,QUE,B,5,Forb,Asteraceae,Hypochaeris,taraxacoides,Hypochaeris taraxacoides,0.5
@@ -2233,7 +2233,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,QUE,B,5,Gramminoid,Poaceae,Bromus,lanatus,Bromus lanatus,1
 2019,Puna,November,QUE,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,15
 2019,Puna,November,QUE,B,5,Gramminoid,Poaceae,Poa,spicigera,Poa spicigera,4
-2019,Puna,November,QUE,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2019,Puna,November,QUE,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2019,Puna,November,QUE,B,5,Forb,Violaceae,Viola,pygmaea,Viola pygmaea,0.5
 2019,Puna,November,TRE,B,1,Gramminoid,Cyperaceae,Carex,bonplandii,Carex bonplandii,16
 2019,Puna,November,TRE,B,1,Gramminoid,Cyperaceae,Carex,pygmaea,Carex pygmaea,2
@@ -2242,7 +2242,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,TRE,B,1,Gramminoid,Poaceae,Agrostis,foliata,Agrostis foliata,0.5
 2019,Puna,November,TRE,B,1,Gramminoid,Poaceae,Agrostis,sedlings,Agrostis sedlings,4
 2019,Puna,November,TRE,B,1,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,40
-2019,Puna,November,TRE,B,1,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2019,Puna,November,TRE,B,1,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2019,Puna,November,TRE,B,2,Forb,Asteraceae,Senecio,burkartii,Senecio burkartii,0.5
 2019,Puna,November,TRE,B,2,Woody,Asteraceae,Baccharis,caespitosa,Baccharis caespitosa,0.5
 2019,Puna,November,TRE,B,2,Gramminoid,Cyperaceae,Carex,bonplandii,Carex bonplandii,10
@@ -2253,7 +2253,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,TRE,B,2,Gramminoid,Poaceae,Agrostis,foliata,Agrostis foliata,2
 2019,Puna,November,TRE,B,2,Gramminoid,Poaceae,Agrostis,sedlings,Agrostis sedlings,3
 2019,Puna,November,TRE,B,2,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,25
-2019,Puna,November,TRE,B,2,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,4
+2019,Puna,November,TRE,B,2,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,4
 2019,Puna,November,TRE,B,2,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,1
 2019,Puna,November,TRE,B,3,Forb,Asteraceae,Aphanactis,villosa,Aphanactis villosa,0.5
 2019,Puna,November,TRE,B,3,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,0.5
@@ -2270,7 +2270,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,TRE,B,3,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,1
 2019,Puna,November,TRE,B,3,Gramminoid,Poaceae,Agrostis,sedlings,Agrostis sedlings,8
 2019,Puna,November,TRE,B,3,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,50
-2019,Puna,November,TRE,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,4
+2019,Puna,November,TRE,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,4
 2019,Puna,November,TRE,B,4,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,0.5
 2019,Puna,November,TRE,B,4,Forb,Asteraceae,Laestadia,muscicola,Laestadia muscicola,0.5
 2019,Puna,November,TRE,B,4,Gramminoid,Cyperaceae,Carex,bonplandii,Carex bonplandii,0.5
@@ -2294,7 +2294,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2019,Puna,November,TRE,B,5,Gramminoid,Poaceae,Anatherostipa,hans-meyeri,Anatherostipa hans-meyeri,2
 2019,Puna,November,TRE,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,60
 2019,Puna,November,TRE,B,5,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,2
-2019,Puna,November,TRE,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,2
+2019,Puna,November,TRE,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,2
 2019,Puna,November,TRE,B,5,Forb,Rosaceae,Lachemilla,jamesonii,Lachemilla jamesonii,0.5
 2019,Puna,November,TRE,C,1,Forb,Asteraceae,Hypochaeris,taraxacoides,Hypochaeris taraxacoides,0.5
 2019,Puna,November,TRE,C,1,Forb,Asteraceae,Perezia,pungens,Perezia pungens,0.5

@@ -1,4 +1,4 @@
-year,project,month,site,treatment,plot_id,functional_group,family,genus,species,taxon,cover
+year,project,month,site,treatment,plot_id,functional_group,family,genus,specie,taxon,cover
 2018,PFTC3,March,ACJ,B,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2018,PFTC3,March,ACJ,B,1,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,0.5
 2018,PFTC3,March,ACJ,B,1,Woody,Asteraceae,Baccharis,tricuneata,Baccharis tricuneata,0.5
@@ -54,7 +54,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,ACJ,B,3,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,0.5
 2018,PFTC3,March,ACJ,B,3,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,4
 2018,PFTC3,March,ACJ,B,3,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
-2018,PFTC3,March,ACJ,B,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,ACJ,B,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,ACJ,B,3,Forb,Violaceae,Viola,pygmaea,Viola pygmaea,0.5
 2018,PFTC3,March,ACJ,B,4,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,0.5
 2018,PFTC3,March,ACJ,B,4,Gramminoid,Cyperaceae,Carex,pichinchensis,Carex pichinchensis,3
@@ -84,7 +84,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,ACJ,B,5,Gramminoid,Poaceae,Calamagrostis,cf. amoena,Calamagrostis cf. amoena,1
 2018,PFTC3,March,ACJ,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,65
 2018,PFTC3,March,ACJ,B,5,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,0.5
-2018,PFTC3,March,ACJ,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,ACJ,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,ACJ,B,5,Forb,Rubiaceae,Galium,corymbosum,Galium corymbosum,0.5
 2018,PFTC3,March,ACJ,C,1,Forb,Asteraceae,Chaptalia,cordata,Chaptalia cordata,0.5
 2018,PFTC3,March,ACJ,C,1,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,0.5
@@ -223,7 +223,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,PIL,B,4,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,55
 2018,PFTC3,March,PIL,B,4,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,1
 2018,PFTC3,March,PIL,B,4,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,2
-2018,PFTC3,March,PIL,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,PIL,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,PIL,B,4,Forb,Rubiaceae,Galium,corymbosum,Galium corymbosum,0.5
 2018,PFTC3,March,PIL,B,4,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2018,PFTC3,March,PIL,B,4,Forb,Violaceae,Viola,pygmaea,Viola pygmaea,0.5
@@ -238,7 +238,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,PIL,B,5,Gramminoid,Poaceae,Agrostis,mertensii,Agrostis mertensii,4
 2018,PFTC3,March,PIL,B,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,55
 2018,PFTC3,March,PIL,B,5,Gramminoid,Poaceae,Festuca,procera,Festuca procera,12
-2018,PFTC3,March,PIL,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,PIL,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,PIL,BB,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2018,PFTC3,March,PIL,BB,1,Gramminoid,Cyperaceae,Carex,pygmaea,Carex pygmaea,6
 2018,PFTC3,March,PIL,BB,1,Gramminoid,Cyperaceae,Rhynchospora,macrochaeta,Rhynchospora macrochaeta,9.5
@@ -279,7 +279,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,PIL,BB,3,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,75
 2018,PFTC3,March,PIL,BB,3,Gramminoid,Poaceae,Festuca,procera,Festuca procera,10
 2018,PFTC3,March,PIL,BB,3,Fern,Pteridaceae,Eriosorus,cheilanthoides,Eriosorus cheilanthoides,0.5
-2018,PFTC3,March,PIL,BB,3,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,PIL,BB,3,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,PIL,BB,3,Forb,Rubiaceae,Nertera,granadensis,Nertera granadensis,0.5
 2018,PFTC3,March,PIL,C,1,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
 2018,PFTC3,March,PIL,C,1,Woody,Asteraceae,Baccharis,genistelloides,Baccharis genistelloides,0.5
@@ -369,7 +369,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,PIL,C,5,Gramminoid,Poaceae,Calamagrostis,tarmensis,Calamagrostis tarmensis,75
 2018,PFTC3,March,PIL,C,5,Gramminoid,Poaceae,Festuca,dolichophylla,Festuca dolichophylla,2
 2018,PFTC3,March,PIL,C,5,Gramminoid,Poaceae,Paspalum,bonplandianum,Paspalum bonplandianum,2
-2018,PFTC3,March,PIL,C,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,PIL,C,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,QUE,B,1,Forb,Apiaceae,Oreomyrrhis,andicola,Oreomyrrhis andicola,0.5
 2018,PFTC3,March,QUE,B,1,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,1
 2018,PFTC3,March,QUE,B,1,Forb,Asteraceae,Aphanactis,villosa,Aphanactis villosa,0.5
@@ -484,7 +484,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,QUE,B,4,Gramminoid,Poaceae,Poa,sp2,Poa sp2,0.5
 2018,PFTC3,March,QUE,B,4,Gramminoid,Poaceae,Poa,spicigera,Poa spicigera,3
 2018,PFTC3,March,QUE,B,4,Moss,Polytrichaceae,Polytrichum,sp1,Polytrichum sp1,3
-2018,PFTC3,March,QUE,B,4,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,0.5
+2018,PFTC3,March,QUE,B,4,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,0.5
 2018,PFTC3,March,QUE,B,5,Forb,Asteraceae,Antennaria,linearifolia,Antennaria linearifolia,3
 2018,PFTC3,March,QUE,B,5,Forb,Asteraceae,Gamochaeta,coarctata,Gamochaeta coarctata,0.5
 2018,PFTC3,March,QUE,B,5,Forb,Asteraceae,Hieracium,cf. mandonii,Hieracium cf. mandonii,0.5
@@ -510,7 +510,7 @@ year,project,month,site,treatment,plot_id,functional_group,family,genus,species,
 2018,PFTC3,March,QUE,B,5,Gramminoid,Poaceae,Bromus,lanatus,Bromus lanatus,1
 2018,PFTC3,March,QUE,B,5,Gramminoid,Poaceae,Calamagrostis,rigida,Calamagrostis rigida,50
 2018,PFTC3,March,QUE,B,5,Moss,Polytrichaceae,Polytrichum,sp1,Polytrichum sp1,0.5
-2018,PFTC3,March,QUE,B,5,Forb,Rosaceae,Lachemilla,cf. vulcanica,Lachemilla cf. vulcanica,1
+2018,PFTC3,March,QUE,B,5,Forb,Rosaceae,Lachemilla,cf vulcanica,Lachemilla cf vulcanica,1
 2018,PFTC3,March,TRE,C,1,Gramminoid,Cyperaceae,Carex,pichinchensis,Carex pichinchensis,6
 2018,PFTC3,March,TRE,C,1,Gramminoid,Cyperaceae,Rhynchospora,macrochaeta,Rhynchospora macrochaeta,2
 2018,PFTC3,March,TRE,C,1,Woody,Ericaceae,Gaultheria,glomerata,Gaultheria glomerata,0.5
