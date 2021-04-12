@@ -14,4 +14,4 @@ The raw data are called from _osf_ and then filtered based on the sites that we 
 
 **Script naming structure**
 
-Each subtask related to/needing a coding workflow should be contained within its own script and should be named starting with the subtask number and a brief descriptive name
+Each subtask related to/needing a coding workflow should be contained within its own script and should be named starting with the subtask number and a brief descriptive name. Scripts should be placed in the `scrpits/'` folder
