@@ -31,7 +31,7 @@ library(tidyverse)
 
 ### >> b) Call source script----
 
-source(here(path = "scripts/Gr3_data_import_checking.R"))
+source(here::here(path = "scripts/0_data_import.R"))
 
 ### 1) Removing unwanted/needed cols ----
 

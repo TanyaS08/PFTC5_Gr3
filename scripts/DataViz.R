@@ -26,7 +26,7 @@ library(naniar)
 
 ### >> b) Call source script----
 
-source(here::here(path = "scripts/Gr3_data_import_checking.R"))
+source(here::here(path = "scripts/0_data_import.R"))
 
 ### 1) Summary graphs ----
 
@@ -42,6 +42,8 @@ ggplot(traits) +
   facet_wrap(vars(plot_id)) +
   labs(title = "TRAITS not trimmed",
        y = "number of samples") +
+  scale_fill_manual(values = c("#7E605E",
+                               "#8AB573")) +
   theme_bw()
 
 ggsave(here(path = "output/Number_indivs_per_plot.png"),
@@ -58,7 +60,7 @@ ggplot(species) +
                      fill = treatment),
                  stat ="count",
                  position = "dodge") +
-  facet_wrap(vars(year)) +
+  facet_wrap(vars(plot_id)) +
   labs(title = "COMMUNITY",
        y = "number of species") +
   scale_fill_manual(values = c("#7E605E",
@@ -68,6 +70,18 @@ ggplot(species) +
 ggsave(here(path = "output/Number_species_per_plot.png"),
        height = 8.3, width = 10,
        units = "in", dpi = 300)
+
+ggplot(species) +
+  geom_histogram(aes(x = functional_group,
+                     fill = treatment),
+                 stat ="count",
+                 position = "dodge") +
+  facet_wrap(vars(site)) +
+  labs(title = "COMMUNITY",
+       y = "number of species") +
+  scale_fill_manual(values = c("#7E605E",
+                               "#8AB573")) +
+  theme_bw()
 
 # N0. species sampled for traits per site and treatment
 
