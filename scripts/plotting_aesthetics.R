@@ -59,7 +59,7 @@ scales::show_col(
 ##Colour palette
 
 #specify the three colours for sites - CHANGE HERE
-colours = c("#F2E22C", "#A37D5D", "#C20A08")
+colours = c("#F50054", "#DB6300", "#FFFA01")
 
 colours_site <- tribble(
   ~t, ~c,
@@ -67,11 +67,11 @@ colours_site <- tribble(
   "TRE", colours[2],
   "QUE", colours[3],
   "ACJ C", colours[1],
-  "ACJ BB", colorspace::darken(colours[1], 0.4),
+  "ACJ NB", colorspace::darken(colours[1], 0.3),
   "TRE C", colours[2],
-  "TRE BB", colorspace::darken(colours[2], 0.4),
+  "TRE NB", colorspace::darken(colours[2], 0.3),
   "QUE C", colours[3],
-  "QUE BB", colorspace::darken(colours[3], 0.4)
+  "QUE NB", colorspace::darken(colours[3], 0.3)
 )
 
 

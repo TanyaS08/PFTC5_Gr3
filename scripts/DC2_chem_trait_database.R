@@ -85,7 +85,7 @@ traits_wide =
               values_from = value,
               values_fill = NA)
 
-traits_chem = 
+traits_w_chem = 
   rbind(
     # add genus level traits
     right_join(traits_wide,
@@ -128,3 +128,5 @@ traits_chem =
                         sla_cm2_g, wet_mass_g, c_n, nitrogen, phosphorus),
                names_to = 'trait',
                values_to = 'value')
+
+traits = traits_w_chem

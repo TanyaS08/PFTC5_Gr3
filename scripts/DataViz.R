@@ -28,6 +28,8 @@ library(naniar)
 
 source(here::here(path = "scripts/0_data_import.R"))
 
+`%notin%` <- Negate(`%in%`)
+
 ### 1) Summary graphs ----
 
 ### >> a) Number of indivdiuals (traits)----
@@ -117,6 +119,7 @@ density_plots <-
     c(site, treatment),
     sep = " ", remove = FALSE
   ) %>%
+  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
   #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(site = case_when(site == "ACJ" ~ "3 468 m.a.s.l.",
                           site == "TRE" ~ "3 715 m.a.s.l.",
@@ -125,10 +128,12 @@ density_plots <-
          trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
                            trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
                            trait == "ldmc" ~ "LDMC",
-                           trait == "leaf_thickness_mm" ~ "Leaf~Thickness~(mm)"))
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "phosphorus" ~ "Phosphorus~content~(mg/g)",
+                           trait == "nitrogen" ~ "Nitrogen~content~(mg/g)",
+                           trait == "c_n" ~ "Carbon~per~leaf~nitrogen"))
 
 density_plots %>%
-  filter(value != Inf) %>%
   ggplot() +
   geom_density_ridges(aes(y = site,
                           x = value,
