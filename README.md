@@ -49,9 +49,9 @@ sites and treatments form the following years:
 | ACJ  | NB        | 2019 |
 
 
-> ⚠️ Note that `data/` is in the `.gitignore` this means you have to run the dta import 
+> ⚠️ Note that `data/` is in the `.gitignore` this means you have to run the data import 
 > script at least once regardless and that anything you export to the data folder will 
-> not be pushed to the repo and other will not be ablye to use that output unless you tell 
+> not be pushed to the repo and others will not be able to use that output unless you tell 
 > them which script to run to source that output.
 
 ## Script naming structure
