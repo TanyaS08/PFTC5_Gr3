@@ -41,12 +41,6 @@ tre_bb <- palettes_d$DresdenColor$paired[8]
 que_c <- palettes_d$DresdenColor$paired[5]
 que_bb <- palettes_d$DresdenColor$paired[6]
 
-
-# theme_blue <- "#4088C7"
-# theme_green <- "#34B362"
-# theme_darkblue <- "#1D5799"
-# theme_yellow <- "#FABC55"
-
 #suggestion 3: using the Fire Nation palette from {tvthemes}
 scales::show_col(avatar_pal(palette = "FireNation")(4))
 #then use lighten() to get the paired shades e.g.
