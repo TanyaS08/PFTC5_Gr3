@@ -27,6 +27,7 @@ library(naniar)
 ### >> b) Call source script----
 
 source(here::here(path = "scripts/0_data_import.R"))
+source(here::here(path = "scripts/plotting_aesthetics.R"))
 
 `%notin%` <- Negate(`%in%`)
 
@@ -42,8 +43,7 @@ ggplot(traits) +
                  stat ="count",
                  position = "dodge") +
   facet_wrap(vars(plot_id)) +
-  labs(title = "TRAITS not trimmed",
-       y = "number of samples") +
+  labs(y = "Number of samples") +
   scale_fill_manual(values = c("#7E605E",
                                "#8AB573")) +
   theme_bw()
@@ -63,8 +63,7 @@ ggplot(species) +
                  stat ="count",
                  position = "dodge") +
   facet_wrap(vars(plot_id)) +
-  labs(title = "COMMUNITY",
-       y = "number of species") +
+  labs(y = "Number of species") +
   scale_fill_manual(values = c("#7E605E",
                                "#8AB573")) +
   theme_bw()
@@ -79,8 +78,7 @@ ggplot(species) +
                  stat ="count",
                  position = "dodge") +
   facet_wrap(vars(site)) +
-  labs(title = "COMMUNITY",
-       y = "number of species") +
+  labs(y = "Number of species") +
   scale_fill_manual(values = c("#7E605E",
                                "#8AB573")) +
   theme_bw()
@@ -99,8 +97,7 @@ traits %>%
   scale_x_discrete(limits = c("ACJ", "TRE", "QUE")) +
   theme_bw() +
   labs(y = "Total no. taxa",
-       x = "Site",
-       title = "Not Trimmed")
+       x = "Site")
 
 ggsave(here(path = "output/number_of_taxa.png"),
        height = 8.3, width = 10,
@@ -149,10 +146,22 @@ density_plots %>%
   scale_colour_manual(name = "Plot",
                       values = colours_site$c,
                       breaks = colours_site$t) +
-  theme_bw() +
   labs(y = "Density",
        x = "Trait Value") +
-  theme(legend.position = "bottom")
+  theme_classic() +
+  theme(legend.position = "bottom",
+        panel.background = element_rect(fill = colorspace::darken("#7E605E", 0.4)),
+        plot.background = element_rect(fill = colorspace::darken("#7E605E", 0.4)),
+        legend.background = element_rect(fill = colorspace::darken("#7E605E", 0.4)),
+        text = element_text(colour = "grey96"),
+        axis.text = element_text(colour = "grey96"),
+        axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.line = element_line(colour = "grey96", size = rel(0.1)),
+        strip.background = element_rect(fill = colorspace::darken("#7E605E", 0.6),
+                                        colour = NA),
+        strip.text = element_text(colour = "grey96"))
 
 ggsave(here(path = "output/traits_density_plots.png"),
        height = 8.3, width = 15,
