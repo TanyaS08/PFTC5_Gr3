@@ -37,7 +37,9 @@ source(here::here(path = "scripts/plotting_aesthetics.R"))
 # Number of indivdiuals traits data were collected for
 #per individual per plot per site per treatment
 
-ggplot(traits) +
+ggplot(traits %>%
+         ungroup() %>%
+         distinct(site, treatment, plot_id, taxon)) +
   geom_histogram(aes(x = site,
                      fill = treatment),
                  stat ="count",
@@ -57,7 +59,8 @@ ggsave(here(path = "output/Number_indivs_per_plot.png"),
 # Number of species
 #species per plot per site per treatment
 
-ggplot(species) +
+ggplot(species %>%
+         distinct(site, treatment, plot_id, taxon)) +
   geom_histogram(aes(x = site,
                      fill = treatment),
                  stat ="count",
@@ -71,17 +74,6 @@ ggplot(species) +
 ggsave(here(path = "output/Number_species_per_plot.png"),
        height = 8.3, width = 10,
        units = "in", dpi = 300)
-
-ggplot(species) +
-  geom_histogram(aes(x = functional_group,
-                     fill = treatment),
-                 stat ="count",
-                 position = "dodge") +
-  facet_wrap(vars(site)) +
-  labs(y = "Number of species") +
-  scale_fill_manual(values = c("#7E605E",
-                               "#8AB573")) +
-  theme_bw()
 
 # N0. species sampled for traits per site and treatment
 
