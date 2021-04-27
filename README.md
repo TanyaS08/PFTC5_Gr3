@@ -6,6 +6,9 @@ Cusco/Wayqecha, Peru - March 2020
 
 **Contact:** dagmar.egelkraut@uib.no
 
+> For repo access contact Tanya either on Slack or shoot her an 
+> email: tanya.strydom@icloud.com
+
 Repository for a proposed manuscript focusing on the effects of fire and 
 elevation on species composition and functional trait in the high 
 Andean moist Puna grasslands. This repository is used to store code 
@@ -32,6 +35,11 @@ datasets to your environment as `traits` (for functional traits) and
 `species` (for community composition) as well as ensuring that you have 
 the most up to date dataset stored on you machine.
 
+> Note if you do call `source(here::here(path = "scripts/0_data_import.R"))` 
+> at the beginning of your script it does mean you will always be using the 
+> most complete/updated dataset if we do end up changing which data we want 
+> to keep or exclude from analyses.
+
 ### Cleaning/filtering the data
 
 The `scripts/0_data_import.R` code will also filter out the the sites 
@@ -49,10 +57,11 @@ sites and treatments form the following years:
 | ACJ  | NB        | 2019 |
 
 
-> ⚠️ Note that `data/` is in the `.gitignore` this means you have to run the data import 
-> script at least once regardless and that anything you export to the data folder will 
-> not be pushed to the repo and others will not be able to use that output unless you tell 
-> them which script to run to source that output.
+> ⚠️ Note that `data/` is in the `.gitignore` this means you have to run 
+> the data import script at least once regardless and that anything you 
+> export to the data folder will not be pushed to the repo and others 
+> will not be able to use that output unless you tell them which script 
+> to run to source that output.
 
 ## Script naming structure
 
@@ -62,6 +71,15 @@ coding workflow should be contained within its own script and should be
 named starting with the subtask number and a brief descriptive name. 
 Scripts should be placed in the `scripts/` folder. This means we can 
 keep track of each task separately.
+
+## Working on subtasks - using pull requests
+
+Ideally each subtask should be on a new branch. This means that each subtask 
+can be turned into a pull request (PR) allowing us to easily see the full 
+commit history for that subtask and also allows subgroup members to request 
+reviews/feedback from each other as well as have conversation threads. PRs can  
+initially be marked as drafts and once ready (i.e. completed) it can be 
+marked as ready for review and then merged into the `master` branch.
 
 ## Data visualisation
 
