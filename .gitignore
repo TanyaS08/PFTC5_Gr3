@@ -24,6 +24,3 @@
 # graphics files
 .bmp
 .tif
-
-# folders
-data/*
