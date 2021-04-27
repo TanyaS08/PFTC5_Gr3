@@ -81,6 +81,9 @@ reviews/feedback from each other as well as have conversation threads. PRs can
 initially be marked as drafts and once ready (i.e. completed) it can be
 marked as ready for review and then merged into the `master` branch.
 
+branches should be named after the subtask code - same for the PR (although this 
+can be a bit more comprehensive/descriptive).
+
 ## Data visualisation
 
 > :construction: still under construction :construction:
