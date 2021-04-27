@@ -49,10 +49,11 @@ get_file(node = "gs8u6",
 traits_raw <- read.csv(file.path("data", "raw", "PFTC3-Puna-PFTC5_Peru_2018-2020_LeafTraits_clean.csv"),
                        header = T,
                        sep = ",") %>%
-  filter(site %in% c("QUE", "TRE") &
+  filter(site %in% c("ACJ", "QUE", "TRE") &
            year == 2020 |
-           site == "ACJ" &
-           year == 2019 |
+           site %in% c("ACJ", "QUE", "TRE") &
+           year %in% c(2019, 2018) &
+           treatment %in% c("C", "NB")|
            site == "QUE" &
            treatment == "B" &
            year == 2019)
@@ -64,10 +65,11 @@ traits_raw <- read.csv(file.path("data", "raw", "PFTC3-Puna-PFTC5_Peru_2018-2020
 species_raw <- read.csv(file.path("data", "raw", "PFTC3-Puna-PFTC5_Peru_2018-2020_CommunityCover_clean.csv"),
                         header = T,
                         sep = ",") %>%
-  filter(site %in% c("QUE", "TRE") &
+  filter(site %in% c("ACJ", "QUE", "TRE") &
            year == 2020 |
-           site == "ACJ" &
-           year == 2019 |
+           site %in% c("ACJ", "QUE", "TRE") &
+           year %in% c(2019, 2018) &
+           treatment %in% c("C", "NB")|
            site == "QUE" &
            treatment == "B" &
            year == 2019)
@@ -89,11 +91,11 @@ traits <- traits_raw %>%
   #Rename 2019 samples to C for QUE
   mutate( 
     treatment = case_when(site == "QUE" & 
-                            year == 2019 ~ "C",
+                            year %in% c(2018, 2019) ~ "C",
                           TRUE ~ treatment)) %>%
   #remove November samples (multiple sampling from 2019 - Puna Project)
-  filter(month != "November",
-         treatment != "B") %>%
+  filter(month != "July") %>%
+  filter(treatment != "B") %>%
   ##REMOVING DUPLICATES FOR INDIVIDUALS
   #group by each individual at each plot for each site & treatment
   group_by(site, treatment, plot_id, taxon, individual_nr, trait) %>%
@@ -113,10 +115,11 @@ species <- species_raw %>%
   #Rename 2019 samples to C for QUE
   mutate( 
     treatment = case_when(site == "QUE" & 
-                            year == 2019 ~ "C",
+                            year %in% c(2018, 2019) ~ "C",
                           TRUE ~ treatment)) %>%
-  filter(month != "November",
-         treatment != "B")
+  #remove November samples (multiple sampling from 2019 - Puna Project)
+  filter(month != "July") %>%
+  filter(treatment != "B") 
 
 #skim(species)
 
