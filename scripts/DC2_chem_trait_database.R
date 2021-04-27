@@ -24,7 +24,8 @@ fam_list =
 BIEN_traits_family = BIEN_trait_traitbyfamily(fam_list,
                                               c("leaf nitrogen content per leaf dry mass",
                                                 "leaf phosphorus content per leaf dry mass", 
-                                                "leaf carbon content per leaf nitrogen content"))
+                                                "leaf carbon content per leaf nitrogen content",
+                                                "leaf carbon content per leaf dry mass"))
 
 anti_join(traits %>%
             ungroup() %>%
@@ -123,10 +124,16 @@ traits_w_chem =
   ) %>%
   rename( c_n = `leaf carbon content per leaf nitrogen content`,
           nitrogen = `leaf nitrogen content per leaf dry mass`,
-          phosphorus = `leaf phosphorus content per leaf dry mass`) %>%
+          phosphorus = `leaf phosphorus content per leaf dry mass`,
+          carbon = `leaf carbon content per leaf dry mass`) %>%
   pivot_longer(cols = c(dry_mass_g, ldmc, leaf_area_cm2, leaf_thickness_mm, plant_height_cm,
-                        sla_cm2_g, wet_mass_g, c_n, nitrogen, phosphorus),
+                        sla_cm2_g, wet_mass_g, c_n, nitrogen, phosphorus, carbon),
                names_to = 'trait',
-               values_to = 'value')
+               values_to = 'value') %>%
+  filter(!is.na(value))
 
 traits = traits_w_chem
+
+#remove unneded dfs
+rm(traits_wide, traits_w_chem, genus_matches,
+   family_matches, spp_matches)
