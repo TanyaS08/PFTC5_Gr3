@@ -63,6 +63,9 @@ named starting with the subtask number and a brief descriptive name.
 Scripts should be placed in the `scripts/` folder. This means we can 
 keep track of each task separately.
 
+Use subtask codes to name branches as well as the PR (although the PR 
+name can be more elaborate).
+
 ## Data visualisation
 
 > :construction: still under construction :construction:
