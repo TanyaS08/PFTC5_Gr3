@@ -134,6 +134,6 @@ traits_w_chem =
 
 traits = traits_w_chem
 
-#remove unneded dfs
+#remove unneeded dfs
 rm(traits_wide, traits_w_chem, genus_matches,
    family_matches, spp_matches)
