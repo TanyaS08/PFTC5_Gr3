@@ -1,4 +1,4 @@
-# **Plant functional trait course 5**
+# README Plant functional trait course 5 - group 3
 
 Cusco/Wayqecha, Peru - March 2020
 
@@ -15,6 +15,14 @@ Andean moist Puna grasslands. This repository is used to store code
 associated with the data analysis portion of the manuscript. The
 proposal can be found [here](https://docs.google.com/document/d/1CN_nDSyvQGwecFTCOalYo6LrnpownpS0l16awSFydFE/edit?usp=sharing)
 
+- [README Plant functional trait course 5 - group 3](#readme-plant-functional-trait-course-5---group-3)
+  - [Downloading and 'cleaning' the data](#downloading-and-cleaning-the-data)
+    - [Downloading data from _osf_](#downloading-data-from-osf)
+    - [Cleaning/filtering the data](#cleaningfiltering-the-data)
+  - [Script naming structure](#script-naming-structure)
+  - [Working on subtasks - using pull requests](#working-on-subtasks---using-pull-requests)
+  - [Data visualisation](#data-visualisation)
+ 
 ## Downloading and 'cleaning' the data
 
 This can be done by running the `scripts/0_data_import.R` file. This will then
