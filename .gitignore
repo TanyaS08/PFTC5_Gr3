@@ -16,11 +16,6 @@
 .DS_Store
 *.DS_Store
 
-# data files
-.xls
-.xlsx
-
-
 # graphics files
 .bmp
 .tif
