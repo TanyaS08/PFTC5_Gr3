@@ -21,6 +21,7 @@ proposal can be found [here](https://docs.google.com/document/d/1CN_nDSyvQGwecFT
     - [Cleaning/filtering the data](#cleaningfiltering-the-data)
   - [Script naming structure](#script-naming-structure)
   - [Working on subtasks - using pull requests](#working-on-subtasks---using-pull-requests)
+    - [DC2 - Placeholder chemical traits data](#dc2---placeholder-chemical-traits-data)
   - [Data visualisation](#data-visualisation)
  
 ## Downloading and 'cleaning' the data
@@ -91,6 +92,25 @@ marked as ready for review and then merged into the `master` branch.
 
 branches should be named after the subtask code - same for the PR (although this 
 can be a bit more comprehensive/descriptive).
+
+### DC2 - Placeholder chemical traits data
+
+Code for scraping and appending chemical traits data to the traits dataset can 
+be found in `scripts/DC2_chem_trait_database.R`. running this script will result 
+in having the `traits` df in your R environment also containing said chemical 
+traits.
+
+We have (thus far) scraped traits data from the BIEN database. Not all traits 
+data are available in BIEN so we do not have any data for N and C isotopes as 
+well as N:P. Of the other chemical traits data we do not have full coverage 
+(even at the family level) for all of the traits. In addition we've used the 
+same trait mean/value across the dataset _i.e._ there is no variation between 
+species/genera/families - mostly because this is placeholder data it seems 
+wasteful to expend energy on trying to generate variation across sites
+
+A quick overview of trait distribution featuring scraped chem traits:
+
+![](https://github.com/TanyaS08/PFTC5_Gr3/blob/DC.2_chemtraits/output/traits_density_plots_w_chem.png?raw=true)
 
 ## Data visualisation
 
