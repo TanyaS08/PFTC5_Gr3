@@ -138,3 +138,65 @@ traits = traits_w_chem
 rm(traits_wide, traits_w_chem, genus_matches,
    family_matches, spp_matches)
 
+density_plots <-
+  traits %>%
+  ungroup() %>%
+  #combine both Site and treatment to one variable
+  unite(
+    #new variable name
+    plot,
+    #cols to combine
+    c(site, treatment),
+    sep = " ", remove = FALSE
+  ) %>%
+  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
+  #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
+  mutate(site = case_when(site == "ACJ" ~ "3 468 m.a.s.l.",
+                          site == "TRE" ~ "3 715 m.a.s.l.",
+                          site == "QUE" ~ "3 888 m.a.s.l"),
+         # Rename traits for labels
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "phosphorus" ~ "Phosphorus~content~(mg/g)",
+                           trait == "nitrogen" ~ "Nitrogen~content~(mg/g)",
+                           trait == "carbon" ~ "Carbon~content~(mg/g)",
+                           trait == "c_n" ~ "Carbon~per~leaf~nitrogen"))
+
+density_plots %>%
+  ggplot() +
+  geom_density_ridges(aes(y = site,
+                          x = value,
+                          fill = plot,
+                          colour = plot),
+                      alpha = 0.6) +
+  facet_wrap(vars(trait),
+             scales = "free_x",
+             labeller = label_parsed) +
+  scale_fill_manual(name = "Plot",
+                    values = colours_site$c,
+                    breaks = colours_site$t) +
+  scale_colour_manual(name = "Plot",
+                      values = colours_site$c,
+                      breaks = colours_site$t) +
+  labs(y = "Density",
+       x = "Trait Value") +
+  theme_classic() +
+  theme(legend.position = "bottom",
+        panel.background = element_rect(fill = colorspace::darken("#7E605E", 0.4)),
+        plot.background = element_rect(fill = colorspace::darken("#7E605E", 0.4)),
+        legend.background = element_rect(fill = colorspace::darken("#7E605E", 0.4)),
+        text = element_text(colour = "grey96"),
+        axis.text = element_text(colour = "grey96"),
+        axis.ticks = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.line = element_line(colour = "grey96", size = rel(0.1)),
+        strip.background = element_rect(fill = colorspace::darken("#7E605E", 0.6),
+                                        colour = NA),
+        strip.text = element_text(colour = "grey96"))
+
+ggsave(here(path = "output/traits_density_plots_w_chem.png"),
+       height = 8.3, width = 15,
+       units = "in", dpi = 300)
