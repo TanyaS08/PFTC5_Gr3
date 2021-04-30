@@ -151,28 +151,44 @@ rm(traits_wide, traits_w_chem, genus_matches,
 
 dir.create("data/processed")
 
-traits_w_chem %>%
+missing_traits = 
+  traits_w_chem %>%
   filter(is.na(value) & 
            trait %in% c("carbon", "c_n", "nitrogen", "phosphorus")) %>%
   ungroup() %>%
-  distinct(family, genus, taxon, trait) %>%
-  mutate(trait = case_when(trait == "c_n" ~ "leaf carbon content per leaf nitrogen content",
-                           trait == "nitrogen" ~ "leaf nitrogen content per leaf dry mass",
-                           trait == "phosphorus" ~ "leaf phosphorus content per leaf dry mass",
-                           trait == "carbon" ~ "leaf carbon content per leaf dry mass")) %>%
+  distinct(taxon, trait) %>%
+  mutate(trait = case_when(trait == "c_n" ~ "146",
+                           trait == "nitrogen" ~ "50",
+                           trait == "phosphorus" ~ "15",
+                           trait == "carbon" ~ "13")) %>%
   rbind(traits_w_chem %>%
           ungroup() %>%
-          distinct(family, genus, taxon) %>%
-          mutate(trait = "leaf phosphorus content per leaf nitrogen content")) %>%
+          distinct(taxon) %>%
+          mutate(trait = "151")) %>% #C:P
   rbind(traits_w_chem %>%
           ungroup() %>%
-          distinct(family, genus, taxon) %>%
-          mutate(trait = "N15 isotope")) %>%
+          distinct(taxon) %>%
+          mutate(trait = "78")) %>% #N isotope
   rbind(traits_w_chem %>%
           ungroup() %>%
-          distinct(family, genus, taxon) %>%
-          mutate(trait = "C13 isotope")) %>%
-  write.csv("data/processed/TRY_needed_traits.csv")
+          distinct(taxon) %>%
+          mutate(trait = "89")) #C isotope
+
+write.csv(missing_traits,
+          "data/processed/TRY_spp_list_with_id.csv")
+
+### TRY get IDs ----
+
+TRY_spp = read.delim("data/Try_Species.txt")
+
+left_join(missing_traits %>%
+            #rename to match with TRY col name
+            rename(AccSpeciesName = taxon),
+          TRY_spp) %>%
+  rename(TraitID = trait) %>%
+  filter(!is.na(AccSpeciesID)) %>%
+  distinct(AccSpeciesID) %>%
+  pull()
 
 
 ### Bonus plot ----
