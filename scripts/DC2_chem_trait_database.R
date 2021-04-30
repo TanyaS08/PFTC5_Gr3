@@ -15,6 +15,7 @@ library(BIEN)
 
 #get family list & BIEN records
 
+#List of families if df - BIEN puls from famil downwards so we get spp, genus and fam
 fam_list = 
   traits %>%
   ungroup() %>%
@@ -35,6 +36,7 @@ anti_join(traits %>%
 
 # "Eriocaulaceae" "Euphobiaceae" <- no matches in BIEN
 
+#pulls species we have matches for
 spp_matches =
   inner_join(traits %>%
                ungroup() %>%
@@ -43,9 +45,11 @@ spp_matches =
              by = c('taxon' = 'scrubbed_species_binomial')) %>%
   select(-c(url_source,project_pi, project_pi_contact, access, id, unit, method)) %>%
   mutate(match_level = rep("species", nrow(.))) %>%
+  #rename to make joining easier later
   rename(family = scrubbed_family,
          genus = scrubbed_genus)
 
+#pulls genera we have matches for
 genus_matches = 
   inner_join(traits %>%
                ungroup() %>%
@@ -58,9 +62,11 @@ genus_matches =
   anti_join(.,
             spp_matches,
             by = c("scrubbed_family" = "family", "trait_name")) %>%
+  #rename to make joining easier later
   rename(family = scrubbed_family,
          taxon = scrubbed_species_binomial)
 
+#pulls families we have matches for
 family_matches = 
   inner_join(traits %>%
                ungroup() %>%
@@ -73,12 +79,14 @@ family_matches =
   anti_join(.,
             genus_matches,
             by = c("family", "trait_name")) %>%
+  #rename to make joining easier later
   rename(taxon = scrubbed_species_binomial,
          genus = scrubbed_genus)
 
 
 ### Adding chem traits to morpho traits ----
 
+#easier if traits are in wide format then we can do a simple join_by
 traits_wide = 
   traits %>%
   pivot_wider(id_cols = -c(trait,value),
@@ -122,7 +130,7 @@ traits_w_chem =
                              values_fill = NA),
                by = c('taxon'))
   ) %>%
-  rename( c_n = `leaf carbon content per leaf nitrogen content`,
+  rename(c_n = `leaf carbon content per leaf nitrogen content`,
           nitrogen = `leaf nitrogen content per leaf dry mass`,
           phosphorus = `leaf phosphorus content per leaf dry mass`,
           carbon = `leaf carbon content per leaf dry mass`) %>%
