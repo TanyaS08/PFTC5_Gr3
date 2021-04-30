@@ -20,6 +20,8 @@
 .xls
 .xlsx
 
+# folders
+data/raw
 
 # graphics files
 .bmp
