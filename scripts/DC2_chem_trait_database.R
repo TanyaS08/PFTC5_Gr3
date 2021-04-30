@@ -129,14 +129,45 @@ traits_w_chem =
   pivot_longer(cols = c(dry_mass_g, ldmc, leaf_area_cm2, leaf_thickness_mm, plant_height_cm,
                         sla_cm2_g, wet_mass_g, c_n, nitrogen, phosphorus, carbon),
                names_to = 'trait',
-               values_to = 'value') %>%
-  filter(!is.na(value))
+               values_to = 'value')
 
-traits = traits_w_chem
+traits = traits_w_chem %>%
+  filter(!is.na(value))
 
 #remove unneeded dfs
 rm(traits_wide, traits_w_chem, genus_matches,
-   family_matches, spp_matches)
+   family_matches, spp_matches, BIEN_traits_family)
+
+
+### Missing traits ----
+
+dir.create("data/processed")
+
+traits_w_chem %>%
+  filter(is.na(value) & 
+           trait %in% c("carbon", "c_n", "nitrogen", "phosphorus")) %>%
+  ungroup() %>%
+  distinct(family, genus, taxon, trait) %>%
+  mutate(trait = case_when(trait == "c_n" ~ "leaf carbon content per leaf nitrogen content",
+                           trait == "nitrogen" ~ "leaf nitrogen content per leaf dry mass",
+                           trait == "phosphorus" ~ "leaf phosphorus content per leaf dry mass",
+                           trait == "carbon" ~ "leaf carbon content per leaf dry mass")) %>%
+  rbind(traits_w_chem %>%
+          ungroup() %>%
+          distinct(family, genus, taxon) %>%
+          mutate(trait = "leaf phosphorus content per leaf nitrogen content")) %>%
+  rbind(traits_w_chem %>%
+          ungroup() %>%
+          distinct(family, genus, taxon) %>%
+          mutate(trait = "N15 isotope")) %>%
+  rbind(traits_w_chem %>%
+          ungroup() %>%
+          distinct(family, genus, taxon) %>%
+          mutate(trait = "C13 isotope")) %>%
+  write.csv("data/processed/TRY_needed_traits.csv")
+
+
+### Bonus plot ----
 
 density_plots <-
   traits %>%
