@@ -45,7 +45,8 @@ ggplot(traits%>%
         text = element_text(colour = "grey96"),
         strip.background = element_rect(fill = colorspace::darken("#7E605E", 0.6),
                                         colour = NA),
-        strip.text = element_text(colour = "grey96"))
+        strip.text = element_text(colour = "grey96")) +
+  labs(title = "Its a circle")
 
 ggsave(here(path = "output/aRt.png"),
        height = 15.5, width = 15,
