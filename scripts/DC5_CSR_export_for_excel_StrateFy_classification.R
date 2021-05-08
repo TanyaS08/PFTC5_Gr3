@@ -59,4 +59,4 @@ summary_trait_species$mean_LA_mm2 <- (summary_trait_species$mean_LA_cm2*100) #co
 summary_trait_species$mean_LDMC_pc <- (summary_trait_species$mean_LDMC*100) # to %
 summary_trait_species$mean__SLA_mm2_mg <- (summary_trait_species$mean_SLA_cm2_g/10) # cm2/g to mm2/mg
 
-write.csv(summary_trait_species, file = "data/CSR_traits_input_taxon.csv")
+write.csv(summary_trait_species, file = "data/CSR/CSR_traits_input_taxon.csv")
