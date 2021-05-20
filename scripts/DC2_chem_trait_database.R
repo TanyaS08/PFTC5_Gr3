@@ -95,18 +95,12 @@ family_matches =
 
 ### Adding chem traits to morpho traits ----
 
-#easier if traits are in wide format then we can do a simple join_by
-traits_wide = 
-  traits %>%
-  pivot_wider(id_cols = -c(trait,value),
-              names_from = trait,
-              values_from = value,
-              values_fill = NA)
-
-traits_w_chem = 
+traits_BIEN = 
   rbind(
     # add genus level traits
-    right_join(traits_wide,
+    right_join(traits %>%
+                 ungroup() %>%
+                 select(-c(trait, value)),
                genus_matches %>%
                  group_by(trait_name, genus) %>%
                  summarise(mean_trait = mean(as.numeric(trait_value))) %>%
@@ -117,7 +111,9 @@ traits_w_chem =
                              values_fill = NA),
                by = 'genus'),
     # add genus level traits
-    right_join(traits_wide,
+    right_join(traits %>%
+                 ungroup() %>%
+                 select(-c(trait, value)),
                family_matches %>%
                  group_by(trait_name, family) %>%
                  summarise(mean_trait = mean(as.numeric(trait_value))) %>%
@@ -128,7 +124,9 @@ traits_w_chem =
                              values_fill = NA),
                by = 'family'),
     #add spp level traits
-    right_join(traits_wide,
+    right_join(traits %>%
+                 ungroup() %>%
+                 select(-c(trait, value)),
                spp_matches %>%
                  group_by(trait_name, taxon) %>%
                  summarise(mean_trait = mean(as.numeric(trait_value))) %>%
@@ -141,67 +139,147 @@ traits_w_chem =
                by = c('taxon'))
   ) %>%
   rename(c_n = `leaf carbon content per leaf nitrogen content`,
-          nitrogen = `leaf nitrogen content per leaf dry mass`,
-          phosphorus = `leaf phosphorus content per leaf dry mass`,
-          carbon = `leaf carbon content per leaf dry mass`) %>%
-  pivot_longer(cols = c(dry_mass_g, ldmc, leaf_area_cm2, leaf_thickness_mm, plant_height_cm,
-                        sla_cm2_g, wet_mass_g, c_n, nitrogen, phosphorus, carbon),
+         nitrogen = `leaf nitrogen content per leaf dry mass`,
+         phosphorus = `leaf phosphorus content per leaf dry mass`,
+         carbon = `leaf carbon content per leaf dry mass`) %>%
+  pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon),
                names_to = 'trait',
-               values_to = 'value')
-
-traits = traits_w_chem %>%
+               values_to = 'value') %>%
+  group_by(year, season, month, site, treatment, plot_id, individual_nr,
+           id, functional_group, family, taxon, genus, species, burn_year, elevation,
+           latitude, longitude, course, trait) %>%
+  summarise(value = mean(value)) %>%
   filter(!is.na(value))
 
+### Missing traits - list to send to TRY ----
+
+# dir.create("data/processed")
+# 
+# missing_traits = 
+#   traits_w_chem %>%
+#   filter(is.na(value) & 
+#            trait %in% c("carbon", "c_n", "nitrogen", "phosphorus")) %>%
+#   ungroup() %>%
+#   distinct(taxon, trait) %>%
+#   mutate(trait = case_when(trait == "c_n" ~ "146",
+#                            trait == "nitrogen" ~ "50",
+#                            trait == "phosphorus" ~ "15",
+#                            trait == "carbon" ~ "13")) %>%
+#   rbind(traits_w_chem %>%
+#           ungroup() %>%
+#           distinct(taxon) %>%
+#           mutate(trait = "151")) %>% #C:P
+#   rbind(traits_w_chem %>%
+#           ungroup() %>%
+#           distinct(taxon) %>%
+#           mutate(trait = "78")) %>% #N isotope
+#   rbind(traits_w_chem %>%
+#           ungroup() %>%
+#           distinct(taxon) %>%
+#           mutate(trait = "89")) #C isotope
+# 
+# write.csv(missing_traits,
+#           "data/processed/TRY_spp_list_with_id.csv")
+# 
+# missing_traits %>%
+#   distinct(trait)
+# 
+# ### TRY get IDs ----
+# 
+# TRY_spp = read.delim("data/TRY/TRY_Species.txt")
+# 
+# left_join(missing_traits %>%
+#             #rename to match with TRY col name
+#             rename(AccSpeciesName = taxon),
+#           TRY_spp) %>%
+#   rename(TraitID = trait) %>%
+#   filter(!is.na(AccSpeciesID)) %>%
+#   distinct(AccSpeciesID) %>%
+#   pull()
+
+### Adding TRY data ----
+
+TRY_data = 
+  read.delim("data/TRY/TRY_Data.txt") %>%
+  filter(!is.na(TraitID)) %>%
+  select(SpeciesName, TraitName, StdValue) %>%
+  rename(taxon = SpeciesName,
+         trait = TraitName,
+         value = StdValue) %>%
+  mutate(trait = case_when(trait == "Leaf nitrogen (N) content per leaf area" ~ 
+                             "nitrogen",
+                           trait == "Leaf phosphorus (P) content per leaf dry mass" ~
+                             "phosphorus",
+                           trait == "Leaf carbon (C) content per leaf dry mass" ~
+                             "carbon",
+                           trait == "Leaf carbon/nitrogen (C/N) ratio" ~ 
+                             "c_n",
+                           trait == "Leaf carbon (C) isotope signature (delta 13C)" ~
+                             "delta_13C"),
+         taxon = case_when(taxon == "Lycopodium clavatum  L." ~
+                             "Lycopodium clavatum",
+                           taxon == "Lycopodium clavatum L." ~
+                             "Lycopodium clavatum",
+                           TRUE ~ taxon)) %>%
+  separate(taxon,
+           into = c("genus", "species"),
+           sep = "\\s", 2,
+           remove = FALSE,
+           # keeps cf. and species taxon together
+           extra = "merge")
+
+# add to trait df
+
+
+traits_TRY = 
+  rbind(right_join(traits %>%
+                     ungroup() %>%
+                     select(-c(trait, value)),
+                   TRY_data %>%
+                     group_by(genus, trait)  %>%
+                     summarise(mean_trait = mean(as.numeric(value))) %>%
+                     ungroup() %>%
+                     pivot_wider(id_cols = -c(trait, mean_trait),
+                                 names_from = trait,
+                                 values_from = mean_trait,
+                                 values_fill = NA),
+                   by = 'genus'),
+        right_join(traits %>%
+                     ungroup() %>%
+                     select(-c(trait, value)),
+                   TRY_data %>%
+                     group_by(taxon, trait)  %>%
+                     summarise(mean_trait = mean(as.numeric(value))) %>%
+                     ungroup() %>%
+                     pivot_wider(id_cols = -c(trait, mean_trait),
+                                 names_from = trait,
+                                 values_from = mean_trait,
+                                 values_fill = NA),
+                   by = 'taxon')) %>%
+  pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon, delta_13C),
+               names_to = 'trait',
+               values_to = 'value') %>%
+  group_by(year, season, month, site, treatment, plot_id, individual_nr,
+           id, functional_group, family, taxon, genus, species, burn_year, elevation,
+           latitude, longitude, course, trait) %>%
+  summarise(value = mean(value)) %>%
+  filter(!is.na(value))
+
+
+
+### Renames and env. clean ----
+
+traits = traits %>%
+  rbind(.,
+        traits_TRY,
+        traits_BIEN)
+
+
 #remove unneeded dfs
-rm(traits_wide, traits_w_chem, genus_matches,
-   family_matches, spp_matches, BIEN_traits_family)
+rm(traits_BIEN, traits_TRY, genus_matches,
+   family_matches, spp_matches, BIEN_traits_family,
+   TRY_data, fam_list)
 
-
-### Missing traits ----
-
-dir.create("data/processed")
-
-missing_traits = 
-  traits_w_chem %>%
-  filter(is.na(value) & 
-           trait %in% c("carbon", "c_n", "nitrogen", "phosphorus")) %>%
-  ungroup() %>%
-  distinct(taxon, trait) %>%
-  mutate(trait = case_when(trait == "c_n" ~ "146",
-                           trait == "nitrogen" ~ "50",
-                           trait == "phosphorus" ~ "15",
-                           trait == "carbon" ~ "13")) %>%
-  rbind(traits_w_chem %>%
-          ungroup() %>%
-          distinct(taxon) %>%
-          mutate(trait = "151")) %>% #C:P
-  rbind(traits_w_chem %>%
-          ungroup() %>%
-          distinct(taxon) %>%
-          mutate(trait = "78")) %>% #N isotope
-  rbind(traits_w_chem %>%
-          ungroup() %>%
-          distinct(taxon) %>%
-          mutate(trait = "89")) #C isotope
-
-write.csv(missing_traits,
-          "data/processed/TRY_spp_list_with_id.csv")
-
-missing_traits %>%
-  distinct(trait)
-
-### TRY get IDs ----
-
-TRY_spp = read.delim("data/Try_Species.txt")
-
-left_join(missing_traits %>%
-            #rename to match with TRY col name
-            rename(AccSpeciesName = taxon),
-          TRY_spp) %>%
-  rename(TraitID = trait) %>%
-  filter(!is.na(AccSpeciesID)) %>%
-  distinct(AccSpeciesID) %>%
-  pull()
 
 
 ### Bonus plot ----
@@ -230,7 +308,10 @@ density_plots <-
                            trait == "phosphorus" ~ "Phosphorus~content~(mg/g)",
                            trait == "nitrogen" ~ "Nitrogen~content~(mg/g)",
                            trait == "carbon" ~ "Carbon~content~(mg/g)",
-                           trait == "c_n" ~ "Carbon~per~leaf~nitrogen"))
+                           trait == "c_n" ~ "Carbon~per~leaf~nitrogen",
+                           trait == "delta_13C" ~ "delta~C[13]"))
+
+library(ggridges)
 
 density_plots %>%
   ggplot() +
