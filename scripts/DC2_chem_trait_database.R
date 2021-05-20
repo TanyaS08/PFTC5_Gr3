@@ -93,12 +93,12 @@ family_matches =
          genus = scrubbed_genus)
 
 
-### Adding chem traits to morpho traits ----
+### Adding BIEN traits ----
 
-traits_BIEN = 
+traits_ BIEN = 
   rbind(
     # add genus level traits
-    right_join(traits %>%
+    left_join(traits %>%
                  ungroup() %>%
                  select(-c(trait, value)),
                genus_matches %>%
@@ -111,7 +111,7 @@ traits_BIEN =
                              values_fill = NA),
                by = 'genus'),
     # add genus level traits
-    right_join(traits %>%
+    left_join(traits %>%
                  ungroup() %>%
                  select(-c(trait, value)),
                family_matches %>%
@@ -124,7 +124,7 @@ traits_BIEN =
                              values_fill = NA),
                by = 'family'),
     #add spp level traits
-    right_join(traits %>%
+    left_join(traits %>%
                  ungroup() %>%
                  select(-c(trait, value)),
                spp_matches %>%
@@ -145,11 +145,7 @@ traits_BIEN =
   pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon),
                names_to = 'trait',
                values_to = 'value') %>%
-  group_by(year, season, month, site, treatment, plot_id, individual_nr,
-           id, functional_group, family, taxon, genus, species, burn_year, elevation,
-           latitude, longitude, course, trait) %>%
-  summarise(value = mean(value)) %>%
-  filter(!is.na(value))
+  mutate(value = replace_na(value, 0.5))
 
 ### Missing traits - list to send to TRY ----
 
@@ -259,11 +255,7 @@ traits_TRY =
   pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon, delta_13C),
                names_to = 'trait',
                values_to = 'value') %>%
-  group_by(year, season, month, site, treatment, plot_id, individual_nr,
-           id, functional_group, family, taxon, genus, species, burn_year, elevation,
-           latitude, longitude, course, trait) %>%
-  summarise(value = mean(value)) %>%
-  filter(!is.na(value))
+  mutate(value = replace_na(value, 0.5))
 
 
 
@@ -272,7 +264,12 @@ traits_TRY =
 traits = traits %>%
   rbind(.,
         traits_TRY,
-        traits_BIEN)
+        traits_BIEN)  %>%
+  #'remove' any potential duplicates by averaging
+  group_by(year, season, month, site, treatment, plot_id, individual_nr,
+           id, functional_group, family, taxon, genus, species, burn_year, elevation,
+           latitude, longitude, course, trait) %>%
+  summarise(value = mean(value, na.rm = TRUE))
 
 
 #remove unneeded dfs
