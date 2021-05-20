@@ -13,6 +13,16 @@ library(BIEN)
 
 ### Data Wrangling ----
 
+traits = 
+  traits %>%
+  ungroup() %>%
+  separate(taxon,
+           into = c("genus", "species"),
+           sep = "\\s", 2,
+           remove = FALSE,
+           # keeps cf. and species taxon together
+           extra = "merge")
+
 #get family list & BIEN records
 
 #List of families if df - BIEN puls from famil downwards so we get spp, genus and fam
@@ -52,7 +62,6 @@ spp_matches =
 #pulls genera we have matches for
 genus_matches = 
   inner_join(traits %>%
-               ungroup() %>%
                distinct(genus),
              BIEN_traits_family,
              by = c('genus' = 'scrubbed_genus')) %>%
@@ -127,7 +136,8 @@ traits_w_chem =
                  pivot_wider(id_cols = -c(trait_name, mean_trait),
                              names_from = trait_name,
                              values_from = mean_trait,
-                             values_fill = NA),
+                             values_fill = NA) %>%
+                 mutate(`leaf carbon content per leaf nitrogen content` = NA),
                by = c('taxon'))
   ) %>%
   rename(c_n = `leaf carbon content per leaf nitrogen content`,
@@ -176,6 +186,9 @@ missing_traits =
 
 write.csv(missing_traits,
           "data/processed/TRY_spp_list_with_id.csv")
+
+missing_traits %>%
+  distinct(trait)
 
 ### TRY get IDs ----
 
