@@ -100,9 +100,9 @@ be found in `scripts/DC2_chem_trait_database.R`. running this script will result
 in having the `traits` df in your R environment also containing said chemical 
 traits.
 
-We have (thus far) scraped traits data from the BIEN database. Not all traits 
-data are available in BIEN so we do not have any data for N and C isotopes as 
-well as N:P. Of the other chemical traits data we do not have full coverage 
+We have scraped traits data from the BIEN database and TRY. Not all traits 
+data are available in BIEN and/or TRY so we do not have any data for N<sub>15</sub> 
+isotopes as well as N:P. Of the other chemical traits data we do not have full coverage 
 (even at the family level) for all of the traits. In addition we've used the 
 same trait mean/value across the dataset _i.e._ there is no variation between 
 species/genera/families - mostly because this is placeholder data it seems 
