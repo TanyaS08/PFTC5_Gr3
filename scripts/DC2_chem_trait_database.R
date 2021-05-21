@@ -95,7 +95,7 @@ family_matches =
 
 ### Adding BIEN traits ----
 
-traits_ BIEN = 
+traits_BIEN = 
   rbind(
     # add genus level traits
     left_join(traits %>%
@@ -144,8 +144,7 @@ traits_ BIEN =
          carbon = `leaf carbon content per leaf dry mass`) %>%
   pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon),
                names_to = 'trait',
-               values_to = 'value') %>%
-  mutate(value = replace_na(value, 0.5))
+               values_to = 'value')
 
 ### Missing traits - list to send to TRY ----
 
@@ -254,35 +253,39 @@ traits_TRY =
                    by = 'taxon')) %>%
   pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon, delta_13C),
                names_to = 'trait',
-               values_to = 'value') %>%
-  mutate(value = replace_na(value, 0.5))
+               values_to = 'value')
 
 
 
 ### Renames and env. clean ----
 
-traits = traits %>%
+traits2 = traits %>%
   rbind(.,
         traits_TRY,
         traits_BIEN)  %>%
+  filter(!is.na(year)) %>%
   #'remove' any potential duplicates by averaging
   group_by(year, season, month, site, treatment, plot_id, individual_nr,
            id, functional_group, family, taxon, genus, species, burn_year, elevation,
            latitude, longitude, course, trait) %>%
-  summarise(value = mean(value, na.rm = TRUE))
-
+  summarise(value = mean(value, na.rm = TRUE)) %>%
+  group_by(trait, site) %>%
+  mutate(value = coalesce(value,
+                           rnorm(n(), 
+                                 mean(value, na.rm = T),
+                                 1)))
 
 #remove unneeded dfs
-rm(traits_BIEN, traits_TRY, genus_matches,
-   family_matches, spp_matches, BIEN_traits_family,
-   TRY_data, fam_list)
+# rm(traits_BIEN, traits_TRY, genus_matches,
+#    family_matches, spp_matches, BIEN_traits_family,
+#    TRY_data, fam_list)
 
 
 
 ### Bonus plot ----
 
 density_plots <-
-  traits %>%
+  traits2 %>%
   ungroup() %>%
   #combine both Site and treatment to one variable
   unite(
