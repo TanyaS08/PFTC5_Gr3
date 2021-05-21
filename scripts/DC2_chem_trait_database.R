@@ -266,7 +266,7 @@ traits_TRY =
 
 ### Renames and env. clean ----
 
-traits2 = traits %>%
+traits = traits %>%
   rbind(.,
         traits_TRY,
         traits_BIEN)  %>%
@@ -284,16 +284,16 @@ traits2 = traits %>%
                                  1)))
 
 #remove unneeded dfs
-# rm(traits_BIEN, traits_TRY, genus_matches,
-#    family_matches, spp_matches, BIEN_traits_family,
-#    TRY_data, fam_list)
+rm(traits_BIEN, traits_TRY, genus_matches,
+   family_matches, spp_matches, BIEN_traits_family,
+   TRY_data, fam_list)
 
 
 
 ### Bonus plot ----
 
 density_plots <-
-  traits2 %>%
+  traits %>%
   ungroup() %>%
   #combine both Site and treatment to one variable
   unite(
