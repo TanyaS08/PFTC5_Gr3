@@ -227,7 +227,7 @@ TRY_data =
 
 
 traits_TRY = 
-  rbind(right_join(traits %>%
+  rbind(left_join(traits %>%
                      ungroup() %>%
                      select(-c(trait, value)),
                    TRY_data %>%
@@ -239,7 +239,7 @@ traits_TRY =
                                  values_from = mean_trait,
                                  values_fill = NA),
                    by = 'genus'),
-        right_join(traits %>%
+        left_join(traits %>%
                      ungroup() %>%
                      select(-c(trait, value)),
                    TRY_data %>%
@@ -251,7 +251,14 @@ traits_TRY =
                                  values_from = mean_trait,
                                  values_fill = NA),
                    by = 'taxon')) %>%
-  pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon, delta_13C),
+  # add C:P and denta_N15 as new variables with dummy values
+  mutate(c_p = rnorm(n(),
+                     13,
+                     1),
+         delta_15N = rnorm(n(),
+                     -26,
+                     1)) %>%
+  pivot_longer(cols = c(c_n, nitrogen, phosphorus, carbon, delta_13C, c_p, delta_15N),
                names_to = 'trait',
                values_to = 'value')
 
@@ -270,6 +277,7 @@ traits2 = traits %>%
            latitude, longitude, course, trait) %>%
   summarise(value = mean(value, na.rm = TRUE)) %>%
   group_by(trait, site) %>%
+  # repalce NAs with a sample from rnorm for traot mean
   mutate(value = coalesce(value,
                            rnorm(n(), 
                                  mean(value, na.rm = T),
@@ -309,7 +317,9 @@ density_plots <-
                            trait == "nitrogen" ~ "Nitrogen~content~(mg/g)",
                            trait == "carbon" ~ "Carbon~content~(mg/g)",
                            trait == "c_n" ~ "Carbon~per~leaf~nitrogen",
-                           trait == "delta_13C" ~ "delta~C[13]"))
+                           trait == "delta_13C" ~ "delta~C[13]",
+                           trait == "c_p" ~ "Carbon~per~leaf~phosphorous",
+                           trait == "delta_15N" ~ "delta~N[15]"))
 
 library(ggridges)
 
