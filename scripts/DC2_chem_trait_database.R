@@ -174,7 +174,7 @@ traits_BIEN =
 #           mutate(trait = "89")) #C isotope
 # 
 # write.csv(missing_traits,
-#           "data/processed/TRY_spp_list_with_id.csv")
+#           "data/TRY/TRY_spp_list_with_id.csv")
 # 
 # missing_traits %>%
 #   distinct(trait)
@@ -288,7 +288,11 @@ rm(traits_BIEN, traits_TRY, genus_matches,
    family_matches, spp_matches, BIEN_traits_family,
    TRY_data, fam_list)
 
+# save dataframe to data/processed
 
+dir.create("data/processed")
+write.csv(traits,
+          "data/processed/LeafTraits_placeholder_chem.csv")
 
 ### Bonus plot ----
 
