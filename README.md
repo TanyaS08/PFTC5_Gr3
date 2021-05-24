@@ -23,7 +23,7 @@ proposal can be found [here](https://docs.google.com/document/d/1CN_nDSyvQGwecFT
   - [Working on subtasks - using pull requests](#working-on-subtasks---using-pull-requests)
     - [DC2 - Placeholder chemical traits data](#dc2---placeholder-chemical-traits-data)
   - [Data visualisation](#data-visualisation)
- 
+
 ## Downloading and 'cleaning' the data
 
 This can be done by running the `scripts/0_data_import.R` file. This will then
@@ -43,6 +43,12 @@ beginning of your script. which will also add the two cleaned/filtered
 datasets to your environment as `traits` (for functional traits) and
 `species` (for community composition) as well as ensuring that you have
 the most up to date dataset stored on you machine.
+
+:rocket: **RELEASE NOTE** calling
+`source(here::here(path = "scripts/0_data_import.R"))` now also incorporates
+the CSR traits as well as temporary chemical traits. This will be updated in
+such a way that when we get the new chemical traits data it should all
+seamlessly integrate and none of the scripts should break...
 
 > Note if you do call `source(here::here(path = "scripts/0_data_import.R"))`
 > at the beginning of your script it does mean you will always be using the
@@ -90,22 +96,22 @@ reviews/feedback from each other as well as have conversation threads. PRs can
 initially be marked as drafts and once ready (i.e. completed) it can be
 marked as ready for review and then merged into the `master` branch.
 
-branches should be named after the subtask code - same for the PR (although this 
+branches should be named after the subtask code - same for the PR (although this
 can be a bit more comprehensive/descriptive).
 
 ### DC2 - Placeholder chemical traits data
 
-Code for scraping and appending chemical traits data to the traits dataset can 
-be found in `scripts/DC2_chem_trait_database.R`. running this script will result 
-in having the `traits` df in your R environment also containing said chemical 
+Code for scraping and appending chemical traits data to the traits dataset can
+be found in `scripts/DC2_chem_trait_database.R`. running this script will result
+in having the `traits` df in your R environment also containing said chemical
 traits.
 
-We have scraped traits data from the BIEN database and TRY. Not all traits 
-data are available in BIEN and/or TRY so we do not have any data for N<sub>15</sub> 
-isotopes as well as N:P. Of the other chemical traits data we do not have full coverage 
-(even at the family level) for all of the traits. In addition we've used the 
-same trait mean/value across the dataset _i.e._ there is no variation between 
-species/genera/families - mostly because this is placeholder data it seems 
+We have scraped traits data from the BIEN database and TRY. Not all traits
+data are available in BIEN and/or TRY so we do not have any data for N<sub>15</sub>
+isotopes as well as N:P. Of the other chemical traits data we do not have full coverage
+(even at the family level) for all of the traits. In addition we've used the
+same trait mean/value across the dataset _i.e._ there is no variation between
+species/genera/families - mostly because this is placeholder data it seems
 wasteful to expend energy on trying to generate variation across sites
 
 A quick overview of trait distribution featuring scraped chem traits:
@@ -116,7 +122,7 @@ A quick overview of trait distribution featuring scraped chem traits:
 
 > :construction: still under construction :construction:
 
-The idea is to centralise and standardise plotting themes and colour 
+The idea is to centralise and standardise plotting themes and colour
 palettes using `scripts/plotting_aesthetics.R`. This script will call a
 custom `{ggplot2}` theme that you can call at the end of your plotting
 code chunk that will standardise aesthetics across the board. You will
