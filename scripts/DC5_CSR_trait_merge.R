@@ -40,4 +40,4 @@ traits_csr <- left_join(traits_wide, csr_taxon_subset, by="taxon") %>%
                values_to = 'value')
 
 dir.create("data/processed")
-write.csv(traits_csr, file = "data/processed/traits_csr_wide.csv")
+write.csv(traits_csr, file = "data/processed/LeafTraits_CSR.csv")
