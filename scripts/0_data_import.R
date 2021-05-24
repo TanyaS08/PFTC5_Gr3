@@ -58,8 +58,6 @@ traits_raw <- read.csv(file.path("data", "raw", "PFTC3-Puna-PFTC5_Peru_2018-2020
            treatment == "B" &
            year == 2019)
 
-#skim(traits_raw)
-
 ### >> b) Community data ----
 
 species_raw <- read.csv(file.path("data", "raw", "PFTC3-Puna-PFTC5_Peru_2018-2020_CommunityCover_clean.csv"),
@@ -76,11 +74,6 @@ species_raw <- read.csv(file.path("data", "raw", "PFTC3-Puna-PFTC5_Peru_2018-202
 
 
 #' This is where the 2020 Community data lives
-#' but for record purposes keeping the 'legacy' link
-#' 
-#write.csv(gsheet2tbl("https://drive.google.com/file/d/1bfVdxXOCxcejbRDzEUEovI4OlHoX3BjA/view?usp=sharing") , 
-#          file = here(path = "data/raw/community/PFTC5_2020_CommunityCover_raw.csv"), 
-#          row.names = FALSE)
 
 ### 2) Data filtering ----
 
@@ -104,10 +97,6 @@ traits <- traits_raw %>%
   #keep only the first record for each individual
   slice_head()
 
-# check again
-#skim(traits)
-
-
 ### >> b) Community data ----
 
 #Combine species datasets
@@ -121,10 +110,21 @@ species <- species_raw %>%
   filter(month != "July") %>%
   filter(treatment != "B") 
 
-#skim(species)
-
 #remove raw files
 rm('traits_raw',
    'species_raw')
+
+### 3) supplementary data to add ----
+
+traits = 
+  #traits %>%
+  read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
+  select(-X) %>%
+  full_join(read.csv("data/processed/LeafTraits_CSR.csv") %>%
+              select(-c(X, trait, value))) %>%
+  distinct(year, season, month, site, treatment, plot_id, 
+           individual_nr, id, functional_group, family, taxon, 
+           burn_year, elevation, latitude, longitude, course,
+           trait, value)
 
 # End of script ----
