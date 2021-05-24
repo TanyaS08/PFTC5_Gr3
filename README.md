@@ -118,6 +118,14 @@ A quick overview of trait distribution featuring scraped chem traits:
 
 ![](https://github.com/TanyaS08/PFTC5_Gr3/blob/DC.2_chemtraits/output/traits_density_plots_w_chem.png?raw=true)
 
+### DC5 - Placeholder chemical traits data
+
+CSR scores were calcualted for each individual based using StrateFY. This process
+is not automated so the output is saved in `data/processed/` and has been appended
+to the original leaf traits dataset. it has also been integrated into
+`scripts/0_data_import.R` so calling that script will autmatically 'add' the CSR
+traits to the `traits` df to your environment
+
 ## Data visualisation
 
 > :construction: still under construction :construction:
