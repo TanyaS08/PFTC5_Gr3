@@ -167,9 +167,6 @@ ggsave(here(path = "output/traits_density_plots.png"),
 
 ### >> Appendix 1) The case of the missing data----
 
-traits_raw %>%
-  filter(is.na(functional_group))
-
 traits %>%
   ungroup() %>%
   filter(

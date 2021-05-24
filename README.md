@@ -62,14 +62,14 @@ relevant for our analyses. AS we are downloading the _entire_ Puna
 dataset form _osf_ we need to filter the data so that we have the following
 sites and treatments form the following years:
 
-| Site | Treatment | Year |
-| :----| :-------- | :--- |
-| QUE  | C         | 2019 |
-| QUE  | NB        | 2020 |
-| TRE  | C         | 2020 |
-| TRE  | NB        | 2020 |
-| ACJ  | C         | 2019 |
-| ACJ  | NB        | 2019 |
+| Site | Treatment | Year             |
+| :----| :-------- | :--------------- |
+| QUE  | C         | 2019             |
+| QUE  | NB        | 2020             |
+| TRE  | C         | 2018, 2019, 2020 |
+| TRE  | NB        | 2019, 2020       |
+| ACJ  | C         | 2018, 2019, 2020 |
+| ACJ  | NB        | 2019, 2020       |
 
 
 > ⚠️ Note that `data/` is in the `.gitignore` this means you have to run
