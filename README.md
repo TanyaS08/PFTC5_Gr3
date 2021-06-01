@@ -22,6 +22,7 @@ proposal can be found [here](https://docs.google.com/document/d/1CN_nDSyvQGwecFT
   - [Script naming structure](#script-naming-structure)
   - [Working on subtasks - using pull requests](#working-on-subtasks---using-pull-requests)
     - [DC2 - Placeholder chemical traits data](#dc2---placeholder-chemical-traits-data)
+    - [DC5 - Allocation of Grimes CSR strategy for FT's](#dc5---allocation-of-grimes-csr-strategy-for-fts)
   - [Data visualisation](#data-visualisation)
 
 ## Downloading and 'cleaning' the data
@@ -118,7 +119,7 @@ A quick overview of trait distribution featuring scraped chem traits:
 
 ![](https://github.com/TanyaS08/PFTC5_Gr3/blob/DC.2_chemtraits/output/traits_density_plots_w_chem.png?raw=true)
 
-### DC5 - Placeholder chemical traits data
+### DC5 - Allocation of Grimes CSR strategy for FT's
 
 CSR scores were calcualted for each individual based using StrateFY. This process
 is not automated so the output is saved in `data/processed/` and has been appended
