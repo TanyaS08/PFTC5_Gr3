@@ -21,6 +21,7 @@ proposal can be found [here](https://docs.google.com/document/d/1CN_nDSyvQGwecFT
     - [Cleaning/filtering the data](#cleaningfiltering-the-data)
   - [Script naming structure](#script-naming-structure)
   - [Working on subtasks - using pull requests](#working-on-subtasks---using-pull-requests)
+  - [Brief summaries of subtasks](#brief-summaries-of-subtasks)
     - [DC2 - Placeholder chemical traits data](#dc2---placeholder-chemical-traits-data)
     - [DC5 - Allocation of Grimes CSR strategy for FT's](#dc5---allocation-of-grimes-csr-strategy-for-fts)
   - [Data visualisation](#data-visualisation)
@@ -49,7 +50,8 @@ the most up to date dataset stored on you machine.
 `source(here::here(path = "scripts/0_data_import.R"))` now also incorporates
 the CSR traits as well as temporary chemical traits. This will be updated in
 such a way that when we get the new chemical traits data it should all
-seamlessly integrate and none of the scripts should break...
+seamlessly integrate and none of the scripts should break - she says 
+hopefully...
 
 > Note if you do call `source(here::here(path = "scripts/0_data_import.R"))`
 > at the beginning of your script it does mean you will always be using the
@@ -59,9 +61,9 @@ seamlessly integrate and none of the scripts should break...
 ### Cleaning/filtering the data
 
 The `scripts/0_data_import.R` code will also filter out the the sites
-relevant for our analyses. AS we are downloading the _entire_ Puna
+relevant for our analyses. As we are downloading the _entire_ Puna
 dataset form _osf_ we need to filter the data so that we have the following
-sites and treatments form the following years:
+sites and treatments from the following years:
 
 | Site | Treatment | Year             |
 | :----| :-------- | :--------------- |
@@ -99,6 +101,7 @@ marked as ready for review and then merged into the `master` branch.
 
 branches should be named after the subtask code - same for the PR (although this
 can be a bit more comprehensive/descriptive).
+## Brief summaries of subtasks
 
 ### DC2 - Placeholder chemical traits data
 
@@ -115,16 +118,23 @@ same trait mean/value across the dataset _i.e._ there is no variation between
 species/genera/families - mostly because this is placeholder data it seems
 wasteful to expend energy on trying to generate variation across sites
 
+All data accessed from TRY are in `data/TRY/` if anyone is interested in looking 
+at them and the dataframe with the placeholder chemical data is in `data/processed/` 
+and is currently called into your working environment when calling `scripts/0_data_import.R` as `traits`. This will be changed once we have the _actual_ 
+chemical traits (and as has been said many times should happen seamlessly and 
+not break anything that has already been scaffolded).
+
 A quick overview of trait distribution featuring scraped chem traits:
 
 ![](https://github.com/TanyaS08/PFTC5_Gr3/blob/DC.2_chemtraits/output/traits_density_plots_w_chem.png?raw=true)
 
 ### DC5 - Allocation of Grimes CSR strategy for FT's
 
-CSR scores were calcualted for each individual based using StrateFY. This process
+CSR scores were calculated for each individual based on trait values 
+using StrateFY. This process
 is not automated so the output is saved in `data/processed/` and has been appended
 to the original leaf traits dataset. it has also been integrated into
-`scripts/0_data_import.R` so calling that script will autmatically 'add' the CSR
+`scripts/0_data_import.R` so calling that script will automatically 'add' the CSR
 traits to the `traits` df to your environment
 
 ## Data visualisation
