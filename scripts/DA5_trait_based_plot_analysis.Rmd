@@ -1,5 +1,6 @@
 ---
-title: "R Notebook"
+title: "PFTC Fire: Trait based plots and analysis"
+authors: "Sonya R. Geange and Ragnhild Gya"
 output: html_notebook
 ---
 
