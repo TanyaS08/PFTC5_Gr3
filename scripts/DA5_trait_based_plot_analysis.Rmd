@@ -29,75 +29,38 @@ Using 'site' rather than elevation for the plots, but in the analysis need the n
 
 ```{r}
 
-# Relevel SIte by elevation
-traits_wide$site <- factor(traits_wide$site, 
+# Site by elevation
+traits$site <- factor(traits$site, 
                     levels = c("ACJ", "TRE", "QUE"))
 
-(SLA_plot <- traits_wide %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = sla_cm2_g, fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(SLA_cm2_g)) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(PlantHeight_plot <- traits_wide %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(plant_height_cm), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Plant~Height,cm))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-
-(LeafArea_plot <- traits_wide %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(leaf_area_cm2), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Leaf~Area, cm2))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(LeafThickness_plot <- traits_wide %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(leaf_thickness_mm), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Leaf~Thickness, mm))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(LDMC_plot <- traits_wide %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = ldmc, fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(Leaf~Dry~Matter~Content)) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
+traits %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2')
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+  geom_boxplot(aes(x = site,
+                   y = log(value), 
+                   fill = treatment), 
+               na.rm = TRUE,
+               position = "dodge2") +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_fill_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom")
 
 
 ```
@@ -138,71 +101,35 @@ anova(LDMC_analysis)
 traits_wide_dry <- traits_wide %>% 
   filter(c(season == "dry_season"))
 
-(SLA_plot_dry <- traits_wide_dry %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = sla_cm2_g, fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(SLA_cm2_g)) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(PlantHeight_plot_dry <- traits_wide_dry %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(plant_height_cm), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Plant~Height,cm))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-
-(LeafArea_plot_dry <- traits_wide_dry %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(leaf_area_cm2), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Leaf~Area, cm2))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(LeafThickness_plot_dry <- traits_wide_dry %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(leaf_thickness_mm), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Leaf~Thickness, mm))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(LDMC_plot_dry <- traits_wide_dry %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = ldmc, fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(Leaf~Dry~Matter~Content)) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
+traits %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2') &&
+      season == "dry_season"
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+  geom_boxplot(aes(x = site,
+                   y = log(value), 
+                   fill = treatment), 
+               na.rm = TRUE,
+               position = "dodge2") +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_fill_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom")
 
 
 # Analysis
@@ -232,79 +159,41 @@ anova(LDMC_analysis_dry)
 # Wet season only plots and analysis
 
 ```{r}
+
+
+traits %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2') &&
+      season == "wet_season"
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+  geom_boxplot(aes(x = site,
+                   y = log(value), 
+                   fill = treatment), 
+               na.rm = TRUE,
+               position = "dodge2") +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_fill_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom")
+
 # Analysis
 traits_wide_wet <- traits_wide %>% 
   filter(c(season == "wet_season"))
-
-
-(SLA_plot_wet <- traits_wide_wet %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = sla_cm2_g, fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(SLA_cm2_g)) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(PlantHeight_plot_wet <- traits_wide_wet %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(plant_height_cm), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Plant~Height,cm))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-
-(LeafArea_plot_wet <- traits_wide_wet %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(leaf_area_cm2), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Leaf~Area, cm2))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(LeafThickness_plot_wet <- traits_wide_wet %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = log(leaf_thickness_mm), fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(log(Leaf~Thickness, mm))) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-(LDMC_plot_wet <- traits_wide_wet %>%  
-    ggplot() +
-    geom_boxplot(aes(x = factor(treatment),
-                     y = ldmc, fill = treatment), na.rm = TRUE) +
-    # Choose manual colours
-    scale_fill_manual(values = c("darkgreen", "orange"),
-                      name = "Burn Treatment") +
-    facet_wrap(site~.) +
-    xlab(bquote(treatment)) +
-    ylab(bquote(Leaf~Dry~Matter~Content)) +
-    theme_classic() +
-    theme(legend.position = "bottom"))
-
-
-
 
 # SLA
 SLA_analysis_wet <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
@@ -329,7 +218,7 @@ anova(LDMC_analysis_wet)
 ```
 
 
-# Prelininary Look at Functional Groups (Wet Season Only)
+# Preliminary Look at Functional Groups (Wet Season Only)
 
 ```{r}
 (SLA_plot_wet_FG <- traits_wide_wet %>%  
