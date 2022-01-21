@@ -87,7 +87,6 @@ traits <- traits_raw %>%
                             year %in% c(2018, 2019) ~ "C",
                           TRUE ~ treatment)) %>%
   #remove November samples (multiple sampling from 2019 - Puna Project)
-  filter(month != "July") %>%
   filter(treatment != "B") %>%
   ##REMOVING DUPLICATES FOR INDIVIDUALS
   #group by each individual at each plot for each site & treatment
@@ -107,7 +106,6 @@ species <- species_raw %>%
                             year %in% c(2018, 2019) ~ "C",
                           TRUE ~ treatment)) %>%
   #remove November samples (multiple sampling from 2019 - Puna Project)
-  filter(month != "July") %>%
   filter(treatment != "B") 
 
 #remove raw files
