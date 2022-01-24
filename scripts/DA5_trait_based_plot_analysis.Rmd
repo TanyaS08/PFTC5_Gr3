@@ -71,26 +71,33 @@ library(lme4)
 library(lmerTest)
 
 # Models for all datasets (years, seasons)
+# NB. Now run with season and functional group added in when using complete dataset (i.e. Puna and PFTC data from 2018-2020 and wet/dry seasons). NOTE: When using community weighted means, we won't keep functional group. Similarly for wet and dry only, the season term would be removed. 
+
+# Many issues with convergence (not resolved until we use CWM)
 # SLA
-SLA_analysis <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide)
+SLA_analysis <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(SLA_analysis)
+summary(SLA_analysis)
 
 # Leaf Area
-LA_analysis <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide)
+LA_analysis <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(LA_analysis)
-
+summary(LA_analysis)
 
 # Plant Height
-PlantHeight_analysis <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide)
+PlantHeight_analysis <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(PlantHeight_analysis)
+summary(PlantHeight_analysis)
 
 # Leaf thickness
-LeafThickness_analysis <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide)
+LeafThickness_analysis <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(LeafThickness_analysis)
+summary(LeafThickness_analysis)
 
 # LDMC
-LDMC_analysis <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide)
+LDMC_analysis <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(LDMC_analysis)
+summary(LDMC_analysis)
 ```
 
 # Dry season only plots and analysis
@@ -135,25 +142,29 @@ traits %>%
 # Analysis
 
 # SLA
-SLA_analysis_dry <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide_dry)
+SLA_analysis_dry <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(SLA_analysis_dry)
+summary(SLA_analysis_dry)
 
 # Leaf Area
-LA_analysis_dry <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide_dry)
+LA_analysis_dry <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(LA_analysis_dry)
-
+summary(LA_analysis_dry)
 
 # Plant Height
-PlantHeight_analysis_dry <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide_dry)
+PlantHeight_analysis_dry <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(PlantHeight_analysis_dry)
+summary(PlantHeight_analysis_dry)
 
 # Leaf thickness
-LeafThickness_analysis_dry <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide_dry)
+LeafThickness_analysis_dry <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(LeafThickness_analysis_dry)
+summary(LeafThickness_analysis_dry)
 
 # LDMC
-LDMC_analysis_dry <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon), data = traits_wide_dry)
+LDMC_analysis_dry <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(LDMC_analysis_dry)
+summmary(LDMC_analysis_dry)
 ```
 
 # Wet season only plots and analysis
@@ -198,23 +209,28 @@ traits_wide_wet <- traits_wide %>%
 # SLA
 SLA_analysis_wet <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(SLA_analysis_wet)
+summary(SLA_analysis_wet)
 
 # Leaf Area
 LA_analysis_wet <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(LA_analysis_wet)
+summary(LA_analysis_wet)
 
 
 # Plant Height
 PlantHeight_analysis_wet <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(PlantHeight_analysis_wet)
+summary(PlantHeight_analysis_wet)
 
 # Leaf thickness
 LeafThickness_analysis_wet <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_wet)
 anova(LeafThickness_analysis_wet)
+summary(LeafThickness_analysis_wet)
 
 # LDMC
 LDMC_analysis_wet <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(LDMC_analysis_wet)
+summary(LDMC_analysis_wet)
 ```
 
 
