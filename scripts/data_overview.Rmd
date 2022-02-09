@@ -1,0 +1,109 @@
+---
+title: "Data Overview"
+author: "Tanya Strydom"
+date: "2/7/2022"
+output: pdf_document
+---
+
+```{r source, warning=FALSE, include=FALSE}
+source(here::here(path = "scripts/0_data_import.R"))
+
+#filter out the placeholder chem because 'nonsense'
+traits =
+  traits %>%
+  ungroup() %>%
+  filter(trait %in% c('plant_height_cm', 'leaf_area_cm2', 'sla_cm2_g', 'ldmc', 'leaf_thickness_mm'))
+
+library(patchwork)
+```
+
+## Goal
+
+The purpose of this document is to give a bit of a more in-depth overview of what data we have for different combinations of sites, treatments, etc. This in turn can hopefully help in informing the game plan for moving forward with regards to what we want to do in the end with regards to the actual research question/aims.
+
+### High level issues
+
+- The issue of needing to use samples from both the dry and wet season.
+- Combining from different years (and imbalances regarding the number of samples we cave for site **x** treatment combos)
+
+We also do not have any chemical traits data yet with no real time frame for when we could have them.
+
+### Potential directions to take
+
+- Only look at species composition (don't work with traits data) and **possibly** spin this into a methods paper using the fuzzy phylogeny matching work that Eric has been doing (this will require re-working the context of the manuscript)
+- Try and make the dataframe less Frankenstein-esque by using something like bootstrapping/simulations to try and even out the number of samples as well as bypass needing to use data from different season (possibly all years???)
+- Try and make the best of a bad situation and soldier on - although we woudl still need to decide on waiting on the traits data or not.
+
+## Data Summary
+
+Below is the number of individuals sampled for *traits* across the different treatment, site, year and season combinations.
+
+
+```{r data summary, echo=FALSE, message=FALSE, warning=FALSE}
+
+grouped = 
+  traits %>%
+  distinct(site, treatment, season, id, year) %>%
+  group_by(site, treatment, season, year) %>%
+  count()  %>%
+  ggplot() +
+  geom_col(aes(
+    x = year,
+    y = n,
+    fill = season,
+    group = year),
+    position="dodge") +
+  facet_grid(cols = vars(treatment),
+             rows = vars(site)) +
+  theme_bw() +
+  theme(text = element_text(size = rel(3),
+                            color = "#5e5e5e"),
+        plot.title = element_text(size = rel(3.5),
+                            color = "#5e5e5e"),
+        legend.text = element_text(size = rel(3),
+                            color = "#5e5e5e"),
+    legend.key.size = unit(4, "mm"),
+    strip.text.y = element_text(size = rel(2),
+                            color = "#5e5e5e"),
+    strip.text.x = element_text(size = rel(3),
+                            color = "#5e5e5e")) +
+  labs(y = "",
+       x = "Year",
+       title = "Number of samples by season and year")
+
+total = 
+  traits %>%
+  distinct(site, treatment, season, id, year) %>%
+  group_by(site, treatment, season) %>%
+  count()  %>%
+  ggplot() +
+  geom_col(aes(
+    x = site,
+    y = n,
+    fill = season)) +
+  facet_grid(cols = vars(treatment)) +
+  theme_bw() +
+  theme(text = element_text(size = rel(3),
+                            color = "#5e5e5e"),
+        plot.title = element_text(size = rel(3.5),
+                            color = "#5e5e5e"),
+        legend.text = element_text(size = rel(3),
+                            color = "#5e5e5e"),
+    legend.key.size = unit(4, "mm"),
+    strip.text = element_text(size = rel(3),
+                            color = "#5e5e5e")) +
+  labs(y = "",
+       x = "Site",
+       title = "Number of samples/individuals")
+
+total / grouped +
+  plot_layout(guides = 'collect',
+              heights = c(1, 1.5))
+
+```
+
+### Coverage
+
+All individuals are 'complete'. That is for the following traits: `plant_height_cm`, `leaf_area_cm2`, `sla_cm2_g`, `ldmc`, `leaf_thickness_mm` each individual (based in their id) has a recorded value.
+
+### Sampling Effort

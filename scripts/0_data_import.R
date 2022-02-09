@@ -22,25 +22,25 @@ library(gsheet)
 library(dataDownloader)
 
 
-### >> b) Data from osf ----
-
-dir.create("data")
-dir.create("data/raw")
-
-
-#Download community data from OSF
-get_file(node = "gs8u6",
-         file = "PFTC3-Puna-PFTC5_Peru_2018-2020_CommunityCover_clean.csv",
-         path = "data/raw",
-         remote_path = "community")
-
-
-#Download traits data from OSF
-get_file(node = "gs8u6",
-         file = "PFTC3-Puna-PFTC5_Peru_2018-2020_LeafTraits_clean.csv",
-         path = "data/raw",
-         remote_path = "traits")
-
+# ### >> b) Data from osf ----
+# 
+# dir.create("data")
+# dir.create("data/raw")
+# 
+# 
+# #Download community data from OSF
+# get_file(node = "gs8u6",
+#          file = "PFTC3-Puna-PFTC5_Peru_2018-2020_CommunityCover_clean.csv",
+#          path = "data/raw",
+#          remote_path = "community")
+# 
+# 
+# #Download traits data from OSF
+# get_file(node = "gs8u6",
+#          file = "PFTC3-Puna-PFTC5_Peru_2018-2020_LeafTraits_clean.csv",
+#          path = "data/raw",
+#          remote_path = "traits")
+# 
 ### 1) Data cleaning ----
 
 ### >> a) Traits data ----
@@ -114,15 +114,15 @@ rm('traits_raw',
 
 ### 3) supplementary data to add ----
 
-traits = 
-  #traits %>%
-  read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
-  select(-X) %>%
-  full_join(read.csv("data/processed/LeafTraits_CSR.csv") %>%
-              select(-c(X, trait, value))) %>%
-  distinct(year, season, month, site, treatment, plot_id, 
-           individual_nr, id, functional_group, family, taxon, 
-           burn_year, elevation, latitude, longitude, course,
-           trait, value)
-
+# traits = 
+#   #traits %>%
+#   read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
+#   select(-X) %>%
+#   full_join(read.csv("data/processed/LeafTraits_CSR.csv") %>%
+#               select(-c(X, trait, value))) %>%
+#   distinct(year, season, month, site, treatment, plot_id, 
+#            individual_nr, id, functional_group, family, taxon, 
+#            burn_year, elevation, latitude, longitude, course,
+#            trait, value)
+# 
 # End of script ----
