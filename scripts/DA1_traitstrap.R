@@ -88,11 +88,8 @@ trait_imputation_3 =
     value_col = "value",
     
     # specifies sampling hierarchy
-    scale_hierarchy = c("year", "season", "site", "plot_id"),
-    
-    # specifying experimental design
-    treatment_col = "treatment", #The treatment does not do one treatment and one control. It is designed for several treatments and one control. So we need to make treatmentA = burnt, treatmentB = control, and a fake (non existing) control
-    treatment_level = "site",
+    scale_hierarchy = c("year", "season", "month","site", "plot_id"),
+  
     
     # min number of samples
     min_n_in_sample = 3
@@ -102,17 +99,14 @@ trait_imputation_3 =
 
 bootstrapped_moments = 
   trait_np_bootstrap(
-    trait_imputation, 
-    nrep = 200
+    trait_imputation_3, 
+    nrep = 20
   )
 
 
 # Summarise Bootstrapping Output  ----
 
-sum_boot_moment <- trait_summarise_boot_moments(
-  np_bootstrapped_moments
-)
-sum_boot_moment
+sum_boot_moment <- trait_summarise_boot_moments(bootstrapped_moments)
 
 # Some 'random' plots  ----
 
