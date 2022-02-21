@@ -118,15 +118,15 @@ same trait mean/value across the dataset _i.e._ there is no variation between
 species/genera/families - mostly because this is placeholder data it seems
 wasteful to expend energy on trying to generate variation across sites
 
+> ⚠️ As of 21/02/2022 The placeholder chemical traist data are no longer being 
+> merged into `traits` but the code is still there if fore soem reason you would 
+> want to so that.
+
 All data accessed from TRY are in `data/TRY/` if anyone is interested in looking 
 at them and the dataframe with the placeholder chemical data is in `data/processed/` 
 and is currently called into your working environment when calling `scripts/0_data_import.R` as `traits`. This will be changed once we have the _actual_ 
 chemical traits (and as has been said many times should happen seamlessly and 
 not break anything that has already been scaffolded).
-
-A quick overview of trait distribution featuring scraped chem traits:
-
-![](https://github.com/TanyaS08/PFTC5_Gr3/blob/DC.2_chemtraits/output/traits_density_plots_w_chem.png?raw=true)
 
 ### DC5 - Allocation of Grimes CSR strategy for FT's
 
