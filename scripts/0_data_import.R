@@ -115,14 +115,14 @@ rm('traits_raw',
 ### 3) supplementary data to add ----
 
 traits = 
-  #traits %>%
-  read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
-  select(-X) %>%
+  traits %>%
+  #   read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
+  #   select(-X) %>%
   full_join(read.csv("data/processed/LeafTraits_CSR.csv") %>%
               select(-c(X, trait, value))) %>%
-  distinct(year, season, month, site, treatment, plot_id, 
-           individual_nr, id, functional_group, family, taxon, 
+  distinct(year, season, month, site, treatment, plot_id,
+           individual_nr, id, functional_group, family, taxon,
            burn_year, elevation, latitude, longitude, course,
-           trait, value)
+           trait, value, csr_strategy)
 
 # End of script ----
