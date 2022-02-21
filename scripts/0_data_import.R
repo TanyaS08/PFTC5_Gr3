@@ -87,7 +87,6 @@ traits <- traits_raw %>%
                             year %in% c(2018, 2019) ~ "C",
                           TRUE ~ treatment)) %>%
   #remove November samples (multiple sampling from 2019 - Puna Project)
-  filter(month != "July") %>%
   filter(treatment != "B") %>%
   ##REMOVING DUPLICATES FOR INDIVIDUALS
   #group by each individual at each plot for each site & treatment
@@ -107,7 +106,6 @@ species <- species_raw %>%
                             year %in% c(2018, 2019) ~ "C",
                           TRUE ~ treatment)) %>%
   #remove November samples (multiple sampling from 2019 - Puna Project)
-  filter(month != "July") %>%
   filter(treatment != "B") 
 
 #remove raw files
@@ -117,14 +115,14 @@ rm('traits_raw',
 ### 3) supplementary data to add ----
 
 traits = 
-  #traits %>%
-  read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
-  select(-X) %>%
+  traits %>%
+  #   read.csv("data/processed/LeafTraits_placeholder_chem.csv") %>%
+  #   select(-X) %>%
   full_join(read.csv("data/processed/LeafTraits_CSR.csv") %>%
               select(-c(X, trait, value))) %>%
-  distinct(year, season, month, site, treatment, plot_id, 
-           individual_nr, id, functional_group, family, taxon, 
+  distinct(year, season, month, site, treatment, plot_id,
+           individual_nr, id, functional_group, family, taxon,
            burn_year, elevation, latitude, longitude, course,
-           trait, value)
+           trait, value, csr_strategy)
 
 # End of script ----
