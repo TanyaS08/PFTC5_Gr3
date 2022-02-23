@@ -17,7 +17,9 @@ species %>%
 
 ### Trait Imputation ----
 
-trait_imputation = 
+# Bootstrapping of control datasets  ----
+
+trait_imputation_control = 
   trait_impute(
     # input data (mandatory)
     comm = species %>%
@@ -36,6 +38,32 @@ trait_imputation =
     # specifies sampling hierarchy
     scale_hierarchy = c("year", "season", "month","site", "plot_id"),
   
+    
+    # min number of samples
+    min_n_in_sample = 3
+  )
+
+# Bootstrapping of burnt datasets  ----
+
+trait_imputation_burnt = 
+  trait_impute(
+    # input data (mandatory)
+    comm = species %>%
+      select(taxon, cover, site, treatment, plot_id, year, season) %>%
+      mutate(treatment = as.factor(treatment)),
+    traits = traits %>%
+      select(taxon, trait, value, site, treatment, plot_id, year, season) %>%
+      mutate(treatment = as.factor(treatment)),
+    
+    # specifies columns in your data (mandatory)
+    abundance_col = "cover",
+    taxon_col = "taxon",
+    trait_col = "trait",
+    value_col = "value",
+    
+    # specifies sampling hierarchy
+    scale_hierarchy = c("year", "season", "month","site", "plot_id"),
+    
     
     # min number of samples
     min_n_in_sample = 3
