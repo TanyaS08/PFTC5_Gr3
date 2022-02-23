@@ -7,8 +7,8 @@ source(here::here(path = "scripts/0_data_import.R"))
 ### Packages----
 
 # install.packages("remotes")
-remotes::install_github("richardjtelford/traitstrap")
-# library(traitstrap)
+#remotes::install_github("richardjtelford/traitstrap")
+library(traitstrap)
 
 species %>%
   select(taxon, cover, site, treatment, plot_id) %>%
