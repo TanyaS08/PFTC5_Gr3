@@ -21,60 +21,6 @@ trait_imputation =
   trait_impute(
     # input data (mandatory)
     comm = species %>%
-      select(taxon, cover, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
-    traits = traits %>%
-      select(taxon, trait, value, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
-    
-    # specifies columns in your data (mandatory)
-    abundance_col = "cover",
-    taxon_col = "taxon",
-    trait_col = "trait",
-    value_col = "value",
-    
-    # specifies sampling hierarchy
-    scale_hierarchy = c("site", "plot_id"),
-    
-    # specifying experimental design
-    treatment_col = "treatment",
-    treatment_level = "site",
-    
-    # min number of samples
-    min_n_in_sample = 3
-  )
-
-# no experimental design
-
-trait_imputation_2 = 
-  trait_impute(
-    # input data (mandatory)
-    comm = species %>%
-      select(taxon, cover, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
-    traits = traits %>%
-      select(taxon, trait, value, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
-    
-    # specifies columns in your data (mandatory)
-    abundance_col = "cover",
-    taxon_col = "taxon",
-    trait_col = "trait",
-    value_col = "value",
-    
-    # specifies sampling hierarchy
-    scale_hierarchy = c("site", "treatment", "plot_id"),
-    
-    # min number of samples
-    min_n_in_sample = 3
-  )
-
-# imputation 3 - trial
-
-trait_imputation_3 = 
-  trait_impute(
-    # input data (mandatory)
-    comm = species %>%
       select(taxon, cover, site, treatment, plot_id, year, season) %>%
       mutate(treatment = as.factor(treatment)),
     traits = traits %>%
@@ -99,7 +45,7 @@ trait_imputation_3 =
 
 bootstrapped_moments = 
   trait_np_bootstrap(
-    trait_imputation_3, 
+    trait_imputation, 
     nrep = 20
   )
 
