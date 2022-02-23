@@ -23,11 +23,13 @@ trait_imputation_control =
   trait_impute(
     # input data (mandatory)
     comm = species %>%
-      select(taxon, cover, site, treatment, plot_id, year, season) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, cover, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == C),
     traits = traits %>%
-      select(taxon, trait, value, site, treatment, plot_id, year, season) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, trait, value, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == C),
     
     # specifies columns in your data (mandatory)
     abundance_col = "cover",
@@ -49,11 +51,13 @@ trait_imputation_burnt =
   trait_impute(
     # input data (mandatory)
     comm = species %>%
-      select(taxon, cover, site, treatment, plot_id, year, season) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, cover, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == NB),
     traits = traits %>%
-      select(taxon, trait, value, site, treatment, plot_id, year, season) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, trait, value, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == NB),
     
     # specifies columns in your data (mandatory)
     abundance_col = "cover",
