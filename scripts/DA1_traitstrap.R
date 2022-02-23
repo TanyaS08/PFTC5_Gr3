@@ -88,11 +88,19 @@ bootstrapped_moments_burnt =
   )
 
 
-# Summarise Bootstrapping Output  ----
+# Summarize Bootstrapping Output  ----
 
-sum_boot_moment_control <- trait_summarise_boot_moments(bootstrapped_moments_control)
+sum_boot_moment_control <- trait_summarise_boot_moments(bootstrapped_moments_control) %>% 
+  mutate(treatment = "C")
 
-sum_boot_moment_burnt <- trait_summarise_boot_moments(bootstrapped_moments_burnt)
+sum_boot_moment_burnt <- trait_summarise_boot_moments(bootstrapped_moments_burnt) %>% 
+  mutate(treatment = "NB")
+
+# Merge bootstrapped data sets  ----
+
+sum_boot_moments_full <- sum_boot_moment_control %>% 
+  bind_rows(sum_boot_moment_burnt)
+
 
 # Some 'random' plots  ----
 
@@ -101,3 +109,5 @@ autoplot(trait_imputation_control) +
 
 autoplot(trait_imputation_burnt) + 
   theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
+
+sum_boot_moments_full %>% ggplot(aes(x = treatment, y = mean, fill = treatment)) + geom_boxplot() + facet_grid(trait ~ site, scales = "free")
