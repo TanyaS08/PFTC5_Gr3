@@ -25,11 +25,11 @@ trait_imputation_control =
     comm = species %>%
       select(taxon, cover, site, treatment, plot_id, year, season, month) %>%
       mutate(treatment = as.factor(treatment)) %>% 
-      filter(treatment == C),
+      filter(treatment == "C"),
     traits = traits %>%
       select(taxon, trait, value, site, treatment, plot_id, year, season, month) %>%
       mutate(treatment = as.factor(treatment)) %>% 
-      filter(treatment == C),
+      filter(treatment == "C"),
     
     # specifies columns in your data (mandatory)
     abundance_col = "cover",
@@ -53,11 +53,11 @@ trait_imputation_burnt =
     comm = species %>%
       select(taxon, cover, site, treatment, plot_id, year, season, month) %>%
       mutate(treatment = as.factor(treatment)) %>% 
-      filter(treatment == NB),
+      filter(treatment == "NB"),
     traits = traits %>%
       select(taxon, trait, value, site, treatment, plot_id, year, season, month) %>%
       mutate(treatment = as.factor(treatment)) %>% 
-      filter(treatment == NB),
+      filter(treatment == "NB"),
     
     # specifies columns in your data (mandatory)
     abundance_col = "cover",
@@ -75,31 +75,29 @@ trait_imputation_burnt =
 
 # Nonparametric Bootstrapping  ----
 
-bootstrapped_moments = 
+bootstrapped_moments_control = 
   trait_np_bootstrap(
-    trait_imputation, 
-    nrep = 20
+    trait_imputation_control, 
+    nrep = 200
+  )
+
+bootstrapped_moments_burnt = 
+  trait_np_bootstrap(
+    trait_imputation_burnt, 
+    nrep = 200
   )
 
 
 # Summarise Bootstrapping Output  ----
 
-sum_boot_moment <- trait_summarise_boot_moments(bootstrapped_moments)
+sum_boot_moment_control <- trait_summarise_boot_moments(bootstrapped_moments_control)
+
+sum_boot_moment_burnt <- trait_summarise_boot_moments(bootstrapped_moments_burnt)
 
 # Some 'random' plots  ----
 
-autoplot(trait_imputation) + 
+autoplot(trait_imputation_control) + 
   theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
 
-autoplot(trait_imputation_2) + 
+autoplot(trait_imputation_burnt) + 
   theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
-
-autoplot(trait_imputation_3) + 
-  theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
-
-# Summarise Bootstrapping Output  ----
-
-Imputed_traits_fullcommunity <- Trait_impute_per_year(com_dat = community_for_boostrapping, trait_dat = traitdata_2)
-
-sum_boot_moment <- trait_summarise_boot_moments(trait_imputation_3)
-sum_boot_moment
