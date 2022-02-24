@@ -7,8 +7,8 @@ source(here::here(path = "scripts/0_data_import.R"))
 ### Packages----
 
 # install.packages("remotes")
-remotes::install_github("richardjtelford/traitstrap")
-# library(traitstrap)
+#remotes::install_github("richardjtelford/traitstrap")
+library(traitstrap)
 
 species %>%
   select(taxon, cover, site, treatment, plot_id) %>%
@@ -17,15 +17,19 @@ species %>%
 
 ### Trait Imputation ----
 
-trait_imputation = 
+# Bootstrapping of control datasets  ----
+
+trait_imputation_control = 
   trait_impute(
     # input data (mandatory)
     comm = species %>%
-      select(taxon, cover, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, cover, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == "C"),
     traits = traits %>%
-      select(taxon, trait, value, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, trait, value, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == "C"),
     
     # specifies columns in your data (mandatory)
     abundance_col = "cover",
@@ -34,27 +38,26 @@ trait_imputation =
     value_col = "value",
     
     # specifies sampling hierarchy
-    scale_hierarchy = c("site", "plot_id"),
-    
-    # specifying experimental design
-    treatment_col = "treatment",
-    treatment_level = "site",
+    scale_hierarchy = c("year", "season", "month","site", "plot_id"),
+  
     
     # min number of samples
     min_n_in_sample = 3
   )
 
-# no experimental design
+# Bootstrapping of burnt datasets  ----
 
-trait_imputation_2 = 
+trait_imputation_burnt = 
   trait_impute(
     # input data (mandatory)
     comm = species %>%
-      select(taxon, cover, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, cover, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == "NB"),
     traits = traits %>%
-      select(taxon, trait, value, site, treatment, plot_id) %>%
-      mutate(treatment = as.factor(treatment)),
+      select(taxon, trait, value, site, treatment, plot_id, year, season, month) %>%
+      mutate(treatment = as.factor(treatment)) %>% 
+      filter(treatment == "NB"),
     
     # specifies columns in your data (mandatory)
     abundance_col = "cover",
@@ -63,7 +66,8 @@ trait_imputation_2 =
     value_col = "value",
     
     # specifies sampling hierarchy
-    scale_hierarchy = c("site", "treatment", "plot_id"),
+    scale_hierarchy = c("year", "season", "month","site", "plot_id"),
+    
     
     # min number of samples
     min_n_in_sample = 3
@@ -71,24 +75,39 @@ trait_imputation_2 =
 
 # Nonparametric Bootstrapping  ----
 
-bootstrapped_moments = 
+bootstrapped_moments_control = 
   trait_np_bootstrap(
-    trait_imputation, 
+    trait_imputation_control, 
+    nrep = 200
+  )
+
+bootstrapped_moments_burnt = 
+  trait_np_bootstrap(
+    trait_imputation_burnt, 
     nrep = 200
   )
 
 
-# Summarise Bootstrapping Output  ----
+# Summarize Bootstrapping Output  ----
 
-sum_boot_moment <- trait_summarise_boot_moments(
-  np_bootstrapped_moments
-)
-sum_boot_moment
+sum_boot_moment_control <- trait_summarise_boot_moments(bootstrapped_moments_control) %>% 
+  mutate(treatment = "C")
+
+sum_boot_moment_burnt <- trait_summarise_boot_moments(bootstrapped_moments_burnt) %>% 
+  mutate(treatment = "NB")
+
+# Merge bootstrapped data sets  ----
+
+sum_boot_moments_full <- sum_boot_moment_control %>% 
+  bind_rows(sum_boot_moment_burnt)
+
 
 # Some 'random' plots  ----
 
-autoplot(trait_imputation) + 
+autoplot(trait_imputation_control) + 
   theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
 
-autoplot(trait_imputation_2) + 
+autoplot(trait_imputation_burnt) + 
   theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
+
+sum_boot_moments_full %>% ggplot(aes(x = treatment, y = mean, fill = treatment)) + geom_boxplot() + facet_grid(trait ~ site, scales = "free")
