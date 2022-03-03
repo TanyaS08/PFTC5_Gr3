@@ -116,13 +116,58 @@ trait_impute_no.split =
   ungroup() %>%
   mutate(split_by = as.factor("no.split"))
 
+# Nonparametric Bootstrapping  ----
+
+# initiate empty list
+trait_bootstrap_list = vector(mode = "list", length = length(trait_impute_list))
+
+for (i in 1:length(trait_impute_list)) {
+  
+  trait_bootstrap_list[[i]] = 
+    trait_np_bootstrap(
+      trait_impute_list[[i]], 
+      nrep = 20,
+      raw = TRUE
+    )
+  
+}
+
+# combine by how dataframes were split
+
+trait_bootstrap_treat.site = 
+  do.call(rbind.data.frame,trait_bootstrap_list[1:6]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("treat.site")) %>%
+  select(-c(site_trait, treatment_trait)) %>%
+  rename(site = site_comm,
+         treatment = treatment_comm)
+
+trait_bootstrap_site = 
+  do.call(rbind.data.frame,trait_bootstrap_list[7:9]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("site")) %>%
+  select(-c(site_trait)) %>%
+  rename(site = site_comm)
+
+trait_bootstrap_treat = 
+  do.call(rbind.data.frame,trait_bootstrap_list[10:11]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("treat")) %>%
+  select(-c(treatment_trait)) %>%
+  rename(treatment = treatment_comm)
+
+trait_bootstrap_no.split = 
+  do.call(rbind.data.frame,trait_bootstrap_list[12]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("no.split"))
+
 #some plots
 
 plots <-
-  rbind(trait_impute_treat.site,
-        trait_impute_site,
-        trait_impute_treat,
-        trait_impute_no.split) %>%
+  rbind(trait_bootstrap_treat.site,
+        trait_bootstrap_site,
+        trait_bootstrap_treat,
+        trait_bootstrap_no.split) %>%
   unite(
     #new variable name
     plot,
@@ -130,14 +175,13 @@ plots <-
     c(site, treatment),
     sep = " ", remove = FALSE
   ) %>%
-  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "Wet_Mass_g")) %>%
+  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
   #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(# Rename traits for labels
     trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
                       trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
                       trait == "ldmc" ~ "LDMC",
-                      trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)")) %>%
-  filter(!is.na(trait))
+                      trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)"))
 
 ggplot(plots) +
   geom_density_ridges(aes(y = site,
@@ -163,56 +207,111 @@ ggplot(plots) +
   theme_classic()+ 
   plot_layout(ncol = 1)
 
-# Nonparametric Bootstrapping  ----
-
-# initiate empty list
-trait_bootstrap_list = vector(mode = "list", length = length(trait_impute_list))
-
-for (i in 1:length(trait_impute_list)) {
-  
-  trait_bootstrap_list[[i]] = 
-    trait_np_bootstrap(
-      trait_impute_list[[i]], 
-      nrep = 20
-    )
-  
-}
-
-# combine by how dataframes were split
-
-trait_bootstrap_treat.site = 
-  do.call(rbind.data.frame,trait_bootstrap_list[1:6]) %>%
-  ungroup() %>%
-  mutate(split_by = as.factor("treat.site"),
-         split_by = as.factor("treat.site"),
-         split_by = as.factor("treat.site"))
-
-trait_bootstrap_site = 
-  do.call(rbind.data.frame,trait_bootstrap_list[7:9]) %>%
-  ungroup() %>%
-  mutate(split_by = as.factor("site")) %>%
-  select(-c(site_trait)) %>%
-  rename(site = site_comm)
-
-trait_bootstrap_treat = 
-  do.call(rbind.data.frame,trait_bootstrap_list[10:11]) %>%
-  ungroup() %>%
-  mutate(split_by = as.factor("treat")) %>%
-  select(-c(treatment_trait)) %>%
-  rename(treatment = treatment_comm)
-
-trait_bootstrap_no.split = 
-  do.call(rbind.data.frame,trait_bootstrap_list[12]) %>%
-  ungroup() %>%
-  mutate(split_by = as.factor("no.split"))
-
 
 # Summarise Bootstrapping Output  ----
 
-sum_boot_moment <- trait_summarise_boot_moments(
-  np_bootstrapped_moments
-)
-sum_boot_moment
+# initiate empty list
+sum_bootstrap_list = vector(mode = "list", length = length(trait_bootstrap_list))
+
+for (i in 1:length(sum_bootstrap_list)) {
+  
+  sum_bootstrap_list[[i]] = 
+    trait_summarise_boot_moments(
+      trait_np_bootstrap(
+        trait_impute_list[[i]], 
+        nrep = 20
+      )
+    )
+}
+
+# there must be a better way to map through the list...
+
+sum_bootstrap = 
+  rbind(sum_bootstrap_list[[1]] %>%
+          mutate(site = "ACJ",
+                 treatment = "C",
+                 split_by = as.factor("treat.site")),
+        sum_bootstrap_list[[2]] %>%
+          mutate(site = "ACJ",
+                 treatment = "NB",
+                 split_by = as.factor("treat.site")),
+        sum_bootstrap_list[[3]] %>%
+          mutate(site = "QUE",
+                 treatment = "C",
+                 split_by = as.factor("treat.site")),
+        sum_bootstrap_list[[4]] %>%
+          mutate(site = "QUE",
+                 treatment = "NB",
+                 split_by = as.factor("treat.site")),
+        sum_bootstrap_list[[5]] %>%
+          mutate(site = "TRE",
+                 treatment = "C",
+                 split_by = as.factor("treat.site")),
+        sum_bootstrap_list[[6]] %>%
+          mutate(site = "TRE",
+                 treatment = "NB",
+                 split_by = as.factor("treat.site")),
+        sum_bootstrap_list[[7]] %>%
+          mutate(site = "ACJ",
+                 split_by = as.factor("site")),
+        sum_bootstrap_list[[8]] %>%
+          mutate(site = "QUE",
+                 split_by = as.factor("site")),
+        sum_bootstrap_list[[9]] %>%
+          mutate(site = "TRE",
+                 split_by = as.factor("site")),
+        sum_bootstrap_list[[10]] %>%
+          mutate(treatment = "C",
+                 split_by = as.factor("treat")),
+        sum_bootstrap_list[[11]] %>%
+          mutate(treatment = "NB",
+                 split_by = as.factor("treat")),
+        sum_bootstrap_list[[12]] %>%
+          mutate(split_by = as.factor("no.split"))) %>%
+  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
+  #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
+  mutate(# Rename traits for labels
+    trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                      trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                      trait == "ldmc" ~ "LDMC",
+                      trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)")) %>%
+  pivot_longer(cols = c('mean', 'var', 'skew', 'kurt'),
+               names_to = 'moment',
+               values_to = 'estimate') %>%
+  pivot_longer(cols = contains('ci_high'),
+               names_to = 'ci_high_moment',
+               values_to = 'ci_high') %>%
+  mutate(ci_high_moment = str_to_lower(str_extract(ci_high_moment,'[[:alpha:]]*$'))) %>%
+  filter(ci_high_moment == moment) %>%
+  pivot_longer(cols = contains('ci_low'),
+               names_to = 'ci_low_moment',
+               values_to = 'ci_low') %>%
+  mutate(ci_low_moment = str_to_lower(str_extract(ci_low_moment,'[[:alpha:]]*$'))) %>%
+  filter(ci_low_moment == moment) %>%
+  select(-c(global, ci_low_moment, ci_high_moment)) %>%
+  mutate(moment = case_when(moment == 'var' ~ 'variance',
+                            moment == 'kurt' ~ 'kurtosis',
+                            moment == 'skew' ~ 'skewness',
+                            TRUE ~ moment)) %>%
+  group_by(treatment, site, split_by, trait, moment) %>%
+  summarise(estimate = mean(estimate),
+            ci_high = mean(ci_high),
+            ci_low = mean(ci_low))
+
+ggplot(sum_bootstrap) +
+  geom_pointrange(aes(x = paste(site, treatment),
+                      y = estimate,
+                      ymin = ci_low,
+                      ymax = ci_high,
+                      colour = split_by,
+                      group = split_by),
+                  position = position_dodge2(width = 0.5, padding = 0.5)) +
+  facet_wrap(vars(moment, trait),
+             ncol = 4,
+             scales = "free",
+             labeller = label_parsed)  +
+  theme_classic()
+
 
 # Some 'random' plots  ----
 
