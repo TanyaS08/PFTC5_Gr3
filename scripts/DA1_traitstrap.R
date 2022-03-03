@@ -133,10 +133,10 @@ plots <-
   filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "Wet_Mass_g")) %>%
   #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(# Rename traits for labels
-         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
-                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
-                           trait == "ldmc" ~ "LDMC",
-                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)")) %>%
+    trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                      trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                      trait == "ldmc" ~ "LDMC",
+                      trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)")) %>%
   filter(!is.na(trait))
 
 ggplot(plots) +
@@ -165,11 +165,46 @@ ggplot(plots) +
 
 # Nonparametric Bootstrapping  ----
 
-bootstrapped_moments = 
-  trait_np_bootstrap(
-    trait_imputation, 
-    nrep = 200
-  )
+# initiate empty list
+trait_bootstrap_list = vector(mode = "list", length = length(trait_impute_list))
+
+for (i in 1:length(trait_impute_list)) {
+  
+  trait_bootstrap_list[[i]] = 
+    trait_np_bootstrap(
+      trait_impute_list[[i]], 
+      nrep = 20
+    )
+  
+}
+
+# combine by how dataframes were split
+
+trait_bootstrap_treat.site = 
+  do.call(rbind.data.frame,trait_bootstrap_list[1:6]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("treat.site"),
+         split_by = as.factor("treat.site"),
+         split_by = as.factor("treat.site"))
+
+trait_bootstrap_site = 
+  do.call(rbind.data.frame,trait_bootstrap_list[7:9]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("site")) %>%
+  select(-c(site_trait)) %>%
+  rename(site = site_comm)
+
+trait_bootstrap_treat = 
+  do.call(rbind.data.frame,trait_bootstrap_list[10:11]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("treat")) %>%
+  select(-c(treatment_trait)) %>%
+  rename(treatment = treatment_comm)
+
+trait_bootstrap_no.split = 
+  do.call(rbind.data.frame,trait_bootstrap_list[12]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("no.split"))
 
 
 # Summarise Bootstrapping Output  ----
