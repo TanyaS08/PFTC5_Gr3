@@ -38,7 +38,8 @@ comm_list =
     species_ %>%
       split(.$site),
     species_ %>%
-      split(.$treatment))
+      split(.$treatment),
+    list(species_))
 
 
 trait_list = 
@@ -47,13 +48,15 @@ trait_list =
     traits_ %>%
       split(.$site),
     traits_ %>%
-      split(.$treatment))
+      split(.$treatment),
+    list(traits_))
 
 # list with scale specified
 hierarchy = 
   c(rep(list(c("year", "season", "month", "plot_id")), 6),              #treatment.site
     rep(list(c("year", "season", "month", "treatment", "plot_id")), 3), #site
-    rep(list(c("year", "season", "month", "site", "plot_id")), 2)       #treatment
+    rep(list(c("year", "season", "month", "site", "plot_id")), 2),      #treatment
+    rep(list(c("year", "season", "month", "site", "treatment", "plot_id")), 1)       #none
   )
 
 ### Trait Imputation ----
@@ -108,12 +111,18 @@ trait_impute_treat =
   select(-c(treatment_trait)) %>%
   rename(treatment = treatment_comm)
 
+trait_impute_no.split = 
+  do.call(rbind.data.frame,trait_impute_list[12]) %>%
+  ungroup() %>%
+  mutate(split_by = as.factor("no.split"))
+
 #some plots
 
 plots <-
   rbind(trait_impute_treat.site,
         trait_impute_site,
-        trait_impute_treat) %>%
+        trait_impute_treat,
+        trait_impute_no.split) %>%
   unite(
     #new variable name
     plot,
