@@ -29,6 +29,146 @@ traits_ =
   mutate(treatment = as.factor(treatment),
          plot_id = as.factor(plot_id))
 
+### Traitstrap ----
+
+#' Note we will split the dataset six ways based on the different combos of
+#' site and treatment
+
+### >> a) Split datasets and make list ----
+
+comm =
+  species_ %>%
+  #split by site & treatment
+  split(list(.$treatment, .$site))
+
+trait = 
+  traits_ %>%
+  #split by site & treatment
+  split(list(.$treatment, .$site))
+
+### >> b) Impute ----
+
+# initiate empty list
+impute_trait = vector(mode = "list", length = length(trait))
+
+for (i in 1:length(trait)) {
+  
+  impute_trait[[i]] =
+    trait_impute(
+      # input data (mandatory)
+      comm = comm[[i]],
+      traits = trait[[i]],
+      
+      # specifies columns in your data (mandatory)
+      abundance_col = "cover",
+      taxon_col = "taxon",
+      trait_col = "trait",
+      value_col = "value",
+      
+      # specifies sampling hierarchy
+      scale_hierarchy = c("year", "season", "month", "plot_id"),
+      
+      # min number of samples
+      min_n_in_sample = 3
+    )
+  
+}
+
+### >> c) Bootstrap raw ----
+
+bootstrap_raw = vector(mode = "list", length = length(impute_trait))
+
+for (i in 1:length(impute_trait)) {
+  
+  bootstrap_raw[[i]] = 
+    trait_np_bootstrap(
+      impute_trait[[i]], 
+      sample_size = 200,
+      raw = TRUE
+    )
+  
+}
+
+### >> d) Bootstrap summary ----
+
+# initiate empty list
+sum_bootstrap = vector(mode = "list", length = length(impute_trait))
+
+sites = c(rep("ACJ", 2), rep("QUE", 2), rep("TRE", 2))
+treatments = rep(c("C", "NB"), 3)
+
+for (i in 1:length(sum_bootstrap)) {
+  
+  x = 
+    trait_np_bootstrap(
+      impute_trait[[i]], 
+      nrep = 200
+    )  %>%
+    mutate(site = paste(sites[i]),
+           treatment = treatments[i])
+  
+  # 'reassign' sacle attributes the site & treatment level
+  
+  attr(x, "attrib")$scale_hierarchy = c("treatment", "site", "trait")
+  
+  # now we summarise at the new hierachy
+  sum_bootstrap[[i]] = 
+    trait_summarise_boot_moments(x) %>%
+    # and make the output data 'pretty'
+    pivot_longer(cols = c('mean', 'var', 'skew', 'kurt'),
+                 names_to = 'moment',
+                 values_to = 'estimate') %>%
+    pivot_longer(cols = contains('ci_high'),
+                 names_to = 'ci_high_moment',
+                 values_to = 'ci_high') %>%
+    mutate(ci_high_moment = str_to_lower(str_extract(ci_high_moment,'[[:alpha:]]*$'))) %>%
+    filter(ci_high_moment == moment) %>%
+    pivot_longer(cols = contains('ci_low'),
+                 names_to = 'ci_low_moment',
+                 values_to = 'ci_low') %>%
+    mutate(ci_low_moment = str_to_lower(str_extract(ci_low_moment,'[[:alpha:]]*$'))) %>%
+    filter(ci_low_moment == moment) %>%
+    select(-c(ci_low_moment, ci_high_moment)) %>%
+    mutate(moment = case_when(moment == 'var' ~ 'variance',
+                              moment == 'kurt' ~ 'kurtosis',
+                              moment == 'skew' ~ 'skewness',
+                              TRUE ~ moment)) %>%
+    group_by(treatment, site, trait, moment) %>%
+    summarise(estimate = mean(estimate),
+              ci_high = mean(ci_high),
+              ci_low = mean(ci_low))
+}
+
+### >> e) Plot ----
+
+ggplot(do.call(rbind.data.frame, sum_bootstrap[1:6])%>%
+         unite(
+           #new variable name
+           plot,
+           #cols to combine
+           c(site, treatment),
+           sep = " ", remove = FALSE
+         ) %>%
+         filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
+         #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
+         mutate(# Rename traits for labels
+           trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                             trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                             trait == "ldmc" ~ "LDMC",
+                             trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)"))) +
+  geom_pointrange(aes(x = site,
+                      y = estimate,
+                      ymin = ci_low,
+                      ymax = ci_high,
+                      colour = treatment,
+                      group = treatment),
+                  position = position_dodge2(width = 0.5, padding = 0.5)) +
+  facet_wrap(vars(moment, trait),
+             ncol = 4,
+             scales = "free",
+             labeller = label_parsed)  +
+  theme_classic()
+
 ### Different dataset splits ----
 
 #' Note this splits the dataset either by site, treatment or treatment and site
