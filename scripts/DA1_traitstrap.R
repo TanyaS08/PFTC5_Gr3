@@ -1,10 +1,10 @@
 #' Calculating bootstrapped means using {traitstrap}
 
-### Call source script----
+### Call source script ----
 
 source(here::here(path = "scripts/0_data_import.R"))
 
-### Packages----
+### Packages ----
 
 # install.packages("remotes")
 # remotes::install_github("richardjtelford/traitstrap")
@@ -12,9 +12,8 @@ library(traitstrap)
 library(purrr)
 library(patchwork) #this is for plots remove later
 
-### Wrangling----
-
-# create 'internal' df's taht have the correct 'grammar' for traitsftap functions
+### Wrangling ----
+# create 'internal' df's that have the correct 'grammar' for traitsftap functions
 
 species_ =
   species %>%
@@ -30,28 +29,35 @@ traits_ =
   mutate(treatment = as.factor(treatment),
          plot_id = as.factor(plot_id))
 
+### Different dataset splits ----
+
+#' Note this splits the dataset either by site, treatment or treatment and site
+#' and then traitstraps at the level of the dataset (as opposed to not splitting
+#' and then having the scale hiearchy act across all scales)
+
 # make lists with the various combos of grouping vars
+# this is easier to loop through
 
 comm_list =
   c(species_ %>%
-      split(list(.$treatment, .$site), drop = TRUE),
+      split(list(.$treatment, .$site), drop = TRUE), #split by site & treatment
     species_ %>%
-      split(.$site),
+      split(.$site), #split by site
     species_ %>%
-      split(.$treatment),
+      split(.$treatment), #split by treatment
     list(species_))
 
 
 trait_list = 
   c(traits_ %>%
-      split(list(.$treatment, .$site), drop = TRUE),
+      split(list(.$treatment, .$site), drop = TRUE), #split by site & treatment
     traits_ %>%
-      split(.$site),
+      split(.$site, drop = TRUE), #split by site & treatment
     traits_ %>%
-      split(.$treatment),
+      split(.$treatment, drop = TRUE), #split by site & treatment
     list(traits_))
 
-# list with scale specified
+# list with scale specified in traitstrap imputation
 hierarchy = 
   c(rep(list(c("year", "season", "month", "plot_id")), 6),              #treatment.site
     rep(list(c("year", "season", "month", "treatment", "plot_id")), 3), #site
@@ -59,7 +65,7 @@ hierarchy =
     rep(list(c("year", "season", "month", "site", "treatment", "plot_id")), 1)       #none
   )
 
-### Trait Imputation ----
+### Trait Imputation
 
 # initiate empty list
 trait_impute_list = vector(mode = "list", length = length(trait_list))
@@ -116,7 +122,8 @@ trait_impute_no.split =
   ungroup() %>%
   mutate(split_by = as.factor("no.split"))
 
-# Nonparametric Bootstrapping  ----
+# Nonparametric Bootstrapping
+# note here we are outputting the raw bootstrapped data
 
 # initiate empty list
 trait_bootstrap_list = vector(mode = "list", length = length(trait_impute_list))
@@ -126,11 +133,11 @@ for (i in 1:length(trait_impute_list)) {
   trait_bootstrap_list[[i]] = 
     trait_np_bootstrap(
       trait_impute_list[[i]], 
-      nrep = 20,
+      sample_size = 200,
       raw = TRUE
     )
-  
-}
+
+  }
 
 # combine by how dataframes were split
 
@@ -161,7 +168,7 @@ trait_bootstrap_no.split =
   ungroup() %>%
   mutate(split_by = as.factor("no.split"))
 
-#some plots
+# plotting
 
 plots <-
   rbind(trait_bootstrap_treat.site,
@@ -176,7 +183,6 @@ plots <-
     sep = " ", remove = FALSE
   ) %>%
   filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
-  #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(# Rename traits for labels
     trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
                       trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
@@ -208,10 +214,16 @@ ggplot(plots) +
   plot_layout(ncol = 1)
 
 
-# Summarise Bootstrapping Output  ----
+# Summarise Bootstrapping Output
+# this runs `trait_np_bootstrap` a second time but not the raw data
 
 # initiate empty list
 sum_bootstrap_list = vector(mode = "list", length = length(trait_bootstrap_list))
+
+
+# TODO
+#' change  attributes for summary so that summaries are at the site/treamtent 
+#' level and not all the way down to plot
 
 for (i in 1:length(sum_bootstrap_list)) {
   
@@ -219,12 +231,13 @@ for (i in 1:length(sum_bootstrap_list)) {
     trait_summarise_boot_moments(
       trait_np_bootstrap(
         trait_impute_list[[i]], 
-        nrep = 20
+        nrep = 200
       )
     )
 }
 
-# there must be a better way to map through the list...
+# we can now plot this
+# although there must be a better way to map through the list...
 
 sum_bootstrap = 
   rbind(sum_bootstrap_list[[1]] %>%
@@ -269,7 +282,6 @@ sum_bootstrap =
         sum_bootstrap_list[[12]] %>%
           mutate(split_by = as.factor("no.split"))) %>%
   filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
-  #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(# Rename traits for labels
     trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
                       trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
@@ -313,7 +325,34 @@ ggplot(sum_bootstrap) +
   theme_classic()
 
 
-# Some 'random' plots  ----
+# Free space  ----
 
-autoplot(trait_impute_list[[1]]) + 
-  theme(axis.text.x = element_text(size = 8, angle = 90, vjust = 0.5))
+ggplot(trait_bootstrap_treat.site %>%
+         unite(
+           #new variable name
+           plot,
+           #cols to combine
+           c(site, treatment),
+           sep = " ", remove = FALSE
+         ) %>%
+         filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
+         #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
+         mutate(# Rename traits for labels
+           trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                             trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                             trait == "ldmc" ~ "LDMC",
+                             trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)"))) +
+  geom_density_ridges(aes(y = site,
+                          x = value,
+                          fill = treatment,
+                          colour = treatment),
+                      alpha = 0.6) +
+  facet_wrap(vars(trait),
+             scales = "free_x",
+             labeller = label_parsed,
+             ncol = 2) +
+  labs(y = "Density",
+       x = "Trait Value") +
+  theme_classic() +
+  labs(title = "Raw bootstrapped distribution when dataset split by site & treatment")
+
