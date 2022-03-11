@@ -89,6 +89,9 @@ for (i in 1:length(impute_trait)) {
   
 }
 
+# TODO
+# Export this as a .csv
+
 ### >> d) Bootstrap summary ----
 
 # initiate empty list
@@ -138,6 +141,9 @@ for (i in 1:length(sum_bootstrap)) {
               ci_high = mean(ci_high),
               ci_low = mean(ci_low))
 }
+
+# TODO
+# Export this as a .csv
 
 ### >> e) Plot ----
 
