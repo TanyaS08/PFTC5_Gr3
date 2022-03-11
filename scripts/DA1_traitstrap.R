@@ -92,6 +92,31 @@ for (i in 1:length(impute_trait)) {
 # TODO
 # Export this as a .csv
 
+### >> c.1) Plot
+
+ggplot(do.call(rbind.data.frame, bootstrap_raw[1:6]) %>%
+         ungroup() %>%
+         filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
+         #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
+         mutate(# Rename traits for labels
+           trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                             trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                             trait == "ldmc" ~ "LDMC",
+                             trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)"))) +
+  geom_density_ridges(aes(y = site_comm,
+                          x = value,
+                          fill = treatment_comm,
+                          colour = treatment_comm),
+                      alpha = 0.6) +
+  facet_wrap(vars(trait),
+             scales = "free_x",
+             labeller = label_parsed,
+             ncol = 2) +
+  labs(y = "Density",
+       x = "Trait Value") +
+  theme_classic() +
+  labs(title = "Raw bootstrapped distribution")
+
 ### >> d) Bootstrap summary ----
 
 # initiate empty list
@@ -145,7 +170,7 @@ for (i in 1:length(sum_bootstrap)) {
 # TODO
 # Export this as a .csv
 
-### >> e) Plot ----
+### >> d.1) Plot
 
 ggplot(do.call(rbind.data.frame, sum_bootstrap[1:6])%>%
          unite(
