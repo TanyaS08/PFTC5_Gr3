@@ -96,25 +96,43 @@ for (i in 1:length(impute_trait)) {
 
 ggplot(do.call(rbind.data.frame, bootstrap_raw[1:6]) %>%
          ungroup() %>%
+         #combine both Site and treatment to one variable
+         unite(
+           #new variable name
+           plot,
+           #cols to combine
+           c(site_comm, treatment_comm),
+           sep = " ", remove = FALSE
+         ) %>%
          filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
          #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
-         mutate(# Rename traits for labels
-           trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
-                             trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
-                             trait == "ldmc" ~ "LDMC",
-                             trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)"))) +
+         mutate(site_comm = case_when(site_comm == "ACJ" ~ "3 468 m.a.s.l.",
+                                 site_comm == "TRE" ~ "3 715 m.a.s.l.",
+                                 site_comm == "QUE" ~ "3 888 m.a.s.l"),
+                # Rename traits for labels
+                trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                                  trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                                  trait == "ldmc" ~ "LDMC",
+                                  trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)"))) +
   geom_density_ridges(aes(y = site_comm,
                           x = value,
-                          fill = treatment_comm,
-                          colour = treatment_comm),
+                          fill = plot,
+                          colour = plot),
                       alpha = 0.6) +
   facet_wrap(vars(trait),
              scales = "free_x",
              labeller = label_parsed,
-             ncol = 2) +
+             ncol = 2)  +
+  scale_fill_manual(name = "Plot",
+                    values = colours_site$c,
+                    breaks = colours_site$t) +
+  scale_colour_manual(name = "Plot",
+                      values = colours_site$c,
+                      breaks = colours_site$t) +
   labs(y = "Density",
        x = "Trait Value") +
   theme_classic() +
+  theme(legend.position = "bottom") +
   labs(title = "Raw bootstrapped distribution")
 
 ### >> d) Bootstrap summary ----
