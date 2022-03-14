@@ -92,6 +92,7 @@ for (i in 1:length(impute_trait)) {
 # Export this as a .csv
 
 write.csv(do.call(rbind.data.frame, bootstrap_raw[1:6]),
+          #TODO clean columns
           file = here::here(path = "data/processed/traits_traitstrapped_raw.csv"))
 
 ### >> c.1) Plot
@@ -145,6 +146,7 @@ ggsave(here(path = "output/traitstrap_raw_values.png"),
 # initiate empty list
 sum_bootstrap = vector(mode = "list", length = length(impute_trait))
 
+# we need to add these as columns so that we can reassign attributes
 sites = c(rep("ACJ", 2), rep("QUE", 2), rep("TRE", 2))
 treatments = rep(c("C", "NB"), 3)
 
@@ -158,9 +160,9 @@ for (i in 1:length(sum_bootstrap)) {
     mutate(site = paste(sites[i]),
            treatment = treatments[i])
   
-  # 'reassign' sacle attributes the site & treatment level
+  # 'reassign' scale attributes the site & treatment level
   
-  attr(x, "attrib")$scale_hierarchy = c("treatment", "site", "trait")
+  attr(x, "attrib")$scale_hierarchy = c("treatment", "site", "plot_id", "trait")
   
   # now we summarise at the new hierachy
   sum_bootstrap[[i]] = 
@@ -184,7 +186,7 @@ for (i in 1:length(sum_bootstrap)) {
                               moment == 'kurt' ~ 'kurtosis',
                               moment == 'skew' ~ 'skewness',
                               TRUE ~ moment)) %>%
-    group_by(treatment, site, trait, moment) %>%
+    group_by(treatment, site, trait, moment, plot_id) %>%
     summarise(estimate = mean(estimate),
               ci_high = mean(ci_high),
               ci_low = mean(ci_low))
