@@ -134,8 +134,11 @@ ggplot(do.call(rbind.data.frame, bootstrap_raw[1:6]) %>%
   labs(y = "Density",
        x = "Trait Value") +
   theme_classic() +
-  theme(legend.position = "bottom") +
-  labs(title = "Raw bootstrapped distribution")
+  theme(legend.position = "bottom")
+
+ggsave(here(path = "output/traitstrap_raw_values.png"),
+       height = 8.3, width = 15,
+       units = "in", dpi = 300)
 
 ### >> d) Bootstrap summary ----
 
@@ -221,6 +224,10 @@ ggplot(do.call(rbind.data.frame, sum_bootstrap[1:6])%>%
              scales = "free",
              labeller = label_parsed)  +
   theme_classic()
+
+ggsave(here(path = "output/community_moments_w_CI.png"),
+       height = 8.3, width = 15,
+       units = "in", dpi = 300)
 
 ### Different dataset splits ----
 
