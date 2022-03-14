@@ -108,7 +108,7 @@ density_plots <-
     c(site, treatment),
     sep = " ", remove = FALSE
   ) %>%
-  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
+  filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "Wet_Mass_g")) %>%
   #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
   mutate(site = case_when(site == "ACJ" ~ "3 468 m.a.s.l.",
                           site == "TRE" ~ "3 715 m.a.s.l.",
@@ -117,10 +117,8 @@ density_plots <-
          trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
                            trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
                            trait == "ldmc" ~ "LDMC",
-                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
-                           trait == "phosphorus" ~ "Phosphorus~content~(mg/g)",
-                           trait == "nitrogen" ~ "Nitrogen~content~(mg/g)",
-                           trait == "c_n" ~ "Carbon~per~leaf~nitrogen"))
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)")) %>%
+  filter(!is.na(trait))
 
 density_plots %>%
   ggplot() +
