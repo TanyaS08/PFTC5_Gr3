@@ -91,8 +91,12 @@ for (i in 1:length(impute_trait)) {
 
 # Export this as a .csv
 
-write.csv(do.call(rbind.data.frame, bootstrap_raw[1:6]),
-          #TODO clean columns
+write.csv(do.call(rbind.data.frame, bootstrap_raw[1:6]) %>%
+            ungroup() %>%
+            select(taxon, cover, site_comm, treatment_comm, plot_id, year, 
+                   season, month, trait, value) %>%
+            rename('site' = 'site_comm',
+                   'treatment' = 'treatment_comm'),
           file = here::here(path = "data/processed/traits_traitstrapped_raw.csv"))
 
 ### >> c.1) Plot
