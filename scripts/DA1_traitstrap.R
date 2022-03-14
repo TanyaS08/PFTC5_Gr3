@@ -92,7 +92,7 @@ for (i in 1:length(impute_trait)) {
 # Export this as a .csv
 
 write.csv(do.call(rbind.data.frame, bootstrap_raw[1:6]),
-          file = "data/processed/traits_traitstrapped_raw.csv")
+          file = here::here(path = "data/processed/traits_traitstrapped_raw.csv"))
 
 ### >> c.1) Plot
 
@@ -190,7 +190,7 @@ for (i in 1:length(sum_bootstrap)) {
 # Export this as a .csv
 
 write.csv(do.call(rbind.data.frame, sum_bootstrap[1:6]),
-          file = "data/processed/traits_traitstrapped_moments.csv")
+          file = here::here(path = "data/processed/traits_traitstrapped_moments.csv"))
 
 ### >> d.1) Plot
 
