@@ -305,3 +305,107 @@ summary(LDMC_analysis_wet)
 
 ```
 
+# Use the Trait-strapped data instead
+```{r}
+# Load new datasets from imputations
+traits_ts <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+traits_wide_ts <- traits_ts %>% pivot_wider(names_from = c(trait),
+                                      values_from = c(value))
+
+# Community weighted means instead
+traits_CWM <- read.csv("./data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
+
+```
+
+# Community weighted mean plots
+
+```{r}
+
+# Site by elevation
+traits_CWM$site <- factor(traits_CWM$site, 
+                    levels = c("ACJ", "TRE", "QUE"))
+
+(traits_CWM %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2')
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+geom_pointrange(aes(x=site, y=log(estimate),
+                    ymin=log(ci_low), ymax=log(ci_high),
+                    color = treatment),
+                    width=0.2,
+                    position = position_dodge(width = 0.3),
+                    shape = 20) +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_color_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom"))
+
+```
+
+# Community Weighted Mean Analyses
+Still a work in progress. Need to change formatting to match new CWM bootstrapped datasets.
+
+```{r}
+# No elevation values here, so check original dataset
+table(traits_wide$site, traits_wide$plot_id, traits_wide$elevation)
+# NB. Site and elevation are not synonymous - multiple elevations per site (plots)
+# So perhaps match by plot_id and elevation, rather than site
+# However, it seems multiple plots are represented at 3400masl for example..
+
+traits_CWM <- traits_CWM %>%
+    mutate(
+         elevation_ave = case_when(site == "ACJ" ~ "3468",
+                           site == "TRE" ~ "3715",
+                           site == "QUE" ~ "3888"))
+         
+# Pivot wider
+traits_CWM_wide <- traits_CWM %>% pivot_wider(names_from = c(trait),
+                                      values_from = c(estimate))
+
+
+### Linear mixed effects models with average elevation for now
+# SLA
+SLA_analysis_CWM <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id),
+                         data = traits_CWM_wide)
+anova(SLA_analysis_CWM)
+summary(SLA_analysis_CWM)
+
+# Leaf Area
+LA_analysis_CWM <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id),
+                        data = traits_CWM)
+anova(LA_analysis_CWM)
+summary(LA_analysis_CWM)
+
+# Plant Height
+PlantHeight_analysis_CWM <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id), data = traits_CWM)
+anova(PlantHeight_analysis_CWM)
+summary(PlantHeight_analysis_CWM)
+
+# Leaf thickness
+LeafThickness_analysis_CWM <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id), data = traits_CWM)
+anova(LeafThickness_analysis_CWM)
+summary(LeafThickness_analysis_CWM)
+
+# LDMC
+LDMC_analysis_CWM <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id),
+                          data = traits_CWM)
+anova(LDMC_analysis_CWM)
+summary(LDMC_analysis_CWM)
+```
+
