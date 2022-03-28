@@ -16,7 +16,7 @@ library(ggplot2)
 source(here::here(path = "scripts/0_data_import.R"))
 
 traits_wide <- traits %>% pivot_wider(names_from = c(trait),
-                                      values_from = c(value))
+                                      values_from = c(value)) %>% mutate(plot_id = paste0(site,"_" ,plot_id))
 
 ```
 
@@ -32,6 +32,7 @@ Using 'site' rather than elevation for the plots, but in the analysis need the n
 # Site by elevation
 traits$site <- factor(traits$site, 
                     levels = c("ACJ", "TRE", "QUE"))
+
 
 traits %>%
   filter(
@@ -73,29 +74,29 @@ library(lmerTest)
 # Models for all datasets (years, seasons)
 # NB. Now run with season and functional group added in when using complete dataset (i.e. Puna and PFTC data from 2018-2020 and wet/dry seasons). NOTE: When using community weighted means, we won't keep functional group. Similarly for wet and dry only, the season term would be removed. 
 
-# Many issues with convergence (not resolved until we use CWM)
+# Scaling issues - can't resolve with elevation.
 # SLA
-SLA_analysis <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group) + (1|season), data = traits_wide)
+SLA_analysis <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(SLA_analysis)
 summary(SLA_analysis)
 
 # Leaf Area
-LA_analysis <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+LA_analysis <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(LA_analysis)
 summary(LA_analysis)
 
 # Plant Height
-PlantHeight_analysis <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+PlantHeight_analysis <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(PlantHeight_analysis)
 summary(PlantHeight_analysis)
 
 # Leaf thickness
-LeafThickness_analysis <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+LeafThickness_analysis <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(LeafThickness_analysis)
 summary(LeafThickness_analysis)
 
 # LDMC
-LDMC_analysis <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+LDMC_analysis <- lmer(ldmc ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
 anova(LDMC_analysis)
 summary(LDMC_analysis)
 ```
@@ -142,29 +143,29 @@ traits %>%
 # Analysis
 
 # SLA
-SLA_analysis_dry <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+SLA_analysis_dry <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(SLA_analysis_dry)
 summary(SLA_analysis_dry)
 
 # Leaf Area
-LA_analysis_dry <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+LA_analysis_dry <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(LA_analysis_dry)
 summary(LA_analysis_dry)
 
 # Plant Height
-PlantHeight_analysis_dry <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+PlantHeight_analysis_dry <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(PlantHeight_analysis_dry)
 summary(PlantHeight_analysis_dry)
 
 # Leaf thickness
-LeafThickness_analysis_dry <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+LeafThickness_analysis_dry <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(LeafThickness_analysis_dry)
 summary(LeafThickness_analysis_dry)
 
 # LDMC
-LDMC_analysis_dry <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+LDMC_analysis_dry <- lmer(ldmc ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
 anova(LDMC_analysis_dry)
-summmary(LDMC_analysis_dry)
+summary(LDMC_analysis_dry)
 ```
 
 # Wet season only plots and analysis
@@ -207,28 +208,28 @@ traits_wide_wet <- traits_wide %>%
   filter(c(season == "wet_season"))
 
 # SLA
-SLA_analysis_wet <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+SLA_analysis_wet <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(SLA_analysis_wet)
 summary(SLA_analysis_wet)
 
 # Leaf Area
-LA_analysis_wet <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+LA_analysis_wet <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(LA_analysis_wet)
 summary(LA_analysis_wet)
 
 
 # Plant Height
-PlantHeight_analysis_wet <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+PlantHeight_analysis_wet <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(PlantHeight_analysis_wet)
 summary(PlantHeight_analysis_wet)
 
 # Leaf thickness
-LeafThickness_analysis_wet <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_wet)
+LeafThickness_analysis_wet <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_wet)
 anova(LeafThickness_analysis_wet)
 summary(LeafThickness_analysis_wet)
 
 # LDMC
-LDMC_analysis_wet <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+LDMC_analysis_wet <- lmer(ldmc ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
 anova(LDMC_analysis_wet)
 summary(LDMC_analysis_wet)
 ```
@@ -313,7 +314,7 @@ traits_wide_ts <- traits_ts %>% pivot_wider(names_from = c(trait),
                                       values_from = c(value))
 
 # Community weighted means instead
-traits_CWM <- read.csv("./data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- read.csv("data/processed/traits_traitstrapped_moments.csv", header = TRUE)
 traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
 
 ```
@@ -363,49 +364,57 @@ Still a work in progress. Need to change formatting to match new CWM bootstrappe
 
 ```{r}
 # No elevation values here, so check original dataset
-table(traits_wide$site, traits_wide$plot_id, traits_wide$elevation)
-# NB. Site and elevation are not synonymous - multiple elevations per site (plots)
-# So perhaps match by plot_id and elevation, rather than site
-# However, it seems multiple plots are represented at 3400masl for example..
+elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, elevation) %>% unique() %>% view()
 
-traits_CWM <- traits_CWM %>%
-    mutate(
-         elevation_ave = case_when(site == "ACJ" ~ "3468",
-                           site == "TRE" ~ "3715",
-                           site == "QUE" ~ "3888"))
+# Found some seedlings... probably should remove in script 0.
+# Also likely to influence trait-strap estimates?
+traits %>% filter(is.na(plot_id))
+
+# Create elevation from original dataset
+traits_CWM <- traits_CWM %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
+
          
 # Pivot wider
-traits_CWM_wide <- traits_CWM %>% pivot_wider(names_from = c(trait),
-                                      values_from = c(estimate))
+traits_CWM_wide <- traits_CWM %>% select(-c(ci_high, ci_low)) %>% 
+  pivot_wider(names_from = c(trait), values_from = c(estimate)) %>% mutate(plot_id = paste0(site,"_" ,plot_id))
 
 
-### Linear mixed effects models with average elevation for now
+### Linear mixed effects models
+# Warning regarding scaling - can't really do much about elevation. 
 # SLA
-SLA_analysis_CWM <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id),
+SLA_analysis_CWM <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id),
                          data = traits_CWM_wide)
 anova(SLA_analysis_CWM)
 summary(SLA_analysis_CWM)
 
 # Leaf Area
-LA_analysis_CWM <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id),
-                        data = traits_CWM)
+LA_analysis_CWM <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id),
+                        data = traits_CWM_wide)
 anova(LA_analysis_CWM)
 summary(LA_analysis_CWM)
 
 # Plant Height
-PlantHeight_analysis_CWM <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id), data = traits_CWM)
+PlantHeight_analysis_CWM <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id), data = traits_CWM_wide)
 anova(PlantHeight_analysis_CWM)
 summary(PlantHeight_analysis_CWM)
 
 # Leaf thickness
-LeafThickness_analysis_CWM <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id), data = traits_CWM)
+LeafThickness_analysis_CWM <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id), data = traits_CWM_wide)
 anova(LeafThickness_analysis_CWM)
 summary(LeafThickness_analysis_CWM)
 
 # LDMC
-LDMC_analysis_CWM <- lmer(ldmc ~ treatment*elevation + (1|site/plot_id),
-                          data = traits_CWM)
+LDMC_analysis_CWM <- lmer(ldmc ~ treatment*elevation + (1|plot_id),
+                          data = traits_CWM_wide)
 anova(LDMC_analysis_CWM)
 summary(LDMC_analysis_CWM)
+```
+
+
+
+# Predicted mean plots for Community Weighted Means
+
+```{r}
+
 ```
 
