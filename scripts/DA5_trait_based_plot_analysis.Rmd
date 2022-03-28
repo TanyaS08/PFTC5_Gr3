@@ -16,7 +16,11 @@ library(ggplot2)
 source(here::here(path = "scripts/0_data_import.R"))
 
 traits_wide <- traits %>% pivot_wider(names_from = c(trait),
-                                      values_from = c(value)) %>% mutate(plot_id = paste0(site,"_" ,plot_id))
+                                      values_from = c(value)) %>% 
+  # Add unique plot_ID code (random effects doesn't like nested nature)
+  mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id)) %>% 
+  # Add in column for colouring with treatment and site
+  mutate(site_treatment = paste0(site, "_", treatment))
 
 ```
 
@@ -306,6 +310,177 @@ summary(LDMC_analysis_wet)
 
 ```
 
+# Predicted means plots for raw trait values
+Still a work in progress - update models above with new random effects structure...
+Same thing for the community weighted mean ones below, though potentially less issues with random effects as values are already averaged. 
+
+```{r}
+##Colour palette
+
+#specify the three colours for sites - CHANGE HERE
+colours = c("#F50054", "#DB6300", "#FFFA01")
+
+colours_site <- tribble(
+  ~t, ~c,
+  "ACJ", colours[1],
+  "TRE", colours[2],
+  "QUE", colours[3],
+  "ACJ C", colours[1],
+  "ACJ NB", colorspace::darken(colours[1], 0.3),
+  "TRE C", colours[2],
+  "TRE NB", colorspace::darken(colours[2], 0.3),
+  "QUE C", colours[3],
+  "QUE NB", colorspace::darken(colours[3], 0.3)
+)
+
+
+######################
+# SLA
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+SLA_analysis_site <- lmer(log(sla_cm2_g) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(SLA_analysis_site)
+summary(SLA_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_SLA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, sla_cm2_g)
+
+
+# Use 'predict' on models
+newdata_SLA$predicted_SLA <- 
+  predict(SLA_analysis_site, newdata = newdata_SLA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_SLA %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_SLA = mean(predicted_SLA)) %>% 
+  ggplot(aes(x = treatment, y = predicted_SLA, fill = site)) + 
+  geom_violin(position=position_dodge(0.5)) + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_SLA, x = treatment, group = site)) # currently not working
+
+
+  
+
+######################
+# Leaf Area
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+LA_analysis_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_site)
+summary(LA_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_LA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, leaf_area_cm2)
+
+
+# Use 'predict' on models
+newdata_LA$predicted_LA <- 
+  predict(LA_analysis_site, newdata = newdata_LA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_LA %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LA = mean(predicted_LA)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LA, fill = site)) + 
+  geom_violin(position=position_dodge(0.5)) + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+######################
+# Plant Height
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+PH_analysis_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(PH_analysis_site)
+summary(PH_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_PH <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, plant_height_cm)
+
+
+# Use 'predict' on models
+newdata_PH$predicted_PH <- 
+  predict(PH_analysis_site, newdata = newdata_PH, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_PH %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_PH = mean(predicted_PH)) %>% 
+  ggplot(aes(x = treatment, y = predicted_PH, fill = site)) + 
+  geom_violin(position=position_dodge(0.5)) + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_PH, x = treatment, group = site)) # currently not working
+
+
+######################
+# Leaf Thickness
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+LT_analysis_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LT_analysis_site)
+summary(LT_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_LT <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, leaf_thickness_mm)
+
+
+# Use 'predict' on models
+newdata_LT$predicted_LT <- 
+  predict(LT_analysis_site, newdata = newdata_LT, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_LT %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LT = mean(predicted_LT)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LT, fill = site)) + 
+  geom_violin(position=position_dodge(0.5)) + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_LT, x = treatment, group = site)) # currently not working
+
+
+
+######################
+# LDMC
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+LDMC_analysis_site <- lmer(log(ldmc) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LDMC_analysis_site)
+summary(LDMC_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_LDMC <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, ldmc)
+
+
+# Use 'predict' on models
+newdata_LDMC$predicted_LDMC <- 
+  predict(LDMC_analysis_site, newdata = newdata_LDMC, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_LDMC %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LDMC = mean(predicted_LDMC)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LDMC, fill = site)) + 
+  geom_violin(position=position_dodge(0.5)) + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_LDMC, x = treatment, group = site)) # currently not working
+
+
+```
+
+
+
 # Use the Trait-strapped data instead
 ```{r}
 # Load new datasets from imputations
@@ -413,8 +588,155 @@ summary(LDMC_analysis_CWM)
 
 
 # Predicted mean plots for Community Weighted Means
+Still a work in progress...
 
 ```{r}
+#########################
+# SLA
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+SLA_analysis_site_CWM <- lmer(log(sla_cm2_g) ~ treatment*site + (1|plot_id), data = traits_CWM_wide)
+anova(SLA_analysis_site_CWM)
+summary(SLA_analysis_site_CWM)
+
+# Create newdate for CWM SLA
+newdata_CWM_SLA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, sla_cm2_g)
+
+# Use 'predict' on models
+newdata_CWM_SLA$predicted_SLA <- 
+  predict(SLA_analysis_site_CWM, newdata = newdata_CWM_SLA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_SLA %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_SLA = mean(predicted_SLA)) %>% 
+  ggplot(aes(x = treatment, y = predicted_SLA, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_SLA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Leaf Area
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|plot_id),
+                        data = traits_CWM_wide)
+anova(LA_analysis_CWM_site)
+summary(LA_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_LA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, leaf_area_cm2)
+
+# Use 'predict' on models
+newdata_CWM_LA$predicted_LA <- 
+  predict(LA_analysis_CWM_site, newdata = newdata_CWM_LA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_LA %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LA = mean(predicted_LA)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LA, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Plant Height
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+PH_analysis_CWM_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|plot_id),
+                        data = traits_CWM_wide)
+anova(PH_analysis_CWM_site)
+summary(PH_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_PH <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, leaf_area_cm2)
+
+# Use 'predict' on models
+newdata_CWM_PH$predicted_PH <- 
+  predict(PH_analysis_CWM_site, newdata = newdata_CWM_PH, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_PH %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_PH = mean(predicted_PH)) %>% 
+  ggplot(aes(x = treatment, y = predicted_PH, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Leaf Thickness
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+LT_analysis_CWM_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|plot_id),
+                        data = traits_CWM_wide)
+anova(LT_analysis_CWM_site)
+summary(LT_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_LT <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, leaf_thickness_mm)
+
+# Use 'predict' on models
+newdata_CWM_LT$predicted_LT <- 
+  predict(LT_analysis_CWM_site, newdata = newdata_CWM_LT, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_LT %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LT = mean(predicted_LT)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LT, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Leaf Dry Matter Content
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+LDMC_analysis_CWM_site <- lmer(log(ldmc) ~ treatment*site + (1|plot_id),
+                        data = traits_CWM_wide)
+anova(LDMC_analysis_CWM_site)
+summary(LDMC_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_LDMC <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, ldmc)
+
+# Use 'predict' on models
+newdata_CWM_LDMC$predicted_LDMC <- 
+  predict(LDMC_analysis_CWM_site, newdata = newdata_CWM_LDMC, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_LDMC %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LDMC = mean(predicted_LDMC)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LDMC, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LDMC, x = treatment, group = site)) # currently not working
+
 
 ```
 
