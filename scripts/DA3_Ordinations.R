@@ -90,3 +90,5 @@ autoplot(PCA, data = species_wide, colour = "site",
          loadings.label = TRUE, loadings.label.size = 3, variance_percentage = TRUE)
 
 #### PCA traits analysis ####
+
+#Need CWM mean traits from this. Will do later
