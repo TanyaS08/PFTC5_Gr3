@@ -10,6 +10,8 @@ library(ape)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+library(ggeffects)
+library(ggpubr)
 
 
 # Load dataset from OSF repository
@@ -22,14 +24,14 @@ traits_wide <- traits %>% pivot_wider(names_from = c(trait),
   # Add in column for colouring with treatment and site
   mutate(site_treatment = paste0(site, "_", treatment))
 
+traits_wide$site <- factor(traits_wide$site, 
+                    levels = c("ACJ", "TRE", "QUE"))
 ```
 
 
 # Plot all data, site by elevation comparisons
 
 Using 'site' rather than elevation for the plots, but in the analysis need the nested nature of plots within sites.
-
-(Yes, we know we could make a function to not replicate plot code, we were just lazy/out of time)
 
 ```{r}
 
@@ -312,6 +314,8 @@ summary(LDMC_analysis_wet)
 
 # Predicted means plots for raw trait values
 Still a work in progress - update models above with new random effects structure...
+But also note, that elevation isn't equivilant for different treatments. Site is used here instead of elevation above.
+
 Same thing for the community weighted mean ones below, though potentially less issues with random effects as values are already averaged. 
 
 ```{r}
@@ -355,7 +359,8 @@ newdata_SLA %>%
   group_by(site, treatment) %>% 
   mutate(mean_SLA = mean(predicted_SLA)) %>% 
   ggplot(aes(x = treatment, y = predicted_SLA, fill = site)) + 
-  geom_violin(position=position_dodge(0.5)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
                       name = "Sites") +
   theme_classic() 
@@ -385,7 +390,8 @@ newdata_LA %>%
   group_by(site, treatment) %>% 
   mutate(mean_LA = mean(predicted_LA)) %>% 
   ggplot(aes(x = treatment, y = predicted_LA, fill = site)) + 
-  geom_violin(position=position_dodge(0.5)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
                       name = "Sites") +
   theme_classic() 
@@ -413,7 +419,8 @@ newdata_PH %>%
   group_by(site, treatment) %>% 
   mutate(mean_PH = mean(predicted_PH)) %>% 
   ggplot(aes(x = treatment, y = predicted_PH, fill = site)) + 
-  geom_violin(position=position_dodge(0.5)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
                       name = "Sites") +
   theme_classic() 
@@ -441,7 +448,8 @@ newdata_LT %>%
   group_by(site, treatment) %>% 
   mutate(mean_LT = mean(predicted_LT)) %>% 
   ggplot(aes(x = treatment, y = predicted_LT, fill = site)) + 
-  geom_violin(position=position_dodge(0.5)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
                       name = "Sites") +
   theme_classic() 
@@ -470,7 +478,8 @@ newdata_LDMC %>%
   group_by(site, treatment) %>% 
   mutate(mean_LDMC = mean(predicted_LDMC)) %>% 
   ggplot(aes(x = treatment, y = predicted_LDMC, fill = site)) + 
-  geom_violin(position=position_dodge(0.5)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
                       name = "Sites") +
   theme_classic() 
@@ -479,17 +488,115 @@ newdata_LDMC %>%
 
 ```
 
+# Using elevation rather than site
+```{r}
+SLA_analysis_elev <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(SLA_analysis_elev)
+summary(SLA_analysis_elev)
+
+SLA_analysis_elev_df <- Effect(c("treatment","elevation"),SLA_analysis_elev) 
+
+(SLA_elev <- ggplot(as.data.frame(SLA_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Specific~Leaf~Area~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     theme_classic())
+ 
+ # Leaf area
+ LA_analysis_elev <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+LA_analysis_elev_df <- Effect(c("treatment","elevation"),LA_analysis_elev) 
+
+(LA_elev <- ggplot(as.data.frame(LA_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Leaf~Area~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     theme_classic())
+ 
+# Plant Height
+ PH_analysis_elev <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+PH_analysis_elev_df <- Effect(c("treatment","elevation"),PH_analysis_elev) 
+
+(PH_elev <- ggplot(as.data.frame(PH_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Plant~Height~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     theme_classic())
+ 
+ # Leaf Thickness
+ LT_analysis_elev <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+LT_analysis_elev_df <- Effect(c("treatment","elevation"),LT_analysis_elev) 
+(LT_elev <- ggplot(as.data.frame(LT_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Leaf~Thickness~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     theme_classic())
+ 
+ # LDMC
+ LDMC_analysis_elev <- lmer(log(ldmc) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+LDMC_analysis_elev_df <- Effect(c("treatment","elevation"),LDMC_analysis_elev) 
+
+(LDMC_elev <- ggplot(as.data.frame(LDMC_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(LDMC~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     theme_classic())
+
+ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
+          nrow = 1, common.legend = TRUE)
+```
 
 
 # Use the Trait-strapped data instead
 ```{r}
 # Load new datasets from imputations
-traits_ts <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+traits_ts <- read.csv("C:/Users/sge010/Documents/PFTC Projects/PFTC_Fire_Manuscript/PFTC5_Gr3/data/processed/traits_traitstrapped_raw.csv", header = TRUE)
 traits_wide_ts <- traits_ts %>% pivot_wider(names_from = c(trait),
                                       values_from = c(value))
 
 # Community weighted means instead
-traits_CWM <- read.csv("data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- read.csv("C:/Users/sge010/Documents/PFTC Projects/PFTC_Fire_Manuscript/PFTC5_Gr3/data/processed/traits_traitstrapped_moments.csv", header = TRUE)
 traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
 
 ```
@@ -545,13 +652,17 @@ elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, ele
 # Also likely to influence trait-strap estimates?
 traits %>% filter(is.na(plot_id))
 
+
 # Create elevation from original dataset
+# Change plot_ID to concatenate site, treatment and plot number
+traits_CWM <- traits_CWM %>%  
+  mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
 traits_CWM <- traits_CWM %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
 
          
 # Pivot wider
 traits_CWM_wide <- traits_CWM %>% select(-c(ci_high, ci_low)) %>% 
-  pivot_wider(names_from = c(trait), values_from = c(estimate)) %>% mutate(plot_id = paste0(site,"_" ,plot_id))
+  pivot_wider(names_from = c(trait), values_from = c(estimate)) 
 
 
 ### Linear mixed effects models
