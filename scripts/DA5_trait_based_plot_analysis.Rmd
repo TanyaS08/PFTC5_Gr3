@@ -15,7 +15,7 @@ library(ggpubr)
 
 
 # Load dataset from OSF repository
-source(here::here(path = "scripts/0_data_import.R"))
+source(here::here(path = "./scripts/0_data_import.R"))
 
 traits_wide <- traits %>% pivot_wider(names_from = c(trait),
                                       values_from = c(value)) %>% 
@@ -316,6 +316,7 @@ summary(LDMC_analysis_wet)
 Still a work in progress - update models above with new random effects structure...
 But also note, that elevation isn't equivilant for different treatments. Site is used here instead of elevation above but with elevation as a random factor instead.
 
+In trying to solve the singularity issues, we ended up having to remove 'season' as a random effect. 
 
 ```{r}
 ##Colour palette
@@ -340,12 +341,13 @@ colours_site <- tribble(
 ######################
 # SLA
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-SLA_analysis_site <- lmer(log(sla_cm2_g) ~ treatment*site + (1|plot_id) + (1|elevation)  + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+SLA_analysis_site <- lmer(log(sla_cm2_g) ~ treatment*site + (1|elevation/plot_id) + (1|taxon) + (1|functional_group), data = traits_wide)
 anova(SLA_analysis_site)
 summary(SLA_analysis_site)
 
+
 # create new dataset with only relevant factors from the model
-newdata_SLA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, sla_cm2_g)
+newdata_SLA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, sla_cm2_g)
 
 
 # Use 'predict' on models
@@ -371,12 +373,12 @@ newdata_SLA %>%
 ######################
 # Leaf Area
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-LA_analysis_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|plot_id) + (1|elevation)  +(1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+LA_analysis_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation/plot_id)  +(1|taxon) + (1|functional_group), data = traits_wide)
 anova(LA_analysis_site)
 summary(LA_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_LA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, leaf_area_cm2)
+newdata_LA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, leaf_area_cm2)
 
 
 # Use 'predict' on models
@@ -400,12 +402,12 @@ newdata_LA %>%
 ######################
 # Plant Height
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-PH_analysis_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|plot_id) +(1|elevation)  + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+PH_analysis_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|elevation/plot_id)  + (1|taxon) + (1|functional_group), data = traits_wide)
 anova(PH_analysis_site)
 summary(PH_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_PH <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, plant_height_cm)
+newdata_PH <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, plant_height_cm)
 
 
 # Use 'predict' on models
@@ -429,12 +431,12 @@ newdata_PH %>%
 ######################
 # Leaf Thickness
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-LT_analysis_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|plot_id) +(1|elevation)  + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+LT_analysis_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + + (1|elevation/plot_id)  + (1|taxon) + (1|functional_group), data = traits_wide)
 anova(LT_analysis_site)
 summary(LT_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_LT <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, leaf_thickness_mm)
+newdata_LT <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, leaf_thickness_mm)
 
 
 # Use 'predict' on models
@@ -459,12 +461,12 @@ newdata_LT %>%
 ######################
 # LDMC
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-LDMC_analysis_site <- lmer(log(ldmc) ~ treatment*site + (1|plot_id) + (1|elevation)  +(1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+LDMC_analysis_site <- lmer(log(ldmc) ~ treatment*site + (1|elevation/plot_id)  +(1|taxon) + (1|functional_group), data = traits_wide)
 anova(LDMC_analysis_site)
 summary(LDMC_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_LDMC <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id,elevation, elevation, taxon, functional_group, season, ldmc)
+newdata_LDMC <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id,elevation, elevation, taxon, functional_group, ldmc)
 
 
 # Use 'predict' on models
@@ -492,8 +494,8 @@ newdata_LDMC %>%
 *NB* Experimental. Just to show the different elevation ranges we have for the sites.
 Also, exploring using 'Effect' rather than 'predict' for summarizing outputs.
 
-```{r}
-SLA_analysis_elev <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+```{r eval=FALSE}
+SLA_analysis_elev <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site) (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(SLA_analysis_elev)
 summary(SLA_analysis_elev)
 
@@ -606,12 +608,12 @@ ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
 # Use the Trait-strapped data instead
 ```{r}
 # Load new datasets from imputations
-traits_ts <- read.csv("data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+traits_ts <- read.csv("../data/processed/traits_traitstrapped_raw.csv", header = TRUE)
 traits_wide_ts <- traits_ts %>% pivot_wider(names_from = c(trait),
                                       values_from = c(value))
 
 # Community weighted means instead
-traits_CWM <- read.csv("data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- read.csv("../data/processed/traits_traitstrapped_moments.csv", header = TRUE)
 traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
 
 ```
