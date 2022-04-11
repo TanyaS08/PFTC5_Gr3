@@ -58,15 +58,15 @@ orditorp(nmds, display = "sites", cex = 1.1, air = 0.01)
 traits_wide <- traits %>% 
   #filter(season == "wet_season") %>% 
   select(-family, -functional_group, -burn_year) %>% 
-  pivot_wider(names_from = trait, values_from = value, values_fill = NA) %>% 
-  filter(!is.na(ldmc),
+  pivot_wider(names_from = trait, values_from = value, values_fill = NA) %>% #filling with NAs so that the true 0 values remain in the dataset after the next filtering step
+  filter(!is.na(ldmc), #Have to remove NAs, otherwise the PCA will not run
          !is.na(leaf_thickness_mm),
          !is.na(plant_height_cm),
          !is.na(sla_cm2_g),
          !is.na(dry_mass_g),
          !is.na(leaf_area_cm2),
          !is.na(wet_mass_g)) %>% 
-  mutate(plant_height_cm = log(plant_height_cm),
+  mutate(plant_height_cm = log(plant_height_cm), #log transform all traits that need log transformation
          sla_cm2_g = log(sla_cm2_g),
          leaf_area_cm2 = log(leaf_area_cm2),
          dry_mass_g = log(dry_mass_g),
@@ -74,8 +74,6 @@ traits_wide <- traits %>%
 
 #### PCA traits analysis ####
 PCA_trait <- rda(traits_wide[c(14:20)])
-
-plot(PCA_trait$tot.chi)
 
 biplot(PCA_trait, choices = c(1,2), type = c("text", "points"))
 
