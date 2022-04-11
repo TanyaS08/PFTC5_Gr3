@@ -93,8 +93,8 @@ traits <- traits_raw %>%
   group_by(site, treatment, plot_id, taxon, individual_nr, trait) %>%
   #arrange in a set way each time to ensure we use the same individuals
   arrange(id) %>%
-  #keep only the first record for each individual
-  slice_head()
+  #keep only the first 3 records for each individual
+  slice_head(n = 3)
 
 ### >> b) Community data ----
 

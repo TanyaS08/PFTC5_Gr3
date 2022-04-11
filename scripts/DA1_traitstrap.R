@@ -3,6 +3,7 @@
 ### Call source script ----
 
 source(here::here(path = "scripts/0_data_import.R"))
+source(here::here(path = "scripts/plotting_aesthetics.R")) #this is for plots remove later
 
 ### Packages ----
 
@@ -11,6 +12,12 @@ source(here::here(path = "scripts/0_data_import.R"))
 library(traitstrap)
 library(purrr)
 library(patchwork) #this is for plots remove later
+library(ggridges) #this is for plots remove later
+
+### Functions ----
+
+# small helper function for filtering
+'%notin%' <- function(x,y)!('%in%'(x,y))
 
 ### Wrangling ----
 # create 'internal' df's that have the correct 'grammar' for traitsftap functions
@@ -203,7 +210,7 @@ write.csv(do.call(rbind.data.frame, sum_bootstrap[1:6]),
 
 ### >> d.1) Plot
 
-ggplot(do.call(rbind.data.frame, sum_bootstrap[1:6])%>%
+ggplot(do.call(rbind.data.frame, sum_bootstrap[1:6]) %>%
          unite(
            #new variable name
            plot,
@@ -211,6 +218,7 @@ ggplot(do.call(rbind.data.frame, sum_bootstrap[1:6])%>%
            c(site, treatment),
            sep = " ", remove = FALSE
          ) %>%
+         ungroup() %>%
          filter(trait %notin% c("dry_mass_g", "leaf_area_cm2", "wet_mass_g")) %>%
          #NOTE We can keep this as site names but from a reader perspective elevation may be more meaningful
          mutate(# Rename traits for labels
