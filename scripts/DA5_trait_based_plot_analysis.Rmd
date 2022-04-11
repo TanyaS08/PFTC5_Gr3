@@ -314,9 +314,8 @@ summary(LDMC_analysis_wet)
 
 # Predicted means plots for raw trait values
 Still a work in progress - update models above with new random effects structure...
-But also note, that elevation isn't equivilant for different treatments. Site is used here instead of elevation above.
+But also note, that elevation isn't equivilant for different treatments. Site is used here instead of elevation above but with elevation as a random factor instead.
 
-Same thing for the community weighted mean ones below, though potentially less issues with random effects as values are already averaged. 
 
 ```{r}
 ##Colour palette
@@ -341,12 +340,12 @@ colours_site <- tribble(
 ######################
 # SLA
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-SLA_analysis_site <- lmer(log(sla_cm2_g) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+SLA_analysis_site <- lmer(log(sla_cm2_g) ~ treatment*site + (1|plot_id) + (1|elevation)  + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(SLA_analysis_site)
 summary(SLA_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_SLA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, sla_cm2_g)
+newdata_SLA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, sla_cm2_g)
 
 
 # Use 'predict' on models
@@ -372,12 +371,12 @@ newdata_SLA %>%
 ######################
 # Leaf Area
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-LA_analysis_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+LA_analysis_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|plot_id) + (1|elevation)  +(1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(LA_analysis_site)
 summary(LA_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_LA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, leaf_area_cm2)
+newdata_LA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, leaf_area_cm2)
 
 
 # Use 'predict' on models
@@ -401,12 +400,12 @@ newdata_LA %>%
 ######################
 # Plant Height
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-PH_analysis_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+PH_analysis_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|plot_id) +(1|elevation)  + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(PH_analysis_site)
 summary(PH_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_PH <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, plant_height_cm)
+newdata_PH <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, plant_height_cm)
 
 
 # Use 'predict' on models
@@ -430,12 +429,12 @@ newdata_PH %>%
 ######################
 # Leaf Thickness
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-LT_analysis_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+LT_analysis_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|plot_id) +(1|elevation)  + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(LT_analysis_site)
 summary(LT_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_LT <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, leaf_thickness_mm)
+newdata_LT <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, season, leaf_thickness_mm)
 
 
 # Use 'predict' on models
@@ -460,12 +459,12 @@ newdata_LT %>%
 ######################
 # LDMC
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-LDMC_analysis_site <- lmer(log(ldmc) ~ treatment*site + (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+LDMC_analysis_site <- lmer(log(ldmc) ~ treatment*site + (1|plot_id) + (1|elevation)  +(1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(LDMC_analysis_site)
 summary(LDMC_analysis_site)
 
 # create new dataset with only relevant factors from the model
-newdata_LDMC <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, taxon, functional_group, season, ldmc)
+newdata_LDMC <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id,elevation, elevation, taxon, functional_group, season, ldmc)
 
 
 # Use 'predict' on models
@@ -489,6 +488,10 @@ newdata_LDMC %>%
 ```
 
 # Using elevation rather than site
+
+*NB* Experimental. Just to show the different elevation ranges we have for the sites.
+Also, exploring using 'Effect' rather than 'predict' for summarizing outputs.
+
 ```{r}
 SLA_analysis_elev <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
 anova(SLA_analysis_elev)
@@ -505,7 +508,10 @@ SLA_analysis_elev_df <- Effect(c("treatment","elevation"),SLA_analysis_elev)
      xlab(bquote(Elevation)) +
      ylab(bquote(Specific~Leaf~Area~(Log~transformed))) +
      ## add rug plot based on original data
-     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     geom_rug(data=SLA_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+            geom_point(data=SLA_analysis_elev_df$data,
+                       aes(y = SLA_analysis_elev_df$data$`log(sla_cm2_g)`,
+                           x = SLA_analysis_elev_df$data$elevation)) +
      theme_classic())
  
  # Leaf area
@@ -524,7 +530,10 @@ LA_analysis_elev_df <- Effect(c("treatment","elevation"),LA_analysis_elev)
      xlab(bquote(Elevation)) +
      ylab(bquote(Leaf~Area~(Log~transformed))) +
      ## add rug plot based on original data
-     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     geom_rug(data=LA_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+        geom_point(data=LA_analysis_elev_df$data,
+                   aes(y = LA_analysis_elev_df$data$`log(leaf_area_cm2)`,
+                       x = LA_analysis_elev_df$data$elevation)) +
      theme_classic())
  
 # Plant Height
@@ -543,7 +552,10 @@ PH_analysis_elev_df <- Effect(c("treatment","elevation"),PH_analysis_elev)
      xlab(bquote(Elevation)) +
      ylab(bquote(Plant~Height~(Log~transformed))) +
      ## add rug plot based on original data
-     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     geom_rug(data=PH_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+    geom_point(data=PH_analysis_elev_df$data,
+               aes(y = PH_analysis_elev_df$data$`log(plant_height_cm)`,
+                   x = PH_analysis_elev_df$data$elevation)) +
      theme_classic())
  
  # Leaf Thickness
@@ -561,7 +573,8 @@ LT_analysis_elev_df <- Effect(c("treatment","elevation"),LT_analysis_elev)
      xlab(bquote(Elevation)) +
      ylab(bquote(Leaf~Thickness~(Log~transformed))) +
      ## add rug plot based on original data
-     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     geom_rug(data=LT_analysis_elev_df$data,aes(y=NULL),sides="b") +      geom_point(data=LT_analysis_elev_df$data,                                                            aes(y = LT_analysis_elev_df$data$`log(leaf_thickness_mm)`,
+                 x = LT_analysis_elev_df$data$elevation)) +
      theme_classic())
  
  # LDMC
@@ -580,7 +593,9 @@ LDMC_analysis_elev_df <- Effect(c("treatment","elevation"),LDMC_analysis_elev)
      xlab(bquote(Elevation)) +
      ylab(bquote(LDMC~(Log~transformed))) +
      ## add rug plot based on original data
-     geom_rug(data=ee$data,aes(y=NULL),sides="b") + 
+     geom_rug(data=LDMC_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+     geom_point(data=LDMC_analysis_elev_df$data, aes(y = LDMC_analysis_elev_df$data$`log(ldmc)`,
+         x = LDMC_analysis_elev_df$data$elevation)) +
      theme_classic())
 
 ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
@@ -591,12 +606,12 @@ ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
 # Use the Trait-strapped data instead
 ```{r}
 # Load new datasets from imputations
-traits_ts <- read.csv("C:/Users/sge010/Documents/PFTC Projects/PFTC_Fire_Manuscript/PFTC5_Gr3/data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+traits_ts <- read.csv("data/processed/traits_traitstrapped_raw.csv", header = TRUE)
 traits_wide_ts <- traits_ts %>% pivot_wider(names_from = c(trait),
                                       values_from = c(value))
 
 # Community weighted means instead
-traits_CWM <- read.csv("C:/Users/sge010/Documents/PFTC Projects/PFTC_Fire_Manuscript/PFTC5_Gr3/data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- read.csv("data/processed/traits_traitstrapped_moments.csv", header = TRUE)
 traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
 
 ```
@@ -663,37 +678,6 @@ traits_CWM <- traits_CWM %>% left_join(elev_data, by = c("site", "treatment", "p
 # Pivot wider
 traits_CWM_wide <- traits_CWM %>% select(-c(ci_high, ci_low)) %>% 
   pivot_wider(names_from = c(trait), values_from = c(estimate)) 
-
-
-### Linear mixed effects models
-# Warning regarding scaling - can't really do much about elevation. 
-# SLA
-SLA_analysis_CWM <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id),
-                         data = traits_CWM_wide)
-anova(SLA_analysis_CWM)
-summary(SLA_analysis_CWM)
-
-# Leaf Area
-LA_analysis_CWM <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id),
-                        data = traits_CWM_wide)
-anova(LA_analysis_CWM)
-summary(LA_analysis_CWM)
-
-# Plant Height
-PlantHeight_analysis_CWM <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id), data = traits_CWM_wide)
-anova(PlantHeight_analysis_CWM)
-summary(PlantHeight_analysis_CWM)
-
-# Leaf thickness
-LeafThickness_analysis_CWM <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id), data = traits_CWM_wide)
-anova(LeafThickness_analysis_CWM)
-summary(LeafThickness_analysis_CWM)
-
-# LDMC
-LDMC_analysis_CWM <- lmer(ldmc ~ treatment*elevation + (1|plot_id),
-                          data = traits_CWM_wide)
-anova(LDMC_analysis_CWM)
-summary(LDMC_analysis_CWM)
 ```
 
 
@@ -705,12 +689,12 @@ Still a work in progress...
 #########################
 # SLA
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-SLA_analysis_site_CWM <- lmer(log(sla_cm2_g) ~ treatment*site + (1|plot_id), data = traits_CWM_wide)
+SLA_analysis_site_CWM <- lmer(log(sla_cm2_g) ~ treatment*site + (1|elevation), data = traits_CWM_wide)
 anova(SLA_analysis_site_CWM)
 summary(SLA_analysis_site_CWM)
 
 # Create newdate for CWM SLA
-newdata_CWM_SLA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, sla_cm2_g)
+newdata_CWM_SLA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, sla_cm2_g)
 
 # Use 'predict' on models
 newdata_CWM_SLA$predicted_SLA <- 
@@ -734,13 +718,13 @@ newdata_CWM_SLA %>%
 # Leaf Area
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|plot_id),
+LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation),
                         data = traits_CWM_wide)
 anova(LA_analysis_CWM_site)
 summary(LA_analysis_CWM_site)
 
 # Create newdate for CWM SLA
-newdata_CWM_LA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, leaf_area_cm2)
+newdata_CWM_LA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_area_cm2)
 
 # Use 'predict' on models
 newdata_CWM_LA$predicted_LA <- 
@@ -764,13 +748,13 @@ newdata_CWM_LA %>%
 # Plant Height
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-PH_analysis_CWM_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|plot_id),
+PH_analysis_CWM_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|elevation),
                         data = traits_CWM_wide)
 anova(PH_analysis_CWM_site)
 summary(PH_analysis_CWM_site)
 
 # Create newdate for CWM SLA
-newdata_CWM_PH <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, leaf_area_cm2)
+newdata_CWM_PH <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_area_cm2)
 
 # Use 'predict' on models
 newdata_CWM_PH$predicted_PH <- 
@@ -794,13 +778,13 @@ newdata_CWM_PH %>%
 # Leaf Thickness
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-LT_analysis_CWM_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|plot_id),
+LT_analysis_CWM_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|elevation),
                         data = traits_CWM_wide)
 anova(LT_analysis_CWM_site)
 summary(LT_analysis_CWM_site)
 
 # Create newdate for CWM SLA
-newdata_CWM_LT <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, leaf_thickness_mm)
+newdata_CWM_LT <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_thickness_mm)
 
 # Use 'predict' on models
 newdata_CWM_LT$predicted_LT <- 
@@ -824,13 +808,13 @@ newdata_CWM_LT %>%
 # Leaf Dry Matter Content
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-LDMC_analysis_CWM_site <- lmer(log(ldmc) ~ treatment*site + (1|plot_id),
+LDMC_analysis_CWM_site <- lmer(log(ldmc) ~ treatment*site + (1|elevation),
                         data = traits_CWM_wide)
 anova(LDMC_analysis_CWM_site)
 summary(LDMC_analysis_CWM_site)
 
 # Create newdate for CWM SLA
-newdata_CWM_LDMC <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, plot_id, ldmc)
+newdata_CWM_LDMC <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, ldmc)
 
 # Use 'predict' on models
 newdata_CWM_LDMC$predicted_LDMC <- 
@@ -847,7 +831,6 @@ newdata_CWM_LDMC %>%
                       name = "Sites") +
   theme_classic()  
   # geom_segment(aes(y = mean_LDMC, x = treatment, group = site)) # currently not working
-
 
 ```
 
