@@ -50,11 +50,13 @@ sites and treatments from the following years:
 ### Datasets to use
 
 Given the Frankenstein nature of the dataset we have used the 
-[traitstrap](https: //doi.org/10.22541/au.162196147.76797968/v1) package to
-help smooth out some of the gaps in the data. The workflow itself is in
-`scripts/DA1_traitstrap.R` if you are interested. The bootstrapped data can 
-be found in `data/processed` as two different datasets. The 
-`traits_traitstrapped_raw.csv` has trait values at the individual level (for
+[traitstrap (see preprint here)](https: //doi.org/10.22541/au.162196147.76797968/v1)
+package to help smooth out some of the gaps in the data. A
+short vignette can be found [here](https://github.com/richardjtelford/traitstrap/blob/main/vignettes/traitstrap-workflow.Rmd).
+
+The workflow itself is in `scripts/DA1_traitstrap.R` if you are interested.
+The bootstrapped data can be found in `data/processed` as two different datasets.
+The `traits_traitstrapped_raw.csv` has trait values at the individual level (for
 the different treatment/sites/plot_id combos) and is 'similar' to the raw data 
 downloaded to `osf` in terms of how it looks but of course the data are generated
 using the bootstrapping simulations from traitstrap. The other data file
@@ -64,7 +66,7 @@ the equivalent of the community weighted mean for example.
 
 In summary: import and use the `traits_traitstrapped_raw.csv` dataset if working with
 individual trait-level questions and `traits_traitstrapped_moments.csv` when concerned
-with community-level work.
+with community-level work. 
 
 ## Script naming structure
 
