@@ -608,9 +608,9 @@ ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
 # Use the Trait-strapped data instead
 ```{r}
 # Load new datasets from imputations
-traits_ts <- read.csv("../data/processed/traits_traitstrapped_raw.csv", header = TRUE)
-traits_wide_ts <- traits_ts %>% pivot_wider(names_from = c(trait),
-                                      values_from = c(value))
+traits_ts <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+traits_wide_ts <- traits_ts %>% ungroup() %>% pivot_wider(names_from = c(trait),
+                                      values_from = c(value)) %>% view()
 
 # Community weighted means instead
 traits_CWM <- read.csv("../data/processed/traits_traitstrapped_moments.csv", header = TRUE)
@@ -623,10 +623,10 @@ traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean")
 ```{r}
 
 # Site by elevation
-traits_CWM$site <- factor(traits_CWM$site, 
+traits_ts$site <- factor(traits_ts$site, 
                     levels = c("ACJ", "TRE", "QUE"))
 
-(traits_CWM %>%
+(traits_ts %>%
   filter(
     trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
                  'leaf_thickness_ave_mm', 'leaf_area_cm2')
@@ -639,8 +639,7 @@ traits_CWM$site <- factor(traits_CWM$site,
                            trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
          ) %>%
   ggplot() +
-geom_pointrange(aes(x=site, y=log(estimate),
-                    ymin=log(ci_low), ymax=log(ci_high),
+geom_boxplot(aes(x=site, y=log(value),
                     color = treatment),
                     width=0.2,
                     position = position_dodge(width = 0.3),
@@ -662,24 +661,24 @@ geom_pointrange(aes(x=site, y=log(estimate),
 Still a work in progress. Need to change formatting to match new CWM bootstrapped datasets.
 
 ```{r}
-# No elevation values here, so check original dataset
-elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, elevation) %>% unique() %>% view()
-
-# Found some seedlings... probably should remove in script 0.
-# Also likely to influence trait-strap estimates?
-traits %>% filter(is.na(plot_id))
+# # No elevation values here, so check original dataset
+# elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, elevation) %>% unique()
+# 
+# # Found some seedlings... probably should remove in script 0.
+# # Also likely to influence trait-strap estimates?
+# traits %>% filter(is.na(plot_id))
 
 
 # Create elevation from original dataset
 # Change plot_ID to concatenate site, treatment and plot number
-traits_CWM <- traits_CWM %>%  
-  mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
-traits_CWM <- traits_CWM %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
+# traits_ts <- traits_ts %>%  
+#   mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
+# traits_ts <- traits_ts %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
 
          
 # Pivot wider
-traits_CWM_wide <- traits_CWM %>% select(-c(ci_high, ci_low)) %>% 
-  pivot_wider(names_from = c(trait), values_from = c(estimate)) 
+traits_ts_wide <- traits_ts  %>% 
+  pivot_wider(names_from = c(trait), values_from = c(value)) 
 ```
 
 
@@ -691,12 +690,13 @@ Still a work in progress...
 #########################
 # SLA
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
-SLA_analysis_site_CWM <- lmer(log(sla_cm2_g) ~ treatment*site + (1|elevation), data = traits_CWM_wide)
+
+SLA_analysis_site_CWM <- lmer(log(sla_cm2_g) ~ treatment*site + (1|elevation.x), data = traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation.x, sla_cm2_g) %>% na.omit())
 anova(SLA_analysis_site_CWM)
 summary(SLA_analysis_site_CWM)
 
 # Create newdate for CWM SLA
-newdata_CWM_SLA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, sla_cm2_g)
+newdata_CWM_SLA <- traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation.x, sla_cm2_g) %>% na.omit()
 
 # Use 'predict' on models
 newdata_CWM_SLA$predicted_SLA <- 
@@ -705,13 +705,12 @@ newdata_CWM_SLA$predicted_SLA <-
 
 # Plot violin plot for treatment and site using predicted values
 newdata_CWM_SLA %>% 
-  group_by(site, treatment) %>% 
-  mutate(mean_SLA = mean(predicted_SLA)) %>% 
   ggplot(aes(x = treatment, y = predicted_SLA, fill = site)) + 
-  geom_violin() + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
                       name = "Sites") +
-  theme_classic()  
+  theme_classic() 
   # geom_segment(aes(y = mean_SLA, x = treatment, group = site)) # currently not working
 
 
@@ -720,14 +719,12 @@ newdata_CWM_SLA %>%
 # Leaf Area
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation),
-                        data = traits_CWM_wide)
+LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation.x), data = traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation.x, leaf_area_cm2) %>% na.omit())
 anova(LA_analysis_CWM_site)
 summary(LA_analysis_CWM_site)
 
 # Create newdate for CWM SLA
-newdata_CWM_LA <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_area_cm2)
-
+newdata_CWM_LA <- traits_ts_wide %>% ungroup() %>% select(treatment, site,  elevation.x, leaf_area_cm2) %>% na.omit()
 # Use 'predict' on models
 newdata_CWM_LA$predicted_LA <- 
   predict(LA_analysis_CWM_site, newdata = newdata_CWM_LA, re.form = NULL, allow.new.levels = TRUE) 
@@ -736,7 +733,6 @@ newdata_CWM_LA$predicted_LA <-
 # Plot violin plot for treatment and site using predicted values
 newdata_CWM_LA %>% 
   group_by(site, treatment) %>% 
-  mutate(mean_LA = mean(predicted_LA)) %>% 
   ggplot(aes(x = treatment, y = predicted_LA, fill = site)) + 
   geom_violin() + 
   scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
