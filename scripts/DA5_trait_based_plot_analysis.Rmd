@@ -662,7 +662,7 @@ Still a work in progress. Need to change formatting to match new CWM bootstrappe
 
 ```{r}
 # # No elevation values here, so check original dataset
-# elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, elevation) %>% unique()
+ elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, elevation) %>% unique()
 # 
 # # Found some seedlings... probably should remove in script 0.
 # # Also likely to influence trait-strap estimates?
@@ -671,16 +671,38 @@ Still a work in progress. Need to change formatting to match new CWM bootstrappe
 
 # Create elevation from original dataset
 # Change plot_ID to concatenate site, treatment and plot number
-# traits_ts <- traits_ts %>%  
-#   mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
-# traits_ts <- traits_ts %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
+ traits_ts <- traits_ts %>%  
+   mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
+ traits_ts <- traits_ts %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
 
          
 # Pivot wider
 traits_ts_wide <- traits_ts  %>% 
-  pivot_wider(names_from = c(trait), values_from = c(value)) 
+  pivot_wider(names_from = c(trait), values_from = c(value))
 ```
 
+# Predicted mean plots for the raw Bootstrapped data
+
+```{r}
+
+analysis_site_bs_raw  = vector(mode = "list", length = nrow(traits_ts %>% distinct(trait)))
+analysis_site_bs_predict  = traits_ts %>%
+  #split by site & treatment
+  split(list(.$trait))
+
+trait_names = traits_ts %>% distinct(trait)
+
+for (i in 1:length(analysis_site_bs_raw)) {
+  
+  analysis_site_bs_raw[[i]] <- lmer(log(value) ~ treatment*site + (1|elevation), data = analysis_site_bs_predict[[i]])
+  
+  # Use 'predict' on models
+  analysis_site_bs_predict[[i]]$predicted_SLA <- 
+    predict(analysis_site_bs_raw[[i]], newdata = analysis_site_bs_predict[[i]], re.form = NULL, allow.new.levels = TRUE) 
+  
+}
+
+```
 
 
 # Predicted mean plots for Community Weighted Means
@@ -691,12 +713,13 @@ Still a work in progress...
 # SLA
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-SLA_analysis_site_CWM <- lmer(log(sla_cm2_g) ~ treatment*site + (1|elevation.x), data = traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation.x, sla_cm2_g) %>% na.omit())
+
+SLA_analysis_site_CWM <- lmer(log(value) ~ treatment*site + (1|elevation), data = traits_ts %>% filter(trait == "sla_cm2_g"))
 anova(SLA_analysis_site_CWM)
 summary(SLA_analysis_site_CWM)
 
 # Create newdate for CWM SLA
-newdata_CWM_SLA <- traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation.x, sla_cm2_g) %>% na.omit()
+newdata_CWM_SLA <- traits_ts %>% filter(trait == "sla_cm2_g")
 
 # Use 'predict' on models
 newdata_CWM_SLA$predicted_SLA <- 
@@ -719,12 +742,12 @@ newdata_CWM_SLA %>%
 # Leaf Area
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
 
-LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation.x), data = traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation.x, leaf_area_cm2) %>% na.omit())
+LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation), data = traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_area_cm2) %>% na.omit())
 anova(LA_analysis_CWM_site)
 summary(LA_analysis_CWM_site)
 
 # Create newdate for CWM SLA
-newdata_CWM_LA <- traits_ts_wide %>% ungroup() %>% select(treatment, site,  elevation.x, leaf_area_cm2) %>% na.omit()
+newdata_CWM_LA <- traits_ts_wide %>% ungroup() %>% select(treatment, site,  elevation, leaf_area_cm2) %>% na.omit()
 # Use 'predict' on models
 newdata_CWM_LA$predicted_LA <- 
   predict(LA_analysis_CWM_site, newdata = newdata_CWM_LA, re.form = NULL, allow.new.levels = TRUE) 
