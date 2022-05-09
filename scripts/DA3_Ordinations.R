@@ -6,6 +6,13 @@
 
 source(here::here(path = "scripts/0_data_import.R"))
 
+# Load new datasets from imputations
+traits <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+
+# Community weighted means instead
+traits_CWM <- read.csv("./data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
+
 #### Load libraries ####
 library(vegan)
 library(ggfortify)
@@ -57,27 +64,23 @@ orditorp(nmds, display = "sites", cex = 1.1, air = 0.01)
 
 traits_wide <- traits %>% 
   #filter(season == "wet_season") %>% 
-  select(-family, -functional_group, -burn_year) %>% 
-  pivot_wider(names_from = trait, values_from = value, values_fill = NA) %>% #filling with NAs so that the true 0 values remain in the dataset after the next filtering step
-  filter(!is.na(ldmc), #Have to remove NAs, otherwise the PCA will not run
-         !is.na(leaf_thickness_mm),
-         !is.na(plant_height_cm),
-         !is.na(sla_cm2_g),
-         !is.na(dry_mass_g),
-         !is.na(leaf_area_cm2),
-         !is.na(wet_mass_g)) %>% 
-  mutate(plant_height_cm = log(plant_height_cm), #log transform all traits that need log transformation
-         sla_cm2_g = log(sla_cm2_g),
-         leaf_area_cm2 = log(leaf_area_cm2),
-         dry_mass_g = log(dry_mass_g),
-         wet_mass_g = log(wet_mass_g))
+  select(-family, -functional_group) %>% 
+  group_by(taxon, site, treatment, trait) %>%
+  summarise(value = mean(value)) %>%
+  pivot_wider(names_from = trait, values_from = value, values_fill = NA) %>%
+  na.omit() %>% #filling with NAs so that the true 0 values remain in the dataset after the next filtering step
+mutate(plant_height_cm = log(plant_height_cm), #log transform all traits that need log transformation
+       sla_cm2_g = log(sla_cm2_g),
+       leaf_area_cm2 = log(leaf_area_cm2),
+       dry_mass_g = log(dry_mass_g),
+       wet_mass_g = log(wet_mass_g))
 
 #### PCA traits analysis ####
-PCA_trait <- rda(traits_wide[c(14:20)])
+PCA_trait <- rda(traits_wide[c(4:10)])
 
 biplot(PCA_trait, choices = c(1,2), type = c("text", "points"))
 
-PCA_trait_env <- bind_cols(traits_wide[c(1:13)], as.data.frame(PCA_trait$CA$u)) 
+PCA_trait_env <- bind_cols(traits_wide, as.data.frame(PCA_trait$CA$u)) 
 
 #Looking for evidence that there is a difference in traits between wet and dry season - there is not strong evidence for that. We can go on and lump everything together in the dataset and analyse both seasons together.
 # PCA_trait_env %>% 
