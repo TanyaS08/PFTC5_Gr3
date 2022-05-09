@@ -610,10 +610,10 @@ ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
 # Load new datasets from imputations
 traits_ts <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
 traits_wide_ts <- traits_ts %>% ungroup() %>% pivot_wider(names_from = c(trait),
-                                      values_from = c(value)) %>% view()
+                                      values_from = c(value))
 
 # Community weighted means instead
-traits_CWM <- read.csv("../data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- read.csv("./data/processed/traits_traitstrapped_moments.csv", header = TRUE)
 traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
 
 ```
@@ -661,9 +661,7 @@ geom_boxplot(aes(x=site, y=log(value),
 Still a work in progress. Need to change formatting to match new CWM bootstrapped datasets.
 
 ```{r}
-# # No elevation values here, so check original dataset
- elev_data <- traits_wide %>%  ungroup() %>% select(site, treatment, plot_id, elevation) %>% unique()
-# 
+
 # # Found some seedlings... probably should remove in script 0.
 # # Also likely to influence trait-strap estimates?
 # traits %>% filter(is.na(plot_id))
@@ -673,7 +671,7 @@ Still a work in progress. Need to change formatting to match new CWM bootstrappe
 # Change plot_ID to concatenate site, treatment and plot number
  traits_ts <- traits_ts %>%  
    mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
- traits_ts <- traits_ts %>% left_join(elev_data, by = c("site", "treatment", "plot_id"))
+ traits_ts <- traits_ts
 
          
 # Pivot wider
@@ -697,10 +695,23 @@ for (i in 1:length(analysis_site_bs_raw)) {
   analysis_site_bs_raw[[i]] <- lmer(log(value) ~ treatment*site + (1|elevation), data = analysis_site_bs_predict[[i]])
   
   # Use 'predict' on models
-  analysis_site_bs_predict[[i]]$predicted_SLA <- 
+  analysis_site_bs_predict[[i]]$predicted_value <- 
     predict(analysis_site_bs_raw[[i]], newdata = analysis_site_bs_predict[[i]], re.form = NULL, allow.new.levels = TRUE) 
   
 }
+
+do.call(rbind.data.frame, analysis_site_bs_predict[1:7]) %>% 
+  as_tibble() %>%
+  ggplot(aes(x = treatment, y = predicted_value, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  #geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2) +
+  scale_fill_manual(values = c("ACJ" = "#F50054", 
+                               "TRE" = "#DB6300",  
+                               "QUE" = "#FFFA01"),
+                    name = "Sites") +
+  facet_wrap(vars(trait),
+             scales = "free") +
+  theme_classic() 
 
 ```
 
@@ -708,7 +719,7 @@ for (i in 1:length(analysis_site_bs_raw)) {
 # Predicted mean plots for Community Weighted Means
 Still a work in progress...
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 #########################
 # SLA
 # Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
