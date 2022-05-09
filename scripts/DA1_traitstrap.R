@@ -103,7 +103,13 @@ write.csv(do.call(rbind.data.frame, bootstrap_raw[1:6]) %>%
             select(taxon, cover, site_comm, treatment_comm, plot_id, year, 
                    season, month, trait, value) %>%
             rename('site' = 'site_comm',
-                   'treatment' = 'treatment_comm'),
+                   'treatment' = 'treatment_comm') %>%
+            left_join(.,
+                      traits %>%
+                        ungroup() %>%
+                        select(functional_group, elevation, family,
+                               taxon, site, treatment)) %>%
+            distinct(),
           file = here::here(path = "data/processed/traits_traitstrapped_raw.csv"))
 
 ### >> c.1) Plot

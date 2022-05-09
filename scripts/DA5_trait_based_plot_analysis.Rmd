@@ -1,0 +1,868 @@
+---
+title: "PFTC Fire: Trait based plots and analysis"
+authors: "Sonya R. Geange and Ragnhild Gya"
+output: html_notebook
+---
+
+```{r}
+library(vegan)
+library(ape)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(ggeffects)
+library(ggpubr)
+
+
+# Load dataset from OSF repository
+source(here::here(path = "./scripts/0_data_import.R"))
+
+traits_wide <- traits %>% pivot_wider(names_from = c(trait),
+                                      values_from = c(value)) %>% 
+  # Add unique plot_ID code (random effects doesn't like nested nature)
+  mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id)) %>% 
+  # Add in column for colouring with treatment and site
+  mutate(site_treatment = paste0(site, "_", treatment))
+
+traits_wide$site <- factor(traits_wide$site, 
+                    levels = c("ACJ", "TRE", "QUE"))
+```
+
+
+# Plot all data, site by elevation comparisons
+
+Using 'site' rather than elevation for the plots, but in the analysis need the nested nature of plots within sites.
+
+```{r}
+
+# Site by elevation
+traits$site <- factor(traits$site, 
+                    levels = c("ACJ", "TRE", "QUE"))
+
+
+traits %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2')
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+  geom_boxplot(aes(x = site,
+                   y = log(value), 
+                   fill = treatment), 
+               na.rm = TRUE,
+               position = "dodge2") +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_fill_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom")
+
+
+```
+
+# Basic Analysis
+```{r all_data_analysis}
+library(lme4)
+library(lmerTest)
+
+# Models for all datasets (years, seasons)
+# NB. Now run with season and functional group added in when using complete dataset (i.e. Puna and PFTC data from 2018-2020 and wet/dry seasons). NOTE: When using community weighted means, we won't keep functional group. Similarly for wet and dry only, the season term would be removed. 
+
+# Scaling issues - can't resolve with elevation.
+# SLA
+SLA_analysis <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(SLA_analysis)
+summary(SLA_analysis)
+
+# Leaf Area
+LA_analysis <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis)
+summary(LA_analysis)
+
+# Plant Height
+PlantHeight_analysis <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+anova(PlantHeight_analysis)
+summary(PlantHeight_analysis)
+
+# Leaf thickness
+LeafThickness_analysis <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+anova(LeafThickness_analysis)
+summary(LeafThickness_analysis)
+
+# LDMC
+LDMC_analysis <- lmer(ldmc ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group) + (1|season), data = traits_wide)
+anova(LDMC_analysis)
+summary(LDMC_analysis)
+```
+
+# Dry season only plots and analysis
+
+```{r}
+# look at only dry season indices
+
+traits_wide_dry <- traits_wide %>% 
+  filter(c(season == "dry_season"))
+
+traits %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2') &&
+      season == "dry_season"
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+  geom_boxplot(aes(x = site,
+                   y = log(value), 
+                   fill = treatment), 
+               na.rm = TRUE,
+               position = "dodge2") +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_fill_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom")
+
+
+# Analysis
+
+# SLA
+SLA_analysis_dry <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+anova(SLA_analysis_dry)
+summary(SLA_analysis_dry)
+
+# Leaf Area
+LA_analysis_dry <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+anova(LA_analysis_dry)
+summary(LA_analysis_dry)
+
+# Plant Height
+PlantHeight_analysis_dry <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+anova(PlantHeight_analysis_dry)
+summary(PlantHeight_analysis_dry)
+
+# Leaf thickness
+LeafThickness_analysis_dry <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+anova(LeafThickness_analysis_dry)
+summary(LeafThickness_analysis_dry)
+
+# LDMC
+LDMC_analysis_dry <- lmer(ldmc ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_dry)
+anova(LDMC_analysis_dry)
+summary(LDMC_analysis_dry)
+```
+
+# Wet season only plots and analysis
+
+```{r}
+
+
+traits %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2') &&
+      season == "wet_season"
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+  geom_boxplot(aes(x = site,
+                   y = log(value), 
+                   fill = treatment), 
+               na.rm = TRUE,
+               position = "dodge2") +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_fill_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom")
+
+# Analysis
+traits_wide_wet <- traits_wide %>% 
+  filter(c(season == "wet_season"))
+
+# SLA
+SLA_analysis_wet <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+anova(SLA_analysis_wet)
+summary(SLA_analysis_wet)
+
+# Leaf Area
+LA_analysis_wet <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+anova(LA_analysis_wet)
+summary(LA_analysis_wet)
+
+
+# Plant Height
+PlantHeight_analysis_wet <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+anova(PlantHeight_analysis_wet)
+summary(PlantHeight_analysis_wet)
+
+# Leaf thickness
+LeafThickness_analysis_wet <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|plot_id) + (1|family/taxon) + (1|functional_group), data = traits_wide_wet)
+anova(LeafThickness_analysis_wet)
+summary(LeafThickness_analysis_wet)
+
+# LDMC
+LDMC_analysis_wet <- lmer(ldmc ~ treatment*elevation + (1|plot_id) + (1|family/taxon)+ (1|functional_group), data = traits_wide_wet)
+anova(LDMC_analysis_wet)
+summary(LDMC_analysis_wet)
+```
+
+
+# Preliminary Look at Functional Groups (Wet Season Only)
+
+```{r}
+(SLA_plot_wet_FG <- traits_wide_wet %>%  
+    ggplot() +
+    geom_boxplot(aes(x = factor(functional_group),
+                     y = sla_cm2_g, fill = treatment), na.rm = TRUE) +
+    # Choose manual colours
+    scale_fill_manual(values = c("darkgreen", "orange"),
+                      name = "Burn Treatment") +
+    facet_wrap(site~.) +
+    xlab(bquote(Functional~Group)) +
+    ylab(bquote(SLA_cm2_g)) +
+    theme_classic() +
+    theme(legend.position = "bottom"))
+
+(PlantHeight_plot_wet_FG <- traits_wide_wet %>%  
+    ggplot() +
+    geom_boxplot(aes(x = factor(functional_group),
+                     y = log(plant_height_cm), fill = treatment), na.rm = TRUE) +
+    # Choose manual colours
+    scale_fill_manual(values = c("darkgreen", "orange"),
+                      name = "Burn Treatment") +
+    facet_wrap(site~.) +
+    xlab(bquote(Functional~Group)) +
+    ylab(bquote(log(Plant~Height,cm))) +
+    theme_classic() +
+    theme(legend.position = "bottom"))
+
+
+(LeafArea_plot_wet_FG <- traits_wide_wet %>%  
+    ggplot() +
+    geom_boxplot(aes(x = factor(functional_group),
+                     y = log(leaf_area_cm2), fill = treatment), na.rm = TRUE) +
+    # Choose manual colours
+    scale_fill_manual(values = c("darkgreen", "orange"),
+                      name = "Burn Treatment") +
+    facet_wrap(site~.) +
+    xlab(bquote(Functional~Group)) +
+    ylab(bquote(log(Leaf~Area, cm2))) +
+    theme_classic() +
+    theme(legend.position = "bottom"))
+
+(LeafThickness_plot_wet_FG <- traits_wide_wet %>%  
+    ggplot() +
+    geom_boxplot(aes(x = factor(functional_group),
+                     y = log(leaf_thickness_mm), fill = treatment), na.rm = TRUE) +
+    # Choose manual colours
+    scale_fill_manual(values = c("darkgreen", "orange"),
+                      name = "Burn Treatment") +
+    facet_wrap(site~.) +
+    xlab(bquote(Functional~Group)) +
+    ylab(bquote(log(Leaf~Thickness, mm))) +
+    theme_classic() +
+    theme(legend.position = "bottom"))
+
+(LDMC_plot_wet <- traits_wide_wet %>%  
+    ggplot() +
+    geom_boxplot(aes(x = factor(functional_group),
+                     y = ldmc, fill = treatment), na.rm = TRUE) +
+    # Choose manual colours
+    scale_fill_manual(values = c("darkgreen", "orange"),
+                      name = "Burn Treatment") +
+    facet_wrap(site~.) +
+    xlab(bquote(Functional~Group)) +
+    ylab(bquote(Leaf~Dry~Matter~Content)) +
+    theme_classic() +
+    theme(legend.position = "bottom"))
+
+```
+
+# Predicted means plots for raw trait values
+Still a work in progress - update models above with new random effects structure...
+But also note, that elevation isn't equivilant for different treatments. Site is used here instead of elevation above but with elevation as a random factor instead.
+
+In trying to solve the singularity issues, we ended up having to remove 'season' as a random effect. 
+
+```{r}
+##Colour palette
+
+#specify the three colours for sites - CHANGE HERE
+colours = c("#F50054", "#DB6300", "#FFFA01")
+
+colours_site <- tribble(
+  ~t, ~c,
+  "ACJ", colours[1],
+  "TRE", colours[2],
+  "QUE", colours[3],
+  "ACJ C", colours[1],
+  "ACJ NB", colorspace::darken(colours[1], 0.3),
+  "TRE C", colours[2],
+  "TRE NB", colorspace::darken(colours[2], 0.3),
+  "QUE C", colours[3],
+  "QUE NB", colorspace::darken(colours[3], 0.3)
+)
+
+
+######################
+# SLA
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+SLA_analysis_site <- lmer(log(sla_cm2_g) ~ treatment*site + (1|elevation/plot_id) + (1|taxon) + (1|functional_group), data = traits_wide)
+anova(SLA_analysis_site)
+summary(SLA_analysis_site)
+
+
+# create new dataset with only relevant factors from the model
+newdata_SLA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, sla_cm2_g)
+
+
+# Use 'predict' on models
+newdata_SLA$predicted_SLA <- 
+  predict(SLA_analysis_site, newdata = newdata_SLA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_SLA %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_SLA = mean(predicted_SLA)) %>% 
+  ggplot(aes(x = treatment, y = predicted_SLA, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_SLA, x = treatment, group = site)) # currently not working
+
+
+  
+
+######################
+# Leaf Area
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+LA_analysis_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation/plot_id)  +(1|taxon) + (1|functional_group), data = traits_wide)
+anova(LA_analysis_site)
+summary(LA_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_LA <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, leaf_area_cm2)
+
+
+# Use 'predict' on models
+newdata_LA$predicted_LA <- 
+  predict(LA_analysis_site, newdata = newdata_LA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_LA %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LA = mean(predicted_LA)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LA, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+######################
+# Plant Height
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+PH_analysis_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|elevation/plot_id)  + (1|taxon) + (1|functional_group), data = traits_wide)
+anova(PH_analysis_site)
+summary(PH_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_PH <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, plant_height_cm)
+
+
+# Use 'predict' on models
+newdata_PH$predicted_PH <- 
+  predict(PH_analysis_site, newdata = newdata_PH, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_PH %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_PH = mean(predicted_PH)) %>% 
+  ggplot(aes(x = treatment, y = predicted_PH, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_PH, x = treatment, group = site)) # currently not working
+
+
+######################
+# Leaf Thickness
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+LT_analysis_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + + (1|elevation/plot_id)  + (1|taxon) + (1|functional_group), data = traits_wide)
+anova(LT_analysis_site)
+summary(LT_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_LT <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id, elevation,taxon, functional_group, leaf_thickness_mm)
+
+
+# Use 'predict' on models
+newdata_LT$predicted_LT <- 
+  predict(LT_analysis_site, newdata = newdata_LT, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_LT %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LT = mean(predicted_LT)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LT, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_LT, x = treatment, group = site)) # currently not working
+
+
+
+######################
+# LDMC
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+LDMC_analysis_site <- lmer(log(ldmc) ~ treatment*site + (1|elevation/plot_id)  +(1|taxon) + (1|functional_group), data = traits_wide)
+anova(LDMC_analysis_site)
+summary(LDMC_analysis_site)
+
+# create new dataset with only relevant factors from the model
+newdata_LDMC <- traits_wide %>% ungroup() %>% select(site, treatment, plot_id,elevation, elevation, taxon, functional_group, ldmc)
+
+
+# Use 'predict' on models
+newdata_LDMC$predicted_LDMC <- 
+  predict(LDMC_analysis_site, newdata = newdata_LDMC, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plots
+newdata_LDMC %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LDMC = mean(predicted_LDMC)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LDMC, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_LDMC, x = treatment, group = site)) # currently not working
+
+
+```
+
+# Using elevation rather than site
+
+*NB* Experimental. Just to show the different elevation ranges we have for the sites.
+Also, exploring using 'Effect' rather than 'predict' for summarizing outputs.
+
+```{r eval=FALSE}
+SLA_analysis_elev <- lmer(log(sla_cm2_g) ~ treatment*elevation + (1|site) (1|plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(SLA_analysis_elev)
+summary(SLA_analysis_elev)
+
+SLA_analysis_elev_df <- Effect(c("treatment","elevation"),SLA_analysis_elev) 
+
+(SLA_elev <- ggplot(as.data.frame(SLA_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Specific~Leaf~Area~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=SLA_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+            geom_point(data=SLA_analysis_elev_df$data,
+                       aes(y = SLA_analysis_elev_df$data$`log(sla_cm2_g)`,
+                           x = SLA_analysis_elev_df$data$elevation)) +
+     theme_classic())
+ 
+ # Leaf area
+ LA_analysis_elev <- lmer(log(leaf_area_cm2) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+LA_analysis_elev_df <- Effect(c("treatment","elevation"),LA_analysis_elev) 
+
+(LA_elev <- ggplot(as.data.frame(LA_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Leaf~Area~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=LA_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+        geom_point(data=LA_analysis_elev_df$data,
+                   aes(y = LA_analysis_elev_df$data$`log(leaf_area_cm2)`,
+                       x = LA_analysis_elev_df$data$elevation)) +
+     theme_classic())
+ 
+# Plant Height
+ PH_analysis_elev <- lmer(log(plant_height_cm) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+PH_analysis_elev_df <- Effect(c("treatment","elevation"),PH_analysis_elev) 
+
+(PH_elev <- ggplot(as.data.frame(PH_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Plant~Height~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=PH_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+    geom_point(data=PH_analysis_elev_df$data,
+               aes(y = PH_analysis_elev_df$data$`log(plant_height_cm)`,
+                   x = PH_analysis_elev_df$data$elevation)) +
+     theme_classic())
+ 
+ # Leaf Thickness
+ LT_analysis_elev <- lmer(log(leaf_thickness_mm) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+LT_analysis_elev_df <- Effect(c("treatment","elevation"),LT_analysis_elev) 
+(LT_elev <- ggplot(as.data.frame(LT_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(Leaf~Thickness~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=LT_analysis_elev_df$data,aes(y=NULL),sides="b") +      geom_point(data=LT_analysis_elev_df$data,                                                            aes(y = LT_analysis_elev_df$data$`log(leaf_thickness_mm)`,
+                 x = LT_analysis_elev_df$data$elevation)) +
+     theme_classic())
+ 
+ # LDMC
+ LDMC_analysis_elev <- lmer(log(ldmc) ~ treatment*elevation + (1|site/plot_id) + (1|taxon) + (1|functional_group) + (1|season), data = traits_wide)
+anova(LA_analysis_elev)
+summary(LA_analysis_elev)
+
+LDMC_analysis_elev_df <- Effect(c("treatment","elevation"),LDMC_analysis_elev) 
+
+(LDMC_elev <- ggplot(as.data.frame(LDMC_analysis_elev_df),
+     aes(x= elevation, y = fit, colour=treatment,fill=treatment))+
+     geom_line()+
+     ## colour=NA suppresses edges of the ribbon
+     geom_ribbon(colour=NA,alpha=0.1,
+                 aes(ymin=lower,ymax=upper))+
+     xlab(bquote(Elevation)) +
+     ylab(bquote(LDMC~(Log~transformed))) +
+     ## add rug plot based on original data
+     geom_rug(data=LDMC_analysis_elev_df$data,aes(y=NULL),sides="b") + 
+     geom_point(data=LDMC_analysis_elev_df$data, aes(y = LDMC_analysis_elev_df$data$`log(ldmc)`,
+         x = LDMC_analysis_elev_df$data$elevation)) +
+     theme_classic())
+
+ggarrange(SLA_elev, LA_elev, LT_elev, LDMC_elev, PH_elev,
+          nrow = 1, common.legend = TRUE)
+```
+
+
+# Use the Trait-strapped data instead
+```{r}
+# Load new datasets from imputations
+traits_ts <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
+traits_wide_ts <- traits_ts %>% ungroup() %>% pivot_wider(names_from = c(trait),
+                                      values_from = c(value))
+
+# Community weighted means instead
+traits_CWM <- read.csv("./data/processed/traits_traitstrapped_moments.csv", header = TRUE)
+traits_CWM <- traits_CWM %>% select(-X) %>% filter(moment == "mean") 
+
+```
+
+# Community weighted mean plots
+
+```{r}
+
+# Site by elevation
+traits_ts$site <- factor(traits_ts$site, 
+                    levels = c("ACJ", "TRE", "QUE"))
+
+(traits_ts %>%
+  filter(
+    trait %in% c('plant_height_cm', 'sla_cm2_g', 'ldmc',
+                 'leaf_thickness_ave_mm', 'leaf_area_cm2')
+    ) %>%
+    mutate(
+         trait = case_when(trait == "plant_height_cm" ~ "Plant~height~(cm)",
+                           trait == "sla_cm2_g" ~ "SLA~(cm^{2}/g)",
+                           trait == "ldmc" ~ "LDMC",
+                           trait == "leaf_thickness_mm" ~ "Leaf~thickness~(mm)",
+                           trait == "leaf_area_cm2" ~ "Leaf~area~cm^{2}")
+         ) %>%
+  ggplot() +
+geom_boxplot(aes(x=site, y=log(value),
+                    color = treatment),
+                    width=0.2,
+                    position = position_dodge(width = 0.3),
+                    shape = 20) +
+  facet_wrap(vars(trait),
+             scales = 'free',
+             labeller = label_parsed) +
+  # Choose manual colours
+  scale_color_manual(values = c("darkgreen", "orange"),
+                    name = "Burn Treatment") +
+  theme_classic() +
+  labs(x = "Site",
+       y = "Trait value (log transformed)") +
+  theme(legend.position = "bottom"))
+
+```
+
+# Community Weighted Mean Analyses
+Still a work in progress. Need to change formatting to match new CWM bootstrapped datasets.
+
+```{r}
+
+# # Found some seedlings... probably should remove in script 0.
+# # Also likely to influence trait-strap estimates?
+# traits %>% filter(is.na(plot_id))
+
+
+# Create elevation from original dataset
+# Change plot_ID to concatenate site, treatment and plot number
+ traits_ts <- traits_ts %>%  
+   mutate(plot_id = paste0(site,"_" ,treatment, "_",plot_id))
+ traits_ts <- traits_ts
+
+         
+# Pivot wider
+traits_ts_wide <- traits_ts  %>% 
+  pivot_wider(names_from = c(trait), values_from = c(value))
+```
+
+# Predicted mean plots for the raw Bootstrapped data
+
+```{r}
+
+analysis_site_bs_raw  = vector(mode = "list", length = nrow(traits_ts %>% distinct(trait)))
+analysis_site_bs_predict  = traits_ts %>%
+  #split by site & treatment
+  split(list(.$trait))
+
+trait_names = traits_ts %>% distinct(trait)
+
+for (i in 1:length(analysis_site_bs_raw)) {
+  
+  analysis_site_bs_raw[[i]] <- lmer(log(value) ~ treatment*site + (1|elevation), data = analysis_site_bs_predict[[i]])
+  
+  # Use 'predict' on models
+  analysis_site_bs_predict[[i]]$predicted_value <- 
+    predict(analysis_site_bs_raw[[i]], newdata = analysis_site_bs_predict[[i]], re.form = NULL, allow.new.levels = TRUE) 
+  
+}
+
+do.call(rbind.data.frame, analysis_site_bs_predict[1:7]) %>% 
+  as_tibble() %>%
+  ggplot(aes(x = treatment, y = predicted_value, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  #geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2) +
+  scale_fill_manual(values = c("ACJ" = "#F50054", 
+                               "TRE" = "#DB6300",  
+                               "QUE" = "#FFFA01"),
+                    name = "Sites") +
+  facet_wrap(vars(trait),
+             scales = "free") +
+  theme_classic() 
+
+```
+
+
+# Predicted mean plots for Community Weighted Means
+Still a work in progress...
+
+```{r eval=FALSE, include=FALSE}
+#########################
+# SLA
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+
+SLA_analysis_site_CWM <- lmer(log(value) ~ treatment*site + (1|elevation), data = traits_ts %>% filter(trait == "sla_cm2_g"))
+anova(SLA_analysis_site_CWM)
+summary(SLA_analysis_site_CWM)
+
+# Create newdate for CWM SLA
+newdata_CWM_SLA <- traits_ts %>% filter(trait == "sla_cm2_g")
+
+# Use 'predict' on models
+newdata_CWM_SLA$predicted_SLA <- 
+  predict(SLA_analysis_site_CWM, newdata = newdata_CWM_SLA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_SLA %>% 
+  ggplot(aes(x = treatment, y = predicted_SLA, fill = site)) + 
+  geom_violin(position=position_dodge(0.5), alpha = 0.3) + 
+  geom_boxplot(position=position_dodge(0.5), na.rm = TRUE, width = 0.2)+
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic() 
+  # geom_segment(aes(y = mean_SLA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Leaf Area
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+LA_analysis_CWM_site <- lmer(log(leaf_area_cm2) ~ treatment*site + (1|elevation), data = traits_ts_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_area_cm2) %>% na.omit())
+anova(LA_analysis_CWM_site)
+summary(LA_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_LA <- traits_ts_wide %>% ungroup() %>% select(treatment, site,  elevation, leaf_area_cm2) %>% na.omit()
+# Use 'predict' on models
+newdata_CWM_LA$predicted_LA <- 
+  predict(LA_analysis_CWM_site, newdata = newdata_CWM_LA, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_LA %>% 
+  group_by(site, treatment) %>% 
+  ggplot(aes(x = treatment, y = predicted_LA, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Plant Height
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+PH_analysis_CWM_site <- lmer(log(plant_height_cm) ~ treatment*site + (1|elevation),
+                        data = traits_CWM_wide)
+anova(PH_analysis_CWM_site)
+summary(PH_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_PH <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_area_cm2)
+
+# Use 'predict' on models
+newdata_CWM_PH$predicted_PH <- 
+  predict(PH_analysis_CWM_site, newdata = newdata_CWM_PH, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_PH %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_PH = mean(predicted_PH)) %>% 
+  ggplot(aes(x = treatment, y = predicted_PH, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Leaf Thickness
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+LT_analysis_CWM_site <- lmer(log(leaf_thickness_mm) ~ treatment*site + (1|elevation),
+                        data = traits_CWM_wide)
+anova(LT_analysis_CWM_site)
+summary(LT_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_LT <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, leaf_thickness_mm)
+
+# Use 'predict' on models
+newdata_CWM_LT$predicted_LT <- 
+  predict(LT_analysis_CWM_site, newdata = newdata_CWM_LT, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_LT %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LT = mean(predicted_LT)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LT, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LA, x = treatment, group = site)) # currently not working
+
+
+
+#########################
+# Leaf Dry Matter Content
+# Run model without random effects causing issues (familY nested over taxon) and (site nested over plot_id)
+
+LDMC_analysis_CWM_site <- lmer(log(ldmc) ~ treatment*site + (1|elevation),
+                        data = traits_CWM_wide)
+anova(LDMC_analysis_CWM_site)
+summary(LDMC_analysis_CWM_site)
+
+# Create newdate for CWM SLA
+newdata_CWM_LDMC <- traits_CWM_wide %>% ungroup() %>% select(site, treatment, elevation, ldmc)
+
+# Use 'predict' on models
+newdata_CWM_LDMC$predicted_LDMC <- 
+  predict(LDMC_analysis_CWM_site, newdata = newdata_CWM_LDMC, re.form = NULL, allow.new.levels = TRUE) 
+
+
+# Plot violin plot for treatment and site using predicted values
+newdata_CWM_LDMC %>% 
+  group_by(site, treatment) %>% 
+  mutate(mean_LDMC = mean(predicted_LDMC)) %>% 
+  ggplot(aes(x = treatment, y = predicted_LDMC, fill = site)) + 
+  geom_violin() + 
+  scale_fill_manual(values = c("ACJ" = "#F50054", "TRE" = "#DB6300",  "QUE" = "#FFFA01"),
+                      name = "Sites") +
+  theme_classic()  
+  # geom_segment(aes(y = mean_LDMC, x = treatment, group = site)) # currently not working
+
+```
+
