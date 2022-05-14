@@ -5,6 +5,7 @@
 #### Call source script ####
 
 source(here::here(path = "scripts/0_data_import.R"))
+source(here::here(path = "scripts/plotting_aesthetics.R"))
 
 # Load new datasets from imputations
 traits <- read.csv("./data/processed/traits_traitstrapped_raw.csv", header = TRUE)
@@ -44,17 +45,35 @@ nmds_out %>%
   stat_ellipse() +
   facet_wrap(~year)
 
-nmds_out %>% 
-  ggplot(aes(x = MDS1, y = MDS2, color = treatment)) +  
+nmds_out %>%
+  unite(
+    plot, c(site, treatment),
+    sep = " ", remove = FALSE
+  ) %>% 
+  ggplot(aes(x = MDS1, y = MDS2, color = plot,
+             fill = plot)) +  
   geom_hline(aes(yintercept = 0)) +
   geom_vline(aes(xintercept = 0)) +
+  stat_ellipse(
+    alpha = 0.15, geom = "polygon"
+  ) +
   geom_point() +
-  stat_ellipse() +
-  facet_wrap(~site)
+  facet_wrap(~site)  +
+  scale_colour_manual(name = "Plot",
+                      values = colours_site$c,
+                      breaks = colours_site$t) +
+  scale_fill_manual(name = "Plot",
+                      values = colours_site$c,
+                      breaks = colours_site$t) +
+  theme_classic() +
+  theme(legend.position = "bottom")
+
+ggsave(here(path = "output/nmds_community.png"),
+       height = 6, width = 10,
+       units = "in", dpi = 300)
 
 orditorp(nmds, display = "species", col = "red", air = 0.01)
 orditorp(nmds, display = "sites", cex = 1.1, air = 0.01)
-
 
 #### PCA traits analysis ####
 
@@ -81,6 +100,7 @@ PCA_trait <- rda(traits_wide[c(4:10)])
 biplot(PCA_trait, choices = c(1,2), type = c("text", "points"))
 
 PCA_trait_env <- bind_cols(traits_wide, as.data.frame(PCA_trait$CA$u)) 
+PCA_trait_axis <- as.data.frame(PCA_trait$CA$v)
 
 #Looking for evidence that there is a difference in traits between wet and dry season - there is not strong evidence for that. We can go on and lump everything together in the dataset and analyse both seasons together.
 # PCA_trait_env %>% 
@@ -92,12 +112,29 @@ PCA_trait_env <- bind_cols(traits_wide, as.data.frame(PCA_trait$CA$u))
 #   stat_ellipse() +
 #   facet_grid(treatment~site)
 
-PCA_trait_env %>% 
+PCA_trait_env %>%
+  unite(plot, c(site, treatment),
+    sep = " ", remove = FALSE) %>% 
   mutate(site = factor(site, levels = c("ACJ", "TRE", "QUE"))) %>% 
-  ggplot(aes(x = PC1, y = PC2, color = treatment)) +  
+  ggplot(aes(x = PC1, y = PC2, color = plot,
+             fill = plot)) +  
   geom_hline(aes(yintercept = 0)) +
   geom_vline(aes(xintercept = 0)) +
+  stat_ellipse(
+    alpha = 0.15, geom = "polygon"
+  ) +
   geom_point() +
-  stat_ellipse() +
-  facet_grid(~site)
+  facet_grid(~site)  +
+  scale_colour_manual(name = "Plot",
+                      values = colours_site$c,
+                      breaks = colours_site$t) +
+  scale_fill_manual(name = "Plot",
+                    values = colours_site$c,
+                    breaks = colours_site$t) +
+  theme_classic() +
+  theme(legend.position = "bottom")
 
+
+ggsave(here(path = "output/nmds_trait.png"),
+       height = 6, width = 10,
+       units = "in", dpi = 300)
