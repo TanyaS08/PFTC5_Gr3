@@ -138,7 +138,11 @@ ggplot(do.call(rbind.data.frame, bootstrap_raw[1:6]) %>%
                           x = value,
                           fill = plot,
                           colour = plot),
-                      alpha = 0.6) +
+                      alpha = 0.8) +
+  geom_density_ridges(aes(y = site_comm,
+                          x = value,
+                          colour = plot),
+                      fill = NA) +
   facet_wrap(vars(trait),
              scales = "free_x",
              labeller = label_parsed,
