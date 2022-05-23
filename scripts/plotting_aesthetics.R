@@ -5,12 +5,10 @@
 ### >> a) Dependencies ----
 library(tvthemes) #A:tla colour theme
 library(here)
-if(!require(ggpomological)){  # for colour scheme
-  devtools::install_github("gadenbuie/ggpomological")
-  library(ggpomological)
-}
+library(ggpomological)
 library(paletteer) 
 library(ggplot2)
+library(tidyverse)
 
 ### 1) Colour scheme ----
 # suggestion 1: draw from ggpomological theme: https://github.com/gadenbuie/ggpomological )
@@ -42,10 +40,10 @@ que_c <- palettes_d$DresdenColor$paired[5]
 que_bb <- palettes_d$DresdenColor$paired[6]
 
 #suggestion 3: using the Fire Nation palette from {tvthemes}
-scales::show_col(avatar_pal(palette = "FireNation")(4))
+scales::show_col(avatar_pal(palette = "FireNation")(8))
 #then use lighten() to get the paired shades e.g.
 scales::show_col(
-  colorspace::lighten(avatar_pal(palette = "FireNation")(4),
+  colorspace::lighten(avatar_pal(palette = "FireNation")(8),
                       .5, space = "HLS")
 )
 
@@ -53,21 +51,24 @@ scales::show_col(
 ##Colour palette
 
 #specify the three colours for sites - CHANGE HERE
-colours = c("#F50054", "#DB6300", "#FFFA01")
+colours = c("#ecb100", "#994823", "#572530")
 
 colours_site <- tribble(
   ~t, ~c,
   "ACJ", colours[1],
   "TRE", colours[2],
   "QUE", colours[3],
-  "ACJ C", colours[1],
-  "ACJ NB", colorspace::darken(colours[1], 0.3),
-  "TRE C", colours[2],
-  "TRE NB", colorspace::darken(colours[2], 0.3),
-  "QUE C", colours[3],
-  "QUE NB", colorspace::darken(colours[3], 0.3)
+  "ACJ C", colorspace::lighten(colours[1], 0.3),
+  "ACJ NB", colours[1],
+  "TRE C", colorspace::lighten(colours[2], 0.3),
+  "TRE NB", colours[2],
+  "QUE C", colorspace::lighten(colours[3], 0.3),
+  "QUE NB", colours[3]
 )
 
+scales::show_col(
+  colours_site$c
+)
 
 ### 2) For facet labels ----
 
