@@ -50,6 +50,7 @@ nmds_out %>%
     plot, c(site, treatment),
     sep = " ", remove = FALSE
   ) %>% 
+  mutate(site = factor(site, levels = c("ACJ", "TRE", "QUE"))) %>% 
   ggplot(aes(x = MDS1, y = MDS2, color = plot,
              fill = plot)) +  
   geom_hline(aes(yintercept = 0)) +
